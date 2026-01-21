@@ -574,48 +574,49 @@
       z-index: 45;
     }
 
-    /* Fire particles */
+    /* Fire particles - teardrop wisps */
     .fire-particle {
-      width: 10px;
-      height: 10px;
-      background: radial-gradient(circle, #fff8e0 0%, #ffd23f 40%, #ff6b35 80%, transparent 100%);
-      border-radius: 50%;
-      animation: fireFloat 0.6s ease-out forwards;
+      width: 8px;
+      height: 12px;
+      background: linear-gradient(180deg, #fff8e0 0%, #ffd23f 40%, #ff6b35 80%, transparent 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      animation: fireWisp 0.6s ease-out forwards;
     }
 
-    @keyframes fireFloat {
-      0% { opacity: 1; transform: scale(1) translateY(0); }
-      100% { opacity: 0; transform: scale(0.3) translateY(-30px); }
+    @keyframes fireWisp {
+      0% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0.2) translateY(-35px) rotate(var(--rot, 30deg)); }
     }
 
-    /* Ember particles */
+    /* Ember particles - sparks that scatter */
     .ember-particle {
-      width: 6px;
-      height: 6px;
-      background: #ffd23f;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #ff6b35;
+      width: 4px;
+      height: 8px;
+      background: linear-gradient(180deg, #fff8e0 0%, #ffd23f 50%, #ff6b35 100%);
+      border-radius: 50% 50% 20% 20%;
+      box-shadow: 0 0 6px #ff6b35, 0 0 12px #ffd23f;
       animation: emberSpark 0.5s ease-out forwards;
     }
 
     @keyframes emberSpark {
-      0% { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(0) translateY(-20px) translateX(var(--dx)); }
+      0% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: scale(0.3) translateY(-25px) translateX(var(--dx)) rotate(180deg); }
     }
 
-    /* Flamethrower */
+    /* Flamethrower stream particles */
     .flame-stream-particle {
-      width: 14px;
-      height: 14px;
-      background: radial-gradient(circle, #fff 0%, #ffd23f 30%, #ff6b35 60%, #cc3300 100%);
-      border-radius: 50%;
+      width: 16px;
+      height: 10px;
+      background: linear-gradient(90deg, #cc3300 0%, #ff6b35 30%, #ffd23f 60%, #fff 100%);
+      border-radius: 30% 70% 70% 30% / 50%;
       box-shadow: 0 0 15px #ff6b35, 0 0 30px #f7931e;
-      animation: flameStream 0.4s ease-out forwards;
+      animation: flameStreamParticle 0.4s ease-out forwards;
     }
 
-    @keyframes flameStream {
-      0% { opacity: 1; transform: scale(1.2); }
-      100% { opacity: 0; transform: scale(0.5); }
+    @keyframes flameStreamParticle {
+      0% { opacity: 1; transform: scale(1.2) scaleX(1.5); }
+      100% { opacity: 0; transform: scale(0.3) scaleX(0.5) translateY(-10px); }
     }
 
     /* Shadow Ball */
@@ -634,20 +635,20 @@
       100% { opacity: 0; transform: scale(0.2); }
     }
 
-    /* Fire Blast */
+    /* Fire Blast - explosive star bursts */
     .blast-particle {
-      width: 24px;
-      height: 24px;
-      background: radial-gradient(circle, #fff 0%, #ffd23f 20%, #ff6b35 50%, #cc3300 80%, transparent 100%);
-      border-radius: 50%;
-      box-shadow: 0 0 25px #ff6b35, 0 0 50px #f7931e, 0 0 75px #cc3300;
+      width: 28px;
+      height: 28px;
+      background: radial-gradient(circle, #fff 0%, #ffd23f 25%, #ff6b35 50%, #cc3300 75%, #660000 100%);
+      clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+      box-shadow: 0 0 30px #ff6b35, 0 0 60px #f7931e;
       animation: blastExplode 0.7s ease-out forwards;
     }
 
     @keyframes blastExplode {
-      0% { opacity: 1; transform: scale(0.5); }
-      30% { transform: scale(2); }
-      100% { opacity: 0; transform: scale(3); }
+      0% { opacity: 1; transform: scale(0.3) rotate(0deg); }
+      30% { transform: scale(2.5) rotate(45deg); }
+      100% { opacity: 0; transform: scale(0.5) rotate(90deg); }
     }
 
     /* Void attack */
@@ -720,32 +721,65 @@
       pointer-events: none;
     }
 
+    /* EMBER - flickering teardrop flame */
     .projectile.ember {
-      width: 16px;
-      height: 16px;
-      background: radial-gradient(circle, #fff8e0 0%, #ffd23f 40%, #ff6b35 100%);
-      box-shadow: 0 0 14px #ff6b35, 0 0 28px #f7931e;
-    }
-
-    .projectile.flamethrower {
-      width: 20px;
+      width: 14px;
       height: 20px;
-      background: radial-gradient(circle, #fff 0%, #ffd23f 30%, #ff6b35 60%, #cc3300 100%);
-      box-shadow: 0 0 24px #ff6b35, 0 0 48px #f7931e, 0 0 72px #cc3300;
+      background: linear-gradient(180deg, #fff8e0 0%, #ffd23f 30%, #ff6b35 70%, #cc3300 100%);
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      box-shadow: 0 0 14px #ff6b35, 0 0 28px #f7931e;
+      animation: emberFlicker 0.1s ease-in-out infinite;
     }
 
+    @keyframes emberFlicker {
+      0%, 100% { transform: scaleX(1) scaleY(1); }
+      50% { transform: scaleX(0.85) scaleY(1.1); }
+    }
+
+    /* FLAMETHROWER - elongated fire stream */
+    .projectile.flamethrower {
+      width: 35px;
+      height: 18px;
+      background: linear-gradient(90deg, #cc3300 0%, #ff6b35 20%, #ffd23f 50%, #fff 80%, #ffd23f 100%);
+      border-radius: 20% 80% 80% 20% / 50% 50% 50% 50%;
+      box-shadow: 0 0 20px #ff6b35, 0 0 40px #f7931e, 0 -5px 30px #ffd23f;
+      animation: flameStream 0.08s ease-in-out infinite;
+    }
+
+    @keyframes flameStream {
+      0%, 100% { transform: scaleX(1) skewX(0deg); }
+      25% { transform: scaleX(1.1) skewX(-3deg); }
+      75% { transform: scaleX(0.95) skewX(3deg); }
+    }
+
+    /* SHADOW BALL - swirling dark energy */
     .projectile.shadow-ball {
       width: 24px;
       height: 24px;
-      background: radial-gradient(circle, #e0aaff 0%, #9d4edd 30%, #7b2cbf 60%, #3c096c 100%);
-      box-shadow: 0 0 18px #9d4edd, 0 0 36px #7b2cbf, 0 0 54px #5a189a;
+      background: radial-gradient(circle at 30% 30%, #e0aaff 0%, #9d4edd 25%, #7b2cbf 50%, #3c096c 80%, #240046 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 18px #9d4edd, 0 0 36px #7b2cbf, inset 0 0 10px #240046;
+      animation: shadowSwirl 0.2s linear infinite;
     }
 
+    @keyframes shadowSwirl {
+      0% { transform: rotate(0deg); background-position: 0% 0%; }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* FIRE BLAST - explosive star shape */
     .projectile.fire-blast {
-      width: 36px;
-      height: 36px;
-      background: radial-gradient(circle, #fff 0%, #ffd23f 20%, #ff6b35 45%, #cc3300 70%, #660000 100%);
-      box-shadow: 0 0 36px #ff6b35, 0 0 72px #f7931e, 0 0 108px #cc3300;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle, #fff 0%, #ffd23f 15%, #ff6b35 35%, #cc3300 60%, #660000 100%);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      box-shadow: 0 0 40px #ff6b35, 0 0 80px #f7931e, 0 0 120px #cc3300;
+      animation: fireBlastPulse 0.1s ease-in-out infinite;
+    }
+
+    @keyframes fireBlastPulse {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      50% { transform: scale(1.15) rotate(18deg); }
     }
 
     .projectile.void {
@@ -1246,6 +1280,8 @@
 
       isAnimating = true;
       move.pp--;
+      // Update PP display
+      document.getElementById('move-pp').textContent = `PP ${move.pp}/${move.maxPp}`;
       const displayName = moveName.replace('-', ' ').toUpperCase();
       showMessage(`BAGUETTE used<br>${displayName}!`);
       showMenu('main');
@@ -1339,10 +1375,27 @@
                     showMessage('What will<br>BAGUETTE do?');
                   }, 1000);
                 } else {
-                  // All enemies defeated - victory!
-                  showMessage('You defeated<br>the trainer!');
+                  // All enemies defeated - Pokemon-style victory!
+                  isAnimating = true;
+
+                  // Victory fanfare sequence
                   setTimeout(() => {
-                    showMessage('VICTORY!<br>Tap to restart');
+                    showMessage('Player defeated<br>TRAINER GHOST!');
+                  }, 500);
+
+                  setTimeout(() => {
+                    const prizeMoney = 2400;
+                    showMessage(`BAGUETTE got<br>$${prizeMoney} for winning!`);
+                    spawnHealParticles('super-heal', playerCreature, 12);
+                  }, 2500);
+
+                  setTimeout(() => {
+                    showMessage('...');
+                  }, 4500);
+
+                  setTimeout(() => {
+                    showMessage('Want to battle<br>again? TAP!');
+
                     // Reset for replay
                     currentEnemy = 0;
                     const firstEnemy = enemies[0];
@@ -1352,6 +1405,9 @@
                     spriteContainer.className = firstEnemy.sprite + '-sprite';
                     enemyCreature.classList.remove('fainting');
 
+                    // Reset PP
+                    Object.values(moves).forEach(m => m.pp = m.maxPp);
+
                     viewport.onclick = () => {
                       viewport.onclick = null;
                       enemyHp = firstEnemy.maxHp;
@@ -1359,9 +1415,17 @@
                       updateHpBar(enemyHpBar, 100, false);
                       updateHpBar(playerHpBar, 100, true);
                       isAnimating = false;
-                      showMessage('What will<br>BAGUETTE do?');
+                      showMessage('TRAINER GHOST<br>wants to battle!');
+                      setTimeout(() => {
+                        showMessage(`TRAINER GHOST<br>sent out ${firstEnemy.name}!`);
+                        enemyCreature.classList.add('appearing');
+                        setTimeout(() => {
+                          enemyCreature.classList.remove('appearing');
+                          showMessage('What will<br>BAGUETTE do?');
+                        }, 800);
+                      }, 1500);
                     };
-                  }, 2000);
+                  }, 6000);
                 }
               }, playerExp >= 300 ? 3500 : 2000);
             }, 1000);
