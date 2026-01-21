@@ -239,79 +239,111 @@
 
     /* FLAME BAGUETTE - Player sprite */
     .flame-sprite {
-      transform: scale(7);
+      transform: scale(5);
     }
 
     .flame-sprite .pixel-sprite {
       box-shadow:
-        /* Body */
-        5px 6px 0 #ff6b35, 6px 6px 0 #ff6b35, 7px 6px 0 #ff6b35, 8px 6px 0 #ff6b35, 9px 6px 0 #ff6b35,
-        4px 7px 0 #ff6b35, 5px 7px 0 #f7931e, 6px 7px 0 #ffd23f, 7px 7px 0 #ffd23f, 8px 7px 0 #f7931e, 9px 7px 0 #ff6b35, 10px 7px 0 #ff6b35,
-        4px 8px 0 #ff6b35, 5px 8px 0 #f7931e, 6px 8px 0 #ffd23f, 7px 8px 0 #fff8e0, 8px 8px 0 #ffd23f, 9px 8px 0 #f7931e, 10px 8px 0 #ff6b35,
-        4px 9px 0 #ff6b35, 5px 9px 0 #f7931e, 6px 9px 0 #ffd23f, 7px 9px 0 #ffd23f, 8px 9px 0 #ffd23f, 9px 9px 0 #f7931e, 10px 9px 0 #ff6b35,
-        5px 10px 0 #ff6b35, 6px 10px 0 #ff6b35, 7px 10px 0 #f7931e, 8px 10px 0 #ff6b35, 9px 10px 0 #ff6b35,
-        /* Eyes */
-        5px 7px 0 #1a1a24, 8px 7px 0 #1a1a24,
-        /* Blush */
-        4px 8px 0 #ff8888, 10px 8px 0 #ff8888,
-        /* Flame crown */
-        6px 4px 0 #ffd23f, 7px 3px 0 #ffd23f, 8px 4px 0 #ffd23f,
-        6px 5px 0 #f7931e, 7px 5px 0 #ffd23f, 8px 5px 0 #f7931e,
-        5px 5px 0 #ff6b35, 9px 5px 0 #ff6b35,
-        7px 2px 0 #fff8e0,
-        /* Feet */
-        5px 11px 0 #cc5529, 6px 11px 0 #cc5529, 8px 11px 0 #cc5529, 9px 11px 0 #cc5529;
+        /* Baguette body - elongated bread shape */
+        6px 8px 0 #d4a574, 7px 8px 0 #e8c097, 8px 8px 0 #e8c097, 9px 8px 0 #e8c097, 10px 8px 0 #d4a574,
+        5px 9px 0 #d4a574, 6px 9px 0 #f5d5a8, 7px 9px 0 #f5d5a8, 8px 9px 0 #fff8e0, 9px 9px 0 #f5d5a8, 10px 9px 0 #f5d5a8, 11px 9px 0 #d4a574,
+        4px 10px 0 #c99a65, 5px 10px 0 #e8c097, 6px 10px 0 #f5d5a8, 7px 10px 0 #fff8e0, 8px 10px 0 #fff8e0, 9px 10px 0 #f5d5a8, 10px 10px 0 #e8c097, 11px 10px 0 #e8c097, 12px 10px 0 #c99a65,
+        4px 11px 0 #c99a65, 5px 11px 0 #e8c097, 6px 11px 0 #f5d5a8, 7px 11px 0 #f5d5a8, 8px 11px 0 #f5d5a8, 9px 11px 0 #f5d5a8, 10px 11px 0 #e8c097, 11px 11px 0 #e8c097, 12px 11px 0 #c99a65,
+        5px 12px 0 #b8894f, 6px 12px 0 #d4a574, 7px 12px 0 #e8c097, 8px 12px 0 #e8c097, 9px 12px 0 #e8c097, 10px 12px 0 #d4a574, 11px 12px 0 #b8894f,
+        6px 13px 0 #a67c3d, 7px 13px 0 #b8894f, 8px 13px 0 #c99a65, 9px 13px 0 #b8894f, 10px 13px 0 #a67c3d,
+        /* Crust scoring marks */
+        6px 10px 0 #c99a65, 8px 11px 0 #c99a65, 10px 10px 0 #c99a65,
+        /* Cute face */
+        6px 10px 0 #1a1a24, 10px 10px 0 #1a1a24,
+        7px 11px 0 #1a1a24, 9px 11px 0 #1a1a24,
+        /* Blush cheeks */
+        5px 11px 0 #ffaaaa, 11px 11px 0 #ffaaaa,
+        /* Flame crown - dancing fire */
+        7px 5px 0 #fff8e0, 8px 4px 0 #fff8e0, 9px 5px 0 #fff8e0,
+        6px 5px 0 #ffd23f, 7px 4px 0 #ffd23f, 8px 3px 0 #ffd23f, 9px 4px 0 #ffd23f, 10px 5px 0 #ffd23f,
+        5px 6px 0 #f7931e, 6px 6px 0 #ffd23f, 7px 6px 0 #fff8e0, 8px 5px 0 #fff8e0, 9px 6px 0 #ffd23f, 10px 6px 0 #f7931e, 11px 6px 0 #f7931e,
+        5px 7px 0 #ff6b35, 6px 7px 0 #f7931e, 7px 7px 0 #ffd23f, 8px 6px 0 #ffd23f, 9px 7px 0 #f7931e, 10px 7px 0 #ff6b35, 11px 7px 0 #ff6b35,
+        6px 8px 0 #ff6b35, 7px 8px 0 #f7931e, 8px 7px 0 #f7931e, 9px 8px 0 #ff6b35, 10px 8px 0 #ff6b35,
+        /* Side flames */
+        4px 7px 0 #ffd23f, 3px 6px 0 #fff8e0, 4px 8px 0 #f7931e, 3px 8px 0 #ff6b35,
+        12px 7px 0 #ffd23f, 13px 6px 0 #fff8e0, 12px 8px 0 #f7931e, 13px 8px 0 #ff6b35,
+        /* Tiny flame wisps */
+        7px 2px 0 #fff8e0, 9px 3px 0 #fff8e0, 6px 4px 0 #ffd23f, 10px 4px 0 #ffd23f,
+        /* Little feet */
+        6px 14px 0 #8b6914, 7px 14px 0 #a67c3d, 9px 14px 0 #a67c3d, 10px 14px 0 #8b6914;
     }
 
     /* VOID SPECTER - Enemy sprite */
     .void-sprite {
-      transform: scale(6);
+      transform: scale(5);
     }
 
     .void-sprite .pixel-sprite {
       box-shadow:
-        /* Main body */
-        6px 5px 0 #7b2cbf, 7px 5px 0 #7b2cbf, 8px 5px 0 #7b2cbf,
-        5px 6px 0 #7b2cbf, 6px 6px 0 #9d4edd, 7px 6px 0 #9d4edd, 8px 6px 0 #9d4edd, 9px 6px 0 #7b2cbf,
-        5px 7px 0 #7b2cbf, 6px 7px 0 #9d4edd, 7px 7px 0 #c77dff, 8px 7px 0 #9d4edd, 9px 7px 0 #7b2cbf,
-        5px 8px 0 #7b2cbf, 6px 8px 0 #9d4edd, 7px 8px 0 #c77dff, 8px 8px 0 #9d4edd, 9px 8px 0 #7b2cbf,
-        5px 9px 0 #5a189a, 6px 9px 0 #7b2cbf, 7px 9px 0 #9d4edd, 8px 9px 0 #7b2cbf, 9px 9px 0 #5a189a,
-        /* Eyes */
-        6px 7px 0 #ffffff, 8px 7px 0 #ffffff,
-        6px 6px 0 #e0aaff, 8px 6px 0 #e0aaff,
-        /* Horns */
-        5px 3px 0 #c77dff, 9px 3px 0 #c77dff,
-        5px 4px 0 #9d4edd, 9px 4px 0 #9d4edd,
-        /* Ghost tail */
-        6px 10px 0 #5a189a, 7px 10px 0 #7b2cbf, 8px 10px 0 #5a189a,
-        6px 11px 0 #3c096c, 8px 11px 0 #3c096c,
-        7px 12px 0 #240046,
-        /* Aura particles */
-        3px 5px 0 #c77dff, 11px 5px 0 #c77dff,
-        4px 8px 0 #9d4edd, 10px 8px 0 #9d4edd;
+        /* Hooded cloak shape */
+        6px 4px 0 #3c096c, 7px 4px 0 #3c096c, 8px 4px 0 #3c096c, 9px 4px 0 #3c096c, 10px 4px 0 #3c096c,
+        5px 5px 0 #3c096c, 6px 5px 0 #5a189a, 7px 5px 0 #5a189a, 8px 5px 0 #5a189a, 9px 5px 0 #5a189a, 10px 5px 0 #5a189a, 11px 5px 0 #3c096c,
+        4px 6px 0 #240046, 5px 6px 0 #5a189a, 6px 6px 0 #7b2cbf, 7px 6px 0 #7b2cbf, 8px 6px 0 #7b2cbf, 9px 6px 0 #7b2cbf, 10px 6px 0 #7b2cbf, 11px 6px 0 #5a189a, 12px 6px 0 #240046,
+        4px 7px 0 #240046, 5px 7px 0 #5a189a, 6px 7px 0 #7b2cbf, 7px 7px 0 #9d4edd, 8px 7px 0 #9d4edd, 9px 7px 0 #9d4edd, 10px 7px 0 #7b2cbf, 11px 7px 0 #5a189a, 12px 7px 0 #240046,
+        4px 8px 0 #240046, 5px 8px 0 #5a189a, 6px 8px 0 #7b2cbf, 7px 8px 0 #9d4edd, 8px 8px 0 #c77dff, 9px 8px 0 #9d4edd, 10px 8px 0 #7b2cbf, 11px 8px 0 #5a189a, 12px 8px 0 #240046,
+        5px 9px 0 #3c096c, 6px 9px 0 #5a189a, 7px 9px 0 #7b2cbf, 8px 9px 0 #9d4edd, 9px 9px 0 #7b2cbf, 10px 9px 0 #5a189a, 11px 9px 0 #3c096c,
+        6px 10px 0 #3c096c, 7px 10px 0 #5a189a, 8px 10px 0 #7b2cbf, 9px 10px 0 #5a189a, 10px 10px 0 #3c096c,
+        /* Ghost wisps/tail */
+        5px 11px 0 #3c096c, 7px 11px 0 #5a189a, 9px 11px 0 #5a189a, 11px 11px 0 #3c096c,
+        4px 12px 0 #240046, 6px 12px 0 #3c096c, 8px 12px 0 #5a189a, 10px 12px 0 #3c096c, 12px 12px 0 #240046,
+        5px 13px 0 #240046, 7px 13px 0 #3c096c, 9px 13px 0 #3c096c, 11px 13px 0 #240046,
+        6px 14px 0 #240046, 10px 14px 0 #240046,
+        /* Glowing eyes - menacing */
+        6px 7px 0 #ff6b6b, 7px 7px 0 #ff0000, 9px 7px 0 #ff0000, 10px 7px 0 #ff6b6b,
+        6px 8px 0 #ffffff, 10px 8px 0 #ffffff,
+        /* Skull-like face markings */
+        7px 9px 0 #240046, 8px 9px 0 #3c096c, 9px 9px 0 #240046,
+        /* Ethereal crown/horns */
+        5px 2px 0 #e0aaff, 6px 3px 0 #c77dff, 7px 3px 0 #9d4edd,
+        11px 2px 0 #e0aaff, 10px 3px 0 #c77dff, 9px 3px 0 #9d4edd,
+        8px 2px 0 #e0aaff, 8px 3px 0 #c77dff,
+        /* Floating dark particles around */
+        2px 6px 0 #9d4edd, 14px 6px 0 #9d4edd,
+        3px 9px 0 #c77dff, 13px 9px 0 #c77dff,
+        1px 8px 0 #7b2cbf, 15px 8px 0 #7b2cbf,
+        2px 11px 0 #5a189a, 14px 11px 0 #5a189a;
     }
 
     /* SLIME - Second enemy sprite (green slime) */
     .slime-sprite {
-      transform: scale(6);
+      transform: scale(5);
     }
 
     .slime-sprite .pixel-sprite {
       box-shadow:
-        /* Body */
-        6px 6px 0 #4a9f4a, 7px 6px 0 #4a9f4a, 8px 6px 0 #4a9f4a,
-        5px 7px 0 #4a9f4a, 6px 7px 0 #6bcf6b, 7px 7px 0 #6bcf6b, 8px 7px 0 #6bcf6b, 9px 7px 0 #4a9f4a,
-        5px 8px 0 #4a9f4a, 6px 8px 0 #6bcf6b, 7px 8px 0 #98e898, 8px 8px 0 #6bcf6b, 9px 8px 0 #4a9f4a,
-        5px 9px 0 #3a8f3a, 6px 9px 0 #4a9f4a, 7px 9px 0 #6bcf6b, 8px 9px 0 #4a9f4a, 9px 9px 0 #3a8f3a,
-        6px 10px 0 #3a8f3a, 7px 10px 0 #3a8f3a, 8px 10px 0 #3a8f3a,
-        /* Eyes */
-        6px 7px 0 #ffffff, 8px 7px 0 #ffffff,
-        6px 8px 0 #1a1a24, 8px 8px 0 #1a1a24,
-        /* Shine */
-        6px 6px 0 #98e898,
-        /* Drips */
-        4px 9px 0 #4a9f4a, 10px 8px 0 #4a9f4a,
-        4px 10px 0 #3a8f3a, 10px 9px 0 #3a8f3a;
+        /* Main gooey body - blobby shape */
+        7px 5px 0 #6bcf6b, 8px 5px 0 #6bcf6b, 9px 5px 0 #6bcf6b,
+        6px 6px 0 #4a9f4a, 7px 6px 0 #6bcf6b, 8px 6px 0 #98e898, 9px 6px 0 #6bcf6b, 10px 6px 0 #4a9f4a,
+        5px 7px 0 #3a8f3a, 6px 7px 0 #4a9f4a, 7px 7px 0 #6bcf6b, 8px 7px 0 #98e898, 9px 7px 0 #6bcf6b, 10px 7px 0 #4a9f4a, 11px 7px 0 #3a8f3a,
+        4px 8px 0 #2a6f2a, 5px 8px 0 #3a8f3a, 6px 8px 0 #4a9f4a, 7px 8px 0 #6bcf6b, 8px 8px 0 #b8f8b8, 9px 8px 0 #6bcf6b, 10px 8px 0 #4a9f4a, 11px 8px 0 #3a8f3a, 12px 8px 0 #2a6f2a,
+        4px 9px 0 #2a6f2a, 5px 9px 0 #3a8f3a, 6px 9px 0 #4a9f4a, 7px 9px 0 #6bcf6b, 8px 9px 0 #98e898, 9px 9px 0 #6bcf6b, 10px 9px 0 #4a9f4a, 11px 9px 0 #3a8f3a, 12px 9px 0 #2a6f2a,
+        5px 10px 0 #2a6f2a, 6px 10px 0 #3a8f3a, 7px 10px 0 #4a9f4a, 8px 10px 0 #6bcf6b, 9px 10px 0 #4a9f4a, 10px 10px 0 #3a8f3a, 11px 10px 0 #2a6f2a,
+        6px 11px 0 #1a5f1a, 7px 11px 0 #2a6f2a, 8px 11px 0 #3a8f3a, 9px 11px 0 #2a6f2a, 10px 11px 0 #1a5f1a,
+        /* Gooey base spread */
+        5px 11px 0 #1a5f1a, 11px 11px 0 #1a5f1a,
+        7px 12px 0 #1a5f1a, 8px 12px 0 #2a6f2a, 9px 12px 0 #1a5f1a,
+        /* Cute derpy eyes */
+        6px 7px 0 #ffffff, 7px 7px 0 #ffffff, 9px 7px 0 #ffffff, 10px 7px 0 #ffffff,
+        6px 8px 0 #ffffff, 7px 8px 0 #1a1a24, 9px 8px 0 #1a1a24, 10px 8px 0 #ffffff,
+        /* Shiny highlight bubbles */
+        7px 5px 0 #d4ffd4, 8px 6px 0 #ffffff, 6px 7px 0 #d4ffd4,
+        /* Happy little mouth */
+        7px 9px 0 #2a6f2a, 8px 10px 0 #1a5f1a, 9px 9px 0 #2a6f2a,
+        /* Dripping goo */
+        3px 9px 0 #4a9f4a, 3px 10px 0 #3a8f3a, 3px 11px 0 #2a6f2a, 3px 12px 0 #1a5f1a,
+        13px 8px 0 #4a9f4a, 13px 9px 0 #3a8f3a, 13px 10px 0 #2a6f2a,
+        2px 8px 0 #6bcf6b, 14px 7px 0 #6bcf6b,
+        /* Floating goo particles */
+        4px 5px 0 #6bcf6b, 12px 5px 0 #6bcf6b,
+        3px 7px 0 #4a9f4a, 13px 6px 0 #4a9f4a,
+        /* Little antennae/tendrils */
+        6px 4px 0 #6bcf6b, 10px 4px 0 #6bcf6b,
+        6px 3px 0 #98e898, 10px 3px 0 #98e898;
     }
 
     /* EXP bar */
