@@ -27,7 +27,7 @@
     html, body {
       height: 100%;
       width: 100%;
-      background: var(--bg-dark);
+      background: #2c2c3a;
       font-family: 'Press Start 2P', cursive;
       overflow: hidden;
       display: flex;
@@ -36,94 +36,270 @@
       touch-action: manipulation;
     }
 
+    /* Gameboy Color shell */
     .container {
       display: flex;
       align-items: center;
       justify-content: center;
       width: 100%;
       height: 100%;
+      padding: 1rem;
     }
 
+    .gameboy-shell {
+      background: linear-gradient(145deg, #6b5b95 0%, #5a4a84 50%, #4a3a74 100%);
+      padding: 1.5rem 1rem 2.5rem 1rem;
+      border-radius: 20px 20px 60px 60px;
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.2),
+        inset 0 -2px 4px rgba(0,0,0,0.3),
+        0 10px 40px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .gameboy-label {
+      position: absolute;
+      top: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.35rem;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 0.15em;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .gameboy-label span {
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #9d65c9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: bold;
+    }
+
+    /* Screen bezel */
+    .screen-bezel {
+      background: #1a1a24;
+      padding: 0.6rem;
+      border-radius: 8px;
+      box-shadow:
+        inset 0 3px 8px rgba(0,0,0,0.8),
+        0 2px 4px rgba(255,255,255,0.1);
+    }
+
+    /* Gameboy screen */
     .viewport {
-      width: min(95vw, 95vh, 600px);
-      height: min(95vw, 95vh, 600px);
-      background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 50%, #1a1a2e 100%);
-      border: 4px solid #2a2a3a;
+      width: min(85vw, 85vh, 480px);
+      height: min(85vw, 85vh, 480px);
+      background: linear-gradient(180deg, #1a2a1a 0%, #0f1a0f 50%, #1a2a1a 100%);
       border-radius: 4px;
       position: relative;
       overflow: hidden;
       box-shadow:
-        0 0 0 4px #0d0d12,
-        0 0 60px rgba(123, 44, 191, 0.3),
-        0 0 100px rgba(255, 107, 53, 0.2);
+        inset 0 0 30px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(100, 200, 100, 0.1);
     }
 
-    .battle-header {
+    /* Screen pixel grid overlay */
+    .viewport::before {
+      content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 0.8rem;
+      inset: 0;
+      pointer-events: none;
+      z-index: 25;
+      background:
+        linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.15) 50%);
+      background-size: 100% 3px;
+    }
+
+    /* Power LED */
+    .power-led {
+      position: absolute;
+      bottom: 1.2rem;
+      left: 1.5rem;
+      width: 8px;
+      height: 8px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #4ade80, 0 0 15px #4ade80;
+      animation: ledPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ledPulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px #4ade80, 0 0 15px #4ade80; }
+      50% { opacity: 0.7; box-shadow: 0 0 4px #4ade80, 0 0 8px #4ade80; }
+    }
+
+    /* D-pad hint */
+    .dpad-area {
+      position: absolute;
+      bottom: 0.8rem;
+      right: 1.5rem;
       display: flex;
-      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .btn-hint {
+      width: 20px;
+      height: 20px;
+      background: #3a3a4a;
+      border-radius: 50%;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1);
+    }
+
+    .btn-hint.a { background: #c44569; }
+    .btn-hint.b { background: #c44569; }
+
+    .stat-box {
+      position: absolute;
+      background: rgba(13, 13, 18, 0.95);
+      border: 3px solid #3a3a4a;
+      padding: 0.5rem 0.7rem;
+      min-width: 110px;
       z-index: 10;
     }
 
-    .stat-box {
-      background: rgba(13, 13, 18, 0.9);
-      border: 2px solid #3a3a4a;
-      padding: 0.4rem 0.6rem;
-      min-width: 90px;
+    .stat-box.enemy {
+      top: 8%;
+      left: 5%;
+      border-color: var(--void-mid);
+      box-shadow: 0 0 15px rgba(123, 44, 191, 0.4);
     }
 
-    .stat-box.enemy { border-color: var(--void-mid); }
-    .stat-box.player { border-color: var(--flame-mid); }
+    .stat-box.player {
+      bottom: 22%;
+      right: 5%;
+      border-color: var(--flame-mid);
+      box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+    }
 
     .stat-name {
-      font-size: 0.35rem;
+      font-size: 0.4rem;
       color: #e8e8e8;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-level {
+      font-size: 0.3rem;
+      color: #888;
+      margin-left: 0.3rem;
     }
 
     .stat-bar-container {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.3rem;
     }
 
     .stat-label {
-      font-size: 0.25rem;
+      font-size: 0.28rem;
       color: var(--flame-mid);
+      font-weight: bold;
     }
 
     .stat-bar {
       flex: 1;
-      height: 4px;
-      background: #2a2a3a;
-      border-radius: 1px;
+      height: 6px;
+      background: #1a1a24;
+      border-radius: 2px;
       overflow: hidden;
+      border: 1px solid #3a3a4a;
     }
 
     .stat-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, #4ade80, #22c55e);
       transition: width 0.3s ease;
+      box-shadow: 0 0 4px #4ade80;
     }
 
-    .stat-bar-fill.medium { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-    .stat-bar-fill.low { background: linear-gradient(90deg, #f87171, #ef4444); }
+    .stat-bar-fill.medium {
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      box-shadow: 0 0 4px #fbbf24;
+    }
+    .stat-bar-fill.low {
+      background: linear-gradient(90deg, #f87171, #ef4444);
+      box-shadow: 0 0 4px #f87171;
+      animation: lowHpPulse 0.5s ease-in-out infinite;
+    }
+
+    @keyframes lowHpPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .stat-hp-text {
+      font-size: 0.25rem;
+      color: #888;
+      text-align: right;
+      margin-top: 0.2rem;
+    }
 
     .title {
       position: absolute;
-      top: 3.5rem;
+      top: 1rem;
       left: 0;
       right: 0;
       text-align: center;
-      font-size: clamp(0.45rem, 1.5vw, 0.65rem);
+      font-size: clamp(0.5rem, 1.8vw, 0.75rem);
       color: #e8e8e8;
-      letter-spacing: 0.25em;
-      text-shadow: 2px 2px 0 #0d0d12, 0 0 15px rgba(199, 125, 255, 0.5);
+      letter-spacing: 0.3em;
+      text-shadow: 2px 2px 0 #0d0d12, 0 0 20px rgba(199, 125, 255, 0.6);
       z-index: 10;
+    }
+
+    /* Battle action box */
+    .action-box {
+      position: absolute;
+      bottom: 5%;
+      right: 5%;
+      background: rgba(13, 13, 18, 0.95);
+      border: 3px solid #3a3a4a;
+      padding: 0.4rem;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.25rem;
+    }
+
+    .action-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.28rem;
+      padding: 0.35rem 0.5rem;
+      background: #1a1a2e;
+      border: 2px solid #3a3a4a;
+      color: #777;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      background: #2a2a3e;
+      color: #c77dff;
+      border-color: var(--void-mid);
+      box-shadow: 0 0 8px rgba(157, 78, 221, 0.4);
+    }
+
+    .action-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Message box */
+    .message-box {
+      position: absolute;
+      bottom: 5%;
+      left: 5%;
+      width: 45%;
+      background: rgba(13, 13, 18, 0.95);
+      border: 3px solid #3a3a4a;
+      padding: 0.5rem 0.6rem;
+      z-index: 10;
+    }
+
+    .message-text {
+      font-size: 0.3rem;
+      color: #ccc;
+      line-height: 1.6;
     }
 
     .arena-floor {
@@ -170,23 +346,28 @@
     }
 
     .footer {
-      position: absolute;
-      bottom: 0.8rem;
-      left: 0;
-      right: 0;
       text-align: center;
-      z-index: 10;
+      margin-top: 0.8rem;
     }
 
     .x-link {
       font-size: 0.3rem;
-      color: #444;
+      color: rgba(255,255,255,0.6);
       text-decoration: none;
-      margin: 0 0.3rem;
-      transition: color 0.3s;
+      transition: all 0.3s;
+      letter-spacing: 0.02em;
     }
 
-    .x-link:hover { color: #c77dff; }
+    .x-link:hover {
+      color: #fff;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+
+    .link-divider {
+      color: rgba(255,255,255,0.3);
+      margin: 0 0.4rem;
+      font-size: 0.3rem;
+    }
 
     .damage-text {
       position: absolute;
@@ -203,49 +384,88 @@
       100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
     }
 
-    @media (max-width: 400px) {
+    @media (max-width: 500px) {
+      .gameboy-shell {
+        padding: 1rem 0.6rem 2rem 0.6rem;
+        border-radius: 15px 15px 40px 40px;
+      }
+      .gameboy-label { font-size: 0.28rem; }
+      .screen-bezel { padding: 0.4rem; }
       .stat-box { min-width: 70px; padding: 0.3rem 0.4rem; }
-      .stat-name { font-size: 0.28rem; }
-      .title { font-size: 0.4rem; top: 3rem; }
-      .tap-hint { font-size: 0.25rem; }
+      .stat-name { font-size: 0.3rem; }
+      .stat-level { font-size: 0.22rem; }
+      .title { font-size: 0.4rem; }
+      .message-box { width: 40%; padding: 0.3rem 0.4rem; }
+      .message-text { font-size: 0.22rem; }
+      .action-box { padding: 0.3rem; }
+      .action-btn { font-size: 0.22rem; padding: 0.25rem 0.35rem; }
+      .footer { margin-top: 0.5rem; }
+      .x-link, .link-divider { font-size: 0.25rem; }
+      .power-led { width: 6px; height: 6px; bottom: 0.8rem; left: 1rem; }
+      .dpad-area { bottom: 0.5rem; right: 1rem; }
+      .btn-hint { width: 15px; height: 15px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="viewport" id="viewport">
-      <div class="battle-header">
-        <div class="stat-box enemy">
-          <div class="stat-name">SPECTER</div>
-          <div class="stat-bar-container">
-            <span class="stat-label">HP</span>
-            <div class="stat-bar">
-              <div class="stat-bar-fill" id="enemy-hp" style="width: 100%"></div>
-            </div>
-          </div>
-        </div>
-        <div class="stat-box player">
-          <div class="stat-name">BAGUETTE</div>
-          <div class="stat-bar-container">
-            <span class="stat-label">HP</span>
-            <div class="stat-bar">
-              <div class="stat-bar-fill" id="player-hp" style="width: 100%"></div>
-            </div>
+    <div class="gameboy-shell">
+      <div class="gameboy-label">GAME BOY <span>COLOR</span></div>
+      <div class="screen-bezel">
+        <div class="viewport" id="viewport">
+          <h1 class="title">BAGUETTE</h1>
+
+      <!-- Enemy stat box - top left -->
+      <div class="stat-box enemy">
+        <div class="stat-name">VOID SPECTER<span class="stat-level">Lv50</span></div>
+        <div class="stat-bar-container">
+          <span class="stat-label">HP</span>
+          <div class="stat-bar">
+            <div class="stat-bar-fill" id="enemy-hp" style="width: 100%"></div>
           </div>
         </div>
       </div>
 
-      <h1 class="title">BAGUETTE</h1>
+      <!-- Player stat box - bottom right -->
+      <div class="stat-box player">
+        <div class="stat-name">BAGUETTE<span class="stat-level">Lv50</span></div>
+        <div class="stat-bar-container">
+          <span class="stat-label">HP</span>
+          <div class="stat-bar">
+            <div class="stat-bar-fill" id="player-hp" style="width: 100%"></div>
+          </div>
+        </div>
+        <div class="stat-hp-text"><span id="player-hp-num">100</span> / 100</div>
+      </div>
 
       <canvas id="battle-canvas"></canvas>
 
       <div class="arena-floor"></div>
       <div class="crt-overlay"></div>
 
-      <div class="tap-hint">TAP CREATURE TO ATTACK</div>
+      <!-- Message box -->
+      <div class="message-box">
+        <div class="message-text" id="battle-message">What will BAGUETTE do?</div>
+      </div>
 
+      <!-- Action box -->
+      <div class="action-box">
+        <div class="action-btn" data-action="fight">FIGHT</div>
+        <div class="action-btn" data-action="magic">MAGIC</div>
+        <div class="action-btn" data-action="item">ITEM</div>
+        <div class="action-btn" data-action="run">RUN</div>
+      </div>
+
+        </div>
+      </div>
+      <div class="power-led"></div>
+      <div class="dpad-area">
+        <div class="btn-hint b"></div>
+        <div class="btn-hint a"></div>
+      </div>
       <div class="footer">
         <a href="mailto:hello@baguette.art" class="x-link">hello@baguette.art</a>
+        <span class="link-divider">/</span>
         <a href="https://x.com/baguetteanon" target="_blank" rel="noopener" class="x-link">@baguetteanon</a>
       </div>
     </div>
@@ -369,15 +589,76 @@
 
     const orbGeometry = new THREE.SphereGeometry(0.6, 48, 48);
 
+    // Glow shader for outer aura
+    const glowVertexShader = `
+      varying vec3 vNormal;
+      varying vec3 vPositionNormal;
+      void main() {
+        vNormal = normalize(normalMatrix * normal);
+        vPositionNormal = normalize((modelViewMatrix * vec4(position, 1.0)).xyz);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `;
+
+    const createGlowFragmentShader = (color1, color2) => `
+      uniform float uTime;
+      uniform float uIntensity;
+      varying vec3 vNormal;
+      varying vec3 vPositionNormal;
+      void main() {
+        float intensity = pow(0.7 - dot(vNormal, vPositionNormal), 2.0);
+        intensity *= uIntensity;
+        float pulse = 0.8 + 0.2 * sin(uTime * 3.0);
+        vec3 color1 = ${color1};
+        vec3 color2 = ${color2};
+        vec3 glow = mix(color1, color2, intensity) * pulse;
+        gl_FragColor = vec4(glow, intensity * 0.8);
+      }
+    `;
+
+    // Player glow
+    const playerGlowMaterial = new THREE.ShaderMaterial({
+      vertexShader: glowVertexShader,
+      fragmentShader: createGlowFragmentShader('vec3(1.0, 0.4, 0.1)', 'vec3(1.0, 0.9, 0.3)'),
+      uniforms: { uTime: { value: 0 }, uIntensity: { value: 1.5 } },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+
+    // Enemy glow
+    const enemyGlowMaterial = new THREE.ShaderMaterial({
+      vertexShader: glowVertexShader,
+      fragmentShader: createGlowFragmentShader('vec3(0.5, 0.1, 0.8)', 'vec3(0.8, 0.4, 1.0)'),
+      uniforms: { uTime: { value: 0 }, uIntensity: { value: 1.5 } },
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+
+    const glowGeometry = new THREE.SphereGeometry(0.85, 32, 32);
+
+    // Player orb + glow
     const playerOrb = new THREE.Mesh(orbGeometry, playerMaterial);
     playerOrb.position.set(-1.5, -0.5, 0);
     playerOrb.userData = { type: 'player', baseY: -0.5 };
     scene.add(playerOrb);
 
+    const playerGlow = new THREE.Mesh(glowGeometry, playerGlowMaterial);
+    playerGlow.position.copy(playerOrb.position);
+    scene.add(playerGlow);
+
+    // Enemy orb + glow
     const enemyOrb = new THREE.Mesh(orbGeometry, enemyMaterial);
     enemyOrb.position.set(1.5, 0.5, 0);
     enemyOrb.userData = { type: 'enemy', baseY: 0.5 };
     scene.add(enemyOrb);
+
+    const enemyGlow = new THREE.Mesh(glowGeometry, enemyGlowMaterial);
+    enemyGlow.position.copy(enemyOrb.position);
+    scene.add(enemyGlow);
 
     // Attack particles
     const attackParticles = [];
@@ -522,9 +803,17 @@
       playerMaterial.uniforms.uHit.value *= 0.9;
       enemyMaterial.uniforms.uHit.value *= 0.9;
 
+      // Update glow shaders
+      playerGlowMaterial.uniforms.uTime.value = t;
+      enemyGlowMaterial.uniforms.uTime.value = t;
+
       // Idle animation
       playerOrb.position.y = playerOrb.userData.baseY + Math.sin(t * 2) * 0.1;
       enemyOrb.position.y = enemyOrb.userData.baseY + Math.sin(t * 2 + 1) * 0.1;
+
+      // Sync glow positions
+      playerGlow.position.copy(playerOrb.position);
+      enemyGlow.position.copy(enemyOrb.position);
 
       // Update attack particles
       for (let i = attackParticles.length - 1; i >= 0; i--) {
