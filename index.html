@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Baguette</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,13 +82,15 @@
       98% { transform: translateX(1px); }
     }
 
-    body {
-      min-height: 100vh;
+    html, body {
+      height: 100%;
+      width: 100%;
       background: var(--bg-dark);
       font-family: 'Press Start 2P', cursive;
       overflow: hidden;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .crt-overlay {
@@ -120,18 +122,19 @@
     }
 
     .battle-container {
-      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem;
-      position: relative;
+      padding: 1rem;
+      width: 100%;
+      height: 100%;
     }
 
     .battle-scene {
-      width: 100%;
-      max-width: 900px;
-      aspect-ratio: 16 / 10;
+      /* Square viewport - Gameboy style */
+      width: min(95vw, 95vh, 600px);
+      height: min(95vw, 95vh, 600px);
+      aspect-ratio: 1 / 1;
       background:
         linear-gradient(180deg,
           #1a1a2e 0%,
@@ -154,7 +157,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      height: 35%;
+      height: 40%;
       background:
         linear-gradient(180deg,
           transparent 0%,
@@ -195,15 +198,15 @@
     }
 
     .monster-player {
-      bottom: 15%;
-      left: 8%;
+      bottom: 18%;
+      left: 10%;
       animation: battleIdle 2s ease-in-out infinite, flameDance 0.5s ease-in-out infinite;
       transform-origin: bottom center;
     }
 
     .monster-enemy {
-      top: 15%;
-      right: 12%;
+      top: 18%;
+      right: 10%;
       animation: float 3s ease-in-out infinite, voidPulse 2s ease-in-out infinite;
     }
 
@@ -467,8 +470,10 @@
 
     .footer {
       position: absolute;
-      bottom: 1rem;
-      right: 1.5rem;
+      bottom: 3%;
+      left: 0;
+      right: 0;
+      text-align: center;
       z-index: 10;
     }
 
@@ -502,12 +507,12 @@
     }
 
     .health-bar-enemy {
-      top: 8%;
+      top: 6%;
       left: 5%;
     }
 
     .health-bar-player {
-      bottom: 25%;
+      bottom: 28%;
       right: 5%;
     }
 
@@ -607,40 +612,71 @@
       }
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
-      .battle-scene {
-        aspect-ratio: 4 / 5;
-      }
-
-      .monster-player {
-        left: 5%;
-        bottom: 20%;
-      }
-
-      .monster-enemy {
-        right: 8%;
-        top: 12%;
-      }
-
+    /* Responsive scaling for square viewport */
+    @media (max-width: 500px), (max-height: 500px) {
       .flame-beast,
       .void-specter {
         transform: scale(3.5);
       }
 
       .health-bar {
-        min-width: 100px;
-        padding: 6px 8px;
+        min-width: 90px;
+        padding: 5px 7px;
       }
 
-      .health-bar-enemy {
-        top: 5%;
-        left: 3%;
+      .monster-name {
+        font-size: 0.35rem;
       }
 
-      .health-bar-player {
-        bottom: 30%;
-        right: 3%;
+      .hp-label {
+        font-size: 0.3rem;
+      }
+
+      .hp-bar-bg {
+        height: 5px;
+      }
+
+      .title {
+        font-size: 0.5rem;
+      }
+
+      .x-link {
+        font-size: 0.35rem;
+      }
+
+      .link-divider {
+        font-size: 0.35rem;
+      }
+    }
+
+    @media (max-width: 350px), (max-height: 350px) {
+      .flame-beast,
+      .void-specter {
+        transform: scale(2.5);
+      }
+
+      .health-bar {
+        min-width: 70px;
+        padding: 4px 5px;
+        border-width: 2px;
+      }
+
+      .monster-name {
+        font-size: 0.3rem;
+      }
+
+      .title {
+        font-size: 0.4rem;
+      }
+
+      .flame-aura {
+        width: 80px;
+        height: 80px;
+      }
+
+      .void-aura {
+        width: 70px;
+        height: 70px;
       }
     }
   </style>
