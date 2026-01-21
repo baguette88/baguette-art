@@ -8,20 +8,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     :root {
       --bg-dark: #0d0d12;
       --void-core: #7b2cbf;
       --void-mid: #9d4edd;
-      --void-outer: #c77dff;
       --flame-core: #ff6b35;
       --flame-mid: #f7931e;
-      --flame-outer: #ffd23f;
     }
 
     html, body {
@@ -36,930 +30,1522 @@
       touch-action: manipulation;
     }
 
-    /* Gameboy Color shell */
-    .container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      padding: 1rem;
-    }
-
     .gameboy-shell {
       background: linear-gradient(145deg, #6b5b95 0%, #5a4a84 50%, #4a3a74 100%);
-      padding: 1.5rem 1rem 2.5rem 1rem;
-      border-radius: 20px 20px 60px 60px;
-      box-shadow:
-        inset 0 2px 4px rgba(255,255,255,0.2),
-        inset 0 -2px 4px rgba(0,0,0,0.3),
-        0 10px 40px rgba(0,0,0,0.5);
+      padding: 1.2rem 0.8rem 2rem 0.8rem;
+      border-radius: 15px 15px 50px 50px;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 10px 40px rgba(0,0,0,0.5);
       position: relative;
     }
 
     .gameboy-label {
       position: absolute;
-      top: 0.5rem;
+      top: 0.4rem;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 0.35rem;
+      font-size: 8px;
       color: rgba(255,255,255,0.7);
-      letter-spacing: 0.15em;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      white-space: nowrap;
     }
 
     .gameboy-label span {
       background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #9d65c9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-weight: bold;
     }
 
-    /* Screen bezel */
     .screen-bezel {
       background: #1a1a24;
-      padding: 0.6rem;
-      border-radius: 8px;
-      box-shadow:
-        inset 0 3px 8px rgba(0,0,0,0.8),
-        0 2px 4px rgba(255,255,255,0.1);
+      padding: 0.4rem;
+      border-radius: 6px;
+      box-shadow: inset 0 3px 8px rgba(0,0,0,0.8);
     }
 
-    /* Gameboy screen */
     .viewport {
-      width: min(85vw, 85vh, 480px);
-      height: min(85vw, 85vh, 480px);
-      background: linear-gradient(180deg, #1a2a1a 0%, #0f1a0f 50%, #1a2a1a 100%);
-      border-radius: 4px;
+      width: min(88vw, 88vh, 500px);
+      height: min(88vw, 88vh, 500px);
+      background: linear-gradient(180deg, #88c8e8 0%, #78b8d8 30%, #98d868 60%, #78b858 100%);
+      border-radius: 3px;
       position: relative;
       overflow: hidden;
-      box-shadow:
-        inset 0 0 30px rgba(0, 0, 0, 0.5),
-        0 0 60px rgba(100, 200, 100, 0.1);
+      image-rendering: pixelated;
     }
 
-    /* Screen pixel grid overlay */
+    .viewport.shake {
+      animation: screenShake 0.3s ease-out;
+    }
+
+    @keyframes screenShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px); }
+      40% { transform: translateX(5px); }
+      60% { transform: translateX(-3px); }
+      80% { transform: translateX(3px); }
+    }
+
+    /* Scanlines */
     .viewport::before {
       content: '';
       position: absolute;
       inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
       pointer-events: none;
-      z-index: 25;
-      background:
-        linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.15) 50%);
-      background-size: 100% 3px;
+      z-index: 50;
+    }
+
+    /* Pokemon-style HP boxes - FireRed layout */
+    .stat-box {
+      position: absolute;
+      background: linear-gradient(180deg, #f8f0d8 0%, #e8e0c8 100%);
+      border: 3px solid #484038;
+      padding: 6px 10px;
+      min-width: 44%;
+      z-index: 20;
+    }
+
+    .stat-box.enemy {
+      top: 2%;
+      left: 2%;
+      border-radius: 0 0 10px 0;
+    }
+
+    .stat-box.player {
+      bottom: 34%;
+      right: 2%;
+      border-radius: 10px 0 0 0;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .stat-name {
+      font-size: 14px;
+      color: #303030;
+      letter-spacing: -0.5px;
+    }
+
+    .stat-level {
+      font-size: 12px;
+      color: #303030;
+    }
+
+    .stat-level::before {
+      content: 'Lv';
+      font-size: 10px;
+      margin-right: 2px;
+    }
+
+    .hp-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hp-label {
+      font-size: 10px;
+      color: #f8a800;
+      font-weight: bold;
+    }
+
+    .hp-bar-bg {
+      flex: 1;
+      height: 12px;
+      background: #484038;
+      border-radius: 6px;
+      padding: 2px;
+    }
+
+    .hp-bar-inner {
+      height: 100%;
+      background: linear-gradient(180deg, #58f858 0%, #20b820 100%);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .hp-bar-inner.medium {
+      background: linear-gradient(180deg, #f8d830 0%, #c8a820 100%);
+    }
+
+    .hp-bar-inner.low {
+      background: linear-gradient(180deg, #f85858 0%, #c82020 100%);
+    }
+
+    .hp-numbers {
+      text-align: right;
+      font-size: 11px;
+      color: #303030;
+      margin-top: 4px;
+    }
+
+    /* Battle arena */
+    .battle-arena {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 32%;
+    }
+
+    /* Ground platforms - Pokemon FireRed style */
+    .platform-enemy {
+      position: absolute;
+      top: 32%;
+      right: 8%;
+      width: 35%;
+      height: 12px;
+      background: linear-gradient(180deg, #90b058 0%, #78a048 100%);
+      border-radius: 50%;
+      box-shadow: 0 4px 0 #608030;
+    }
+
+    .platform-player {
+      position: absolute;
+      bottom: 2%;
+      left: 3%;
+      width: 45%;
+      height: 16px;
+      background: linear-gradient(180deg, #90b058 0%, #78a048 100%);
+      border-radius: 50%;
+      box-shadow: 0 6px 0 #608030;
+    }
+
+    /* Pixel art creatures - FireRed positions */
+    .creature {
+      position: absolute;
+      image-rendering: pixelated;
+      z-index: 10;
+    }
+
+    .creature-enemy {
+      top: 8%;
+      right: 18%;
+      transform: scaleX(-1);
+    }
+
+    .creature-player {
+      bottom: 38%;
+      left: 15%;
+    }
+
+    .pixel-sprite {
+      width: 1px;
+      height: 1px;
+      transform-origin: center;
+    }
+
+    /* FLAME BAGUETTE - Player sprite */
+    .flame-sprite {
+      transform: scale(7);
+    }
+
+    .flame-sprite .pixel-sprite {
+      box-shadow:
+        /* Body */
+        5px 6px 0 #ff6b35, 6px 6px 0 #ff6b35, 7px 6px 0 #ff6b35, 8px 6px 0 #ff6b35, 9px 6px 0 #ff6b35,
+        4px 7px 0 #ff6b35, 5px 7px 0 #f7931e, 6px 7px 0 #ffd23f, 7px 7px 0 #ffd23f, 8px 7px 0 #f7931e, 9px 7px 0 #ff6b35, 10px 7px 0 #ff6b35,
+        4px 8px 0 #ff6b35, 5px 8px 0 #f7931e, 6px 8px 0 #ffd23f, 7px 8px 0 #fff8e0, 8px 8px 0 #ffd23f, 9px 8px 0 #f7931e, 10px 8px 0 #ff6b35,
+        4px 9px 0 #ff6b35, 5px 9px 0 #f7931e, 6px 9px 0 #ffd23f, 7px 9px 0 #ffd23f, 8px 9px 0 #ffd23f, 9px 9px 0 #f7931e, 10px 9px 0 #ff6b35,
+        5px 10px 0 #ff6b35, 6px 10px 0 #ff6b35, 7px 10px 0 #f7931e, 8px 10px 0 #ff6b35, 9px 10px 0 #ff6b35,
+        /* Eyes */
+        5px 7px 0 #1a1a24, 8px 7px 0 #1a1a24,
+        /* Blush */
+        4px 8px 0 #ff8888, 10px 8px 0 #ff8888,
+        /* Flame crown */
+        6px 4px 0 #ffd23f, 7px 3px 0 #ffd23f, 8px 4px 0 #ffd23f,
+        6px 5px 0 #f7931e, 7px 5px 0 #ffd23f, 8px 5px 0 #f7931e,
+        5px 5px 0 #ff6b35, 9px 5px 0 #ff6b35,
+        7px 2px 0 #fff8e0,
+        /* Feet */
+        5px 11px 0 #cc5529, 6px 11px 0 #cc5529, 8px 11px 0 #cc5529, 9px 11px 0 #cc5529;
+    }
+
+    /* VOID SPECTER - Enemy sprite */
+    .void-sprite {
+      transform: scale(6);
+    }
+
+    .void-sprite .pixel-sprite {
+      box-shadow:
+        /* Main body */
+        6px 5px 0 #7b2cbf, 7px 5px 0 #7b2cbf, 8px 5px 0 #7b2cbf,
+        5px 6px 0 #7b2cbf, 6px 6px 0 #9d4edd, 7px 6px 0 #9d4edd, 8px 6px 0 #9d4edd, 9px 6px 0 #7b2cbf,
+        5px 7px 0 #7b2cbf, 6px 7px 0 #9d4edd, 7px 7px 0 #c77dff, 8px 7px 0 #9d4edd, 9px 7px 0 #7b2cbf,
+        5px 8px 0 #7b2cbf, 6px 8px 0 #9d4edd, 7px 8px 0 #c77dff, 8px 8px 0 #9d4edd, 9px 8px 0 #7b2cbf,
+        5px 9px 0 #5a189a, 6px 9px 0 #7b2cbf, 7px 9px 0 #9d4edd, 8px 9px 0 #7b2cbf, 9px 9px 0 #5a189a,
+        /* Eyes */
+        6px 7px 0 #ffffff, 8px 7px 0 #ffffff,
+        6px 6px 0 #e0aaff, 8px 6px 0 #e0aaff,
+        /* Horns */
+        5px 3px 0 #c77dff, 9px 3px 0 #c77dff,
+        5px 4px 0 #9d4edd, 9px 4px 0 #9d4edd,
+        /* Ghost tail */
+        6px 10px 0 #5a189a, 7px 10px 0 #7b2cbf, 8px 10px 0 #5a189a,
+        6px 11px 0 #3c096c, 8px 11px 0 #3c096c,
+        7px 12px 0 #240046,
+        /* Aura particles */
+        3px 5px 0 #c77dff, 11px 5px 0 #c77dff,
+        4px 8px 0 #9d4edd, 10px 8px 0 #9d4edd;
+    }
+
+    /* SLIME - Second enemy sprite (green slime) */
+    .slime-sprite {
+      transform: scale(6);
+    }
+
+    .slime-sprite .pixel-sprite {
+      box-shadow:
+        /* Body */
+        6px 6px 0 #4a9f4a, 7px 6px 0 #4a9f4a, 8px 6px 0 #4a9f4a,
+        5px 7px 0 #4a9f4a, 6px 7px 0 #6bcf6b, 7px 7px 0 #6bcf6b, 8px 7px 0 #6bcf6b, 9px 7px 0 #4a9f4a,
+        5px 8px 0 #4a9f4a, 6px 8px 0 #6bcf6b, 7px 8px 0 #98e898, 8px 8px 0 #6bcf6b, 9px 8px 0 #4a9f4a,
+        5px 9px 0 #3a8f3a, 6px 9px 0 #4a9f4a, 7px 9px 0 #6bcf6b, 8px 9px 0 #4a9f4a, 9px 9px 0 #3a8f3a,
+        6px 10px 0 #3a8f3a, 7px 10px 0 #3a8f3a, 8px 10px 0 #3a8f3a,
+        /* Eyes */
+        6px 7px 0 #ffffff, 8px 7px 0 #ffffff,
+        6px 8px 0 #1a1a24, 8px 8px 0 #1a1a24,
+        /* Shine */
+        6px 6px 0 #98e898,
+        /* Drips */
+        4px 9px 0 #4a9f4a, 10px 8px 0 #4a9f4a,
+        4px 10px 0 #3a8f3a, 10px 9px 0 #3a8f3a;
+    }
+
+    /* EXP bar */
+    .exp-bar-container {
+      position: absolute;
+      bottom: 34%;
+      right: 2%;
+      width: 44%;
+      z-index: 21;
+    }
+
+    .exp-bar-bg {
+      height: 6px;
+      background: #484038;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .exp-bar-inner {
+      height: 100%;
+      background: linear-gradient(180deg, #58c8f8 0%, #2090c8 100%);
+      width: 0%;
+      transition: width 1s ease-out;
+    }
+
+    /* Faint animation */
+    @keyframes faintDrop {
+      0% { transform: translateY(0) scaleX(-1); opacity: 1; }
+      100% { transform: translateY(60px) scaleX(-1); opacity: 0; }
+    }
+
+    .creature-enemy.fainting {
+      animation: faintDrop 0.8s ease-in forwards !important;
+    }
+
+    /* Appear animation */
+    @keyframes appearPop {
+      0% { transform: scale(0) scaleX(-1); opacity: 0; }
+      50% { transform: scale(1.2) scaleX(-1); }
+      100% { transform: scale(1) scaleX(-1); opacity: 1; }
+    }
+
+    .creature-enemy.appearing {
+      animation: appearPop 0.5s ease-out forwards !important;
+    }
+
+    /* Creature animations */
+    @keyframes creatureBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes enemyFloat {
+      0%, 100% { transform: translateY(0) scaleX(-1); }
+      50% { transform: translateY(-8px) scaleX(-1); }
+    }
+
+    .creature-player { animation: creatureBounce 1s ease-in-out infinite; }
+    .creature-enemy { animation: enemyFloat 1.5s ease-in-out infinite; }
+
+    /* Attack flash */
+    @keyframes hitFlash {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(3) saturate(0); }
+    }
+
+    .creature.hit {
+      animation: hitFlash 0.1s ease-in-out 4 !important;
+    }
+
+    /* Bottom battle panel - FireRed style */
+    .battle-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32%;
+      background: #78c850;
+      border-top: 4px solid #484038;
+      display: flex;
+      z-index: 30;
+    }
+
+    .message-box {
+      flex: 1;
+      background: #f8f8f8;
+      border: 4px solid #484038;
+      border-radius: 10px;
+      margin: 8px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .message-text {
+      font-size: 15px;
+      color: #303030;
+      line-height: 1.6;
+    }
+
+    .action-box {
+      width: 46%;
+      background: #f8f8f8;
+      border: 4px solid #484038;
+      border-radius: 10px;
+      margin: 8px;
+      padding: 8px 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      align-items: center;
+    }
+
+    .action-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 13px;
+      padding: 10px 4px 10px 22px;
+      background: transparent;
+      border: none;
+      color: #303030;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .action-btn::before {
+      content: '▶';
+      position: absolute;
+      left: 4px;
+      opacity: 0;
+      font-size: 10px;
+    }
+
+    .action-btn:hover::before,
+    .action-btn:active::before { opacity: 1; }
+
+    /* Fight panel - FireRed style */
+    .fight-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32%;
+      background: #78c850;
+      border-top: 4px solid #484038;
+      display: none;
+      z-index: 31;
+    }
+
+    .fight-panel.active { display: flex; }
+
+    .moves-box {
+      flex: 1;
+      background: #f8f8f8;
+      border: 4px solid #484038;
+      border-radius: 10px;
+      margin: 8px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      padding: 8px;
+      align-items: center;
+    }
+
+    .move-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      padding: 8px 4px 8px 22px;
+      background: transparent;
+      border: none;
+      color: #303030;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    .move-btn::before {
+      content: '▶';
+      position: absolute;
+      left: 4px;
+      opacity: 0;
+      font-size: 9px;
+    }
+
+    .move-btn:hover::before,
+    .move-btn:active::before { opacity: 1; }
+
+    .move-info {
+      width: 32%;
+      background: #f8f8f8;
+      border: 4px solid #484038;
+      border-radius: 10px;
+      margin: 8px;
+      padding: 12px;
+      font-size: 12px;
+      color: #303030;
+      line-height: 1.8;
+    }
+
+    /* Items panel - FireRed style */
+    .items-panel {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 32%;
+      background: #78c850;
+      border-top: 4px solid #484038;
+      display: none;
+      z-index: 31;
+    }
+
+    .items-panel.active { display: flex; }
+
+    .items-list {
+      flex: 1;
+      background: #f8f8f8;
+      border: 4px solid #484038;
+      border-radius: 10px;
+      margin: 8px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .item-btn {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      padding: 10px 4px 10px 22px;
+      background: transparent;
+      border: none;
+      color: #303030;
+      cursor: pointer;
+      text-align: left;
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .item-btn::before {
+      content: '▶';
+      position: absolute;
+      left: 4px;
+      opacity: 0;
+      font-size: 9px;
+    }
+
+    .item-btn:hover::before,
+    .item-btn:active::before { opacity: 1; }
+
+    .item-count { color: #606060; }
+
+    /* PARTICLE SYSTEMS */
+    .particle {
+      position: absolute;
+      pointer-events: none;
+      z-index: 45;
+    }
+
+    /* Fire particles */
+    .fire-particle {
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #fff8e0 0%, #ffd23f 40%, #ff6b35 80%, transparent 100%);
+      border-radius: 50%;
+      animation: fireFloat 0.6s ease-out forwards;
+    }
+
+    @keyframes fireFloat {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.3) translateY(-30px); }
+    }
+
+    /* Ember particles */
+    .ember-particle {
+      width: 6px;
+      height: 6px;
+      background: #ffd23f;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ff6b35;
+      animation: emberSpark 0.5s ease-out forwards;
+    }
+
+    @keyframes emberSpark {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0) translateY(-20px) translateX(var(--dx)); }
+    }
+
+    /* Flamethrower */
+    .flame-stream-particle {
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, #fff 0%, #ffd23f 30%, #ff6b35 60%, #cc3300 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 15px #ff6b35, 0 0 30px #f7931e;
+      animation: flameStream 0.4s ease-out forwards;
+    }
+
+    @keyframes flameStream {
+      0% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(0.5); }
+    }
+
+    /* Shadow Ball */
+    .shadow-particle {
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #e0aaff 0%, #9d4edd 40%, #7b2cbf 70%, #3c096c 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #9d4edd, 0 0 20px #7b2cbf;
+      animation: shadowPulse 0.5s ease-out forwards;
+    }
+
+    @keyframes shadowPulse {
+      0% { opacity: 1; transform: scale(1); filter: brightness(1); }
+      50% { filter: brightness(1.5); }
+      100% { opacity: 0; transform: scale(0.2); }
+    }
+
+    /* Fire Blast */
+    .blast-particle {
+      width: 24px;
+      height: 24px;
+      background: radial-gradient(circle, #fff 0%, #ffd23f 20%, #ff6b35 50%, #cc3300 80%, transparent 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 25px #ff6b35, 0 0 50px #f7931e, 0 0 75px #cc3300;
+      animation: blastExplode 0.7s ease-out forwards;
+    }
+
+    @keyframes blastExplode {
+      0% { opacity: 1; transform: scale(0.5); }
+      30% { transform: scale(2); }
+      100% { opacity: 0; transform: scale(3); }
+    }
+
+    /* Void attack */
+    .void-particle {
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #c77dff 0%, #7b2cbf 60%, #240046 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 8px #9d4edd;
+      animation: voidWisp 0.5s ease-out forwards;
+    }
+
+    @keyframes voidWisp {
+      0% { opacity: 1; transform: scale(1) rotate(0deg); }
+      100% { opacity: 0; transform: scale(0.3) rotate(180deg) translateY(20px); }
+    }
+
+    /* Heal particles */
+    .heal-particle {
+      width: 8px;
+      height: 8px;
+      background: #58f858;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #58f858, 0 0 20px #20b820;
+      animation: healSparkle 0.8s ease-out forwards;
+    }
+
+    @keyframes healSparkle {
+      0% { opacity: 0; transform: scale(0) translateY(20px); }
+      30% { opacity: 1; transform: scale(1.5) translateY(10px); }
+      100% { opacity: 0; transform: scale(0.5) translateY(-30px); }
+    }
+
+    /* Super heal */
+    .super-heal-particle {
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(135deg, #ffd23f 0%, #f7931e 100%);
+      border-radius: 2px;
+      transform: rotate(45deg);
+      box-shadow: 0 0 12px #ffd23f, 0 0 24px #f7931e;
+      animation: superHealSparkle 1s ease-out forwards;
+    }
+
+    @keyframes superHealSparkle {
+      0% { opacity: 0; transform: rotate(0deg) scale(0) translateY(30px); }
+      40% { opacity: 1; transform: rotate(180deg) scale(1.2) translateY(0); }
+      100% { opacity: 0; transform: rotate(360deg) scale(0) translateY(-40px); }
+    }
+
+    /* Max heal */
+    .max-heal-particle {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      animation: maxHealBurst 1.2s ease-out forwards;
+    }
+
+    @keyframes maxHealBurst {
+      0% { opacity: 0; transform: scale(0); }
+      30% { opacity: 1; transform: scale(2); }
+      100% { opacity: 0; transform: scale(0.5) translateY(-50px); }
+    }
+
+    /* Attack projectiles */
+    .projectile {
+      position: absolute;
+      border-radius: 50%;
+      z-index: 35;
+      pointer-events: none;
+    }
+
+    .projectile.ember {
+      width: 16px;
+      height: 16px;
+      background: radial-gradient(circle, #fff8e0 0%, #ffd23f 40%, #ff6b35 100%);
+      box-shadow: 0 0 14px #ff6b35, 0 0 28px #f7931e;
+    }
+
+    .projectile.flamethrower {
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #fff 0%, #ffd23f 30%, #ff6b35 60%, #cc3300 100%);
+      box-shadow: 0 0 24px #ff6b35, 0 0 48px #f7931e, 0 0 72px #cc3300;
+    }
+
+    .projectile.shadow-ball {
+      width: 24px;
+      height: 24px;
+      background: radial-gradient(circle, #e0aaff 0%, #9d4edd 30%, #7b2cbf 60%, #3c096c 100%);
+      box-shadow: 0 0 18px #9d4edd, 0 0 36px #7b2cbf, 0 0 54px #5a189a;
+    }
+
+    .projectile.fire-blast {
+      width: 36px;
+      height: 36px;
+      background: radial-gradient(circle, #fff 0%, #ffd23f 20%, #ff6b35 45%, #cc3300 70%, #660000 100%);
+      box-shadow: 0 0 36px #ff6b35, 0 0 72px #f7931e, 0 0 108px #cc3300;
+    }
+
+    .projectile.void {
+      width: 18px;
+      height: 18px;
+      background: radial-gradient(circle, #c77dff 0%, #9d4edd 40%, #7b2cbf 70%, #240046 100%);
+      box-shadow: 0 0 14px #9d4edd, 0 0 28px #7b2cbf;
+    }
+
+    .projectile.sludge {
+      width: 20px;
+      height: 18px;
+      background: radial-gradient(ellipse, #98e898 0%, #6bcf6b 30%, #4a9f4a 60%, #2a6f2a 100%);
+      box-shadow: 0 0 16px #6bcf6b, 0 0 32px #4a9f4a;
+      border-radius: 60% 40% 50% 50%;
+      animation: sludgeWobble 0.3s ease-in-out infinite;
+    }
+
+    @keyframes sludgeWobble {
+      0%, 100% { transform: scaleX(1) scaleY(1); }
+      50% { transform: scaleX(1.1) scaleY(0.9); }
+    }
+
+    /* Sludge particles */
+    .sludge-particle {
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle, #98e898 0%, #4a9f4a 70%, #2a6f2a 100%);
+      border-radius: 60% 40% 70% 30%;
+      box-shadow: 0 0 10px #6bcf6b;
+      animation: sludgeDrip 0.6s ease-out forwards;
+    }
+
+    @keyframes sludgeDrip {
+      0% { opacity: 1; transform: scale(1) translateY(0); }
+      100% { opacity: 0; transform: scale(0.5) translateY(25px); }
+    }
+
+    /* Screen splat overlay */
+    .screen-splat {
+      position: absolute;
+      pointer-events: none;
+      z-index: 48;
+      opacity: 0;
+    }
+
+    .screen-splat.active {
+      animation: splatFade 2s ease-out forwards;
+    }
+
+    @keyframes splatFade {
+      0% { opacity: 0.9; }
+      70% { opacity: 0.7; }
+      100% { opacity: 0; }
+    }
+
+    .splat-blob {
+      position: absolute;
+      background: radial-gradient(ellipse, #6bcf6b 0%, #4a9f4a 50%, #2a6f2a 80%, transparent 100%);
+      border-radius: 50% 40% 60% 50%;
+      box-shadow: inset 0 -5px 15px rgba(0,0,0,0.3), 0 0 20px #6bcf6b;
+    }
+
+    .splat-drip {
+      position: absolute;
+      background: linear-gradient(180deg, #4a9f4a 0%, #2a6f2a 100%);
+      border-radius: 50% 50% 40% 40%;
+      animation: dripDown 2s ease-in forwards;
+    }
+
+    @keyframes dripDown {
+      0% { transform: translateY(0) scaleY(1); }
+      100% { transform: translateY(40px) scaleY(1.5); }
+    }
+
+    /* Damage number - BIGGER */
+    .damage-num {
+      position: absolute;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 18px;
+      color: #fff;
+      text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+      z-index: 40;
+      animation: damageFloat 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    .damage-num.crit {
+      font-size: 24px;
+      color: #ff6b35;
+    }
+
+    .damage-num.heal {
+      color: #58f858;
+    }
+
+    @keyframes damageFloat {
+      0% { opacity: 1; transform: translateY(0) scale(1); }
+      20% { transform: translateY(-10px) scale(1.3); }
+      100% { opacity: 0; transform: translateY(-40px) scale(1); }
+    }
+
+    /* Impact flash overlay */
+    .impact-flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 49;
+    }
+
+    .impact-flash.active {
+      animation: impactFlash 0.15s ease-out;
+    }
+
+    @keyframes impactFlash {
+      0% { opacity: 0.7; }
+      100% { opacity: 0; }
+    }
+
+    /* Footer links - BIGGER */
+    .footer {
+      text-align: center;
+      margin-top: 0.6rem;
+    }
+
+    .x-link {
+      font-size: 10px;
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .x-link:hover { color: #fff; }
+
+    .link-divider {
+      color: rgba(255,255,255,0.4);
+      margin: 0 12px;
+      font-size: 10px;
     }
 
     /* Power LED */
     .power-led {
       position: absolute;
-      bottom: 1.2rem;
-      left: 1.5rem;
+      bottom: 0.9rem;
+      left: 1.2rem;
       width: 8px;
       height: 8px;
-      background: #4ade80;
+      background: #58f858;
       border-radius: 50%;
-      box-shadow: 0 0 8px #4ade80, 0 0 15px #4ade80;
+      box-shadow: 0 0 8px #58f858;
       animation: ledPulse 2s ease-in-out infinite;
     }
 
     @keyframes ledPulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 8px #4ade80, 0 0 15px #4ade80; }
-      50% { opacity: 0.7; box-shadow: 0 0 4px #4ade80, 0 0 8px #4ade80; }
+      0%, 100% { box-shadow: 0 0 8px #58f858; }
+      50% { box-shadow: 0 0 15px #58f858, 0 0 25px #20b820; }
     }
 
-    /* D-pad hint */
-    .dpad-area {
-      position: absolute;
-      bottom: 0.8rem;
-      right: 1.5rem;
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .btn-hint {
-      width: 20px;
-      height: 20px;
-      background: #3a3a4a;
-      border-radius: 50%;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.1);
-    }
-
-    .btn-hint.a { background: #c44569; }
-    .btn-hint.b { background: #c44569; }
-
-    .stat-box {
-      position: absolute;
-      background: rgba(13, 13, 18, 0.95);
-      border: 3px solid #3a3a4a;
-      padding: 0.5rem 0.7rem;
-      min-width: 110px;
-      z-index: 10;
-    }
-
-    .stat-box.enemy {
-      top: 8%;
-      left: 5%;
-      border-color: var(--void-mid);
-      box-shadow: 0 0 15px rgba(123, 44, 191, 0.4);
-    }
-
-    .stat-box.player {
-      bottom: 22%;
-      right: 5%;
-      border-color: var(--flame-mid);
-      box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
-    }
-
-    .stat-name {
-      font-size: 0.4rem;
-      color: #e8e8e8;
-      margin-bottom: 0.3rem;
-      letter-spacing: 0.05em;
-    }
-
-    .stat-level {
-      font-size: 0.3rem;
-      color: #888;
-      margin-left: 0.3rem;
-    }
-
-    .stat-bar-container {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .stat-label {
-      font-size: 0.28rem;
-      color: var(--flame-mid);
-      font-weight: bold;
-    }
-
-    .stat-bar {
-      flex: 1;
-      height: 6px;
-      background: #1a1a24;
-      border-radius: 2px;
-      overflow: hidden;
-      border: 1px solid #3a3a4a;
-    }
-
-    .stat-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #4ade80, #22c55e);
-      transition: width 0.3s ease;
-      box-shadow: 0 0 4px #4ade80;
-    }
-
-    .stat-bar-fill.medium {
-      background: linear-gradient(90deg, #fbbf24, #f59e0b);
-      box-shadow: 0 0 4px #fbbf24;
-    }
-    .stat-bar-fill.low {
-      background: linear-gradient(90deg, #f87171, #ef4444);
-      box-shadow: 0 0 4px #f87171;
-      animation: lowHpPulse 0.5s ease-in-out infinite;
-    }
-
-    @keyframes lowHpPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
-
-    .stat-hp-text {
-      font-size: 0.25rem;
-      color: #888;
-      text-align: right;
-      margin-top: 0.2rem;
-    }
-
-    .title {
-      position: absolute;
-      top: 1rem;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: clamp(0.5rem, 1.8vw, 0.75rem);
-      color: #e8e8e8;
-      letter-spacing: 0.3em;
-      text-shadow: 2px 2px 0 #0d0d12, 0 0 20px rgba(199, 125, 255, 0.6);
-      z-index: 10;
-    }
-
-    /* Battle action box */
-    .action-box {
-      position: absolute;
-      bottom: 5%;
-      right: 5%;
-      background: rgba(13, 13, 18, 0.95);
-      border: 3px solid #3a3a4a;
-      padding: 0.4rem;
-      z-index: 10;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.25rem;
-    }
-
-    .action-btn {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 0.28rem;
-      padding: 0.35rem 0.5rem;
-      background: #1a1a2e;
-      border: 2px solid #3a3a4a;
-      color: #777;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .action-btn:hover {
-      background: #2a2a3e;
-      color: #c77dff;
-      border-color: var(--void-mid);
-      box-shadow: 0 0 8px rgba(157, 78, 221, 0.4);
-    }
-
-    .action-btn:active {
-      transform: scale(0.95);
-    }
-
-    /* Message box */
-    .message-box {
-      position: absolute;
-      bottom: 5%;
-      left: 5%;
-      width: 45%;
-      background: rgba(13, 13, 18, 0.95);
-      border: 3px solid #3a3a4a;
-      padding: 0.5rem 0.6rem;
-      z-index: 10;
-    }
-
-    .message-text {
-      font-size: 0.3rem;
-      color: #ccc;
-      line-height: 1.6;
-    }
-
-    .arena-floor {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 30%;
-      background: linear-gradient(180deg, transparent 0%, rgba(20, 20, 35, 0.5) 40%, rgba(15, 15, 25, 0.7) 100%);
-      z-index: 2;
-    }
-
-    #battle-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 5;
-    }
-
-    .crt-overlay {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 20;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
-    }
-
-    .tap-hint {
-      position: absolute;
-      bottom: 4rem;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: 0.3rem;
-      color: #444;
-      z-index: 10;
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    .footer {
-      text-align: center;
-      margin-top: 0.8rem;
-    }
-
-    .x-link {
-      font-size: 0.3rem;
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      transition: all 0.3s;
-      letter-spacing: 0.02em;
-    }
-
-    .x-link:hover {
-      color: #fff;
-      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-    }
-
-    .link-divider {
-      color: rgba(255,255,255,0.3);
-      margin: 0 0.4rem;
-      font-size: 0.3rem;
-    }
-
-    .damage-text {
-      position: absolute;
-      font-size: 0.5rem;
-      color: #fff;
-      text-shadow: 2px 2px 0 #000;
-      pointer-events: none;
-      z-index: 15;
-      animation: damageFloat 0.8s ease-out forwards;
-    }
-
-    @keyframes damageFloat {
-      0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
-    }
-
-    @media (max-width: 500px) {
-      .gameboy-shell {
-        padding: 1rem 0.6rem 2rem 0.6rem;
-        border-radius: 15px 15px 40px 40px;
-      }
-      .gameboy-label { font-size: 0.28rem; }
-      .screen-bezel { padding: 0.4rem; }
-      .stat-box { min-width: 70px; padding: 0.3rem 0.4rem; }
-      .stat-name { font-size: 0.3rem; }
-      .stat-level { font-size: 0.22rem; }
-      .title { font-size: 0.4rem; }
-      .message-box { width: 40%; padding: 0.3rem 0.4rem; }
-      .message-text { font-size: 0.22rem; }
-      .action-box { padding: 0.3rem; }
-      .action-btn { font-size: 0.22rem; padding: 0.25rem 0.35rem; }
-      .footer { margin-top: 0.5rem; }
-      .x-link, .link-divider { font-size: 0.25rem; }
-      .power-led { width: 6px; height: 6px; bottom: 0.8rem; left: 1rem; }
-      .dpad-area { bottom: 0.5rem; right: 1rem; }
-      .btn-hint { width: 15px; height: 15px; }
+    @media (max-width: 450px) {
+      .gameboy-shell { padding: 0.8rem 0.5rem 1.5rem 0.5rem; }
+      .stat-name { font-size: 11px; }
+      .stat-level { font-size: 10px; }
+      .message-text { font-size: 13px; }
+      .action-btn { font-size: 11px; }
+      .move-btn { font-size: 10px; }
+      .item-btn { font-size: 10px; }
+      .flame-sprite { transform: scale(5); }
+      .void-sprite { transform: scale(4.5); }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="gameboy-shell">
-      <div class="gameboy-label">GAME BOY <span>COLOR</span></div>
-      <div class="screen-bezel">
-        <div class="viewport" id="viewport">
-          <h1 class="title">BAGUETTE</h1>
+  <div class="gameboy-shell">
+    <div class="gameboy-label">GAME BOY <span>COLOR</span></div>
+    <div class="screen-bezel">
+      <div class="viewport" id="viewport">
+        <div class="impact-flash" id="impact-flash"></div>
 
-      <!-- Enemy stat box - top left -->
-      <div class="stat-box enemy">
-        <div class="stat-name">VOID SPECTER<span class="stat-level">Lv50</span></div>
-        <div class="stat-bar-container">
-          <span class="stat-label">HP</span>
-          <div class="stat-bar">
-            <div class="stat-bar-fill" id="enemy-hp" style="width: 100%"></div>
+        <!-- Enemy HP box - top left -->
+        <div class="stat-box enemy">
+          <div class="stat-row">
+            <span class="stat-name">SPECTER</span>
+            <span class="stat-level">50</span>
+          </div>
+          <div class="hp-row">
+            <span class="hp-label">HP</span>
+            <div class="hp-bar-bg">
+              <div class="hp-bar-inner" id="enemy-hp" style="width: 100%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Player HP box - bottom right -->
+        <div class="stat-box player">
+          <div class="stat-row">
+            <span class="stat-name">BAGUETTE</span>
+            <span class="stat-level">50</span>
+          </div>
+          <div class="hp-row">
+            <span class="hp-label">HP</span>
+            <div class="hp-bar-bg">
+              <div class="hp-bar-inner" id="player-hp" style="width: 100%"></div>
+            </div>
+          </div>
+          <div class="hp-numbers"><span id="player-hp-num">100</span>/ 100</div>
+          <div class="exp-bar-bg" style="margin-top: 4px;">
+            <div class="exp-bar-inner" id="exp-bar" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Battle arena -->
+        <div class="battle-arena">
+          <div class="platform-enemy"></div>
+          <div class="platform-player"></div>
+
+          <!-- Enemy creature -->
+          <div class="creature creature-enemy" id="enemy-creature">
+            <div class="void-sprite">
+              <div class="pixel-sprite"></div>
+            </div>
+          </div>
+
+          <!-- Player creature -->
+          <div class="creature creature-player" id="player-creature">
+            <div class="flame-sprite">
+              <div class="pixel-sprite"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main battle panel -->
+        <div class="battle-panel" id="main-panel">
+          <div class="message-box">
+            <div class="message-text" id="battle-message">What will<br>BAGUETTE do?</div>
+          </div>
+          <div class="action-box">
+            <div class="action-btn" data-action="fight">FIGHT</div>
+            <div class="action-btn" data-action="bag">BAG</div>
+            <div class="action-btn" data-action="pokemon">PKMN</div>
+            <div class="action-btn" data-action="run">RUN</div>
+          </div>
+        </div>
+
+        <!-- Fight panel -->
+        <div class="fight-panel" id="fight-panel">
+          <div class="moves-box">
+            <div class="move-btn" data-move="ember">EMBER</div>
+            <div class="move-btn" data-move="flamethrower">FLAMETHWR</div>
+            <div class="move-btn" data-move="shadow-ball">SHADOWBALL</div>
+            <div class="move-btn" data-move="fire-blast">FIREBLAST</div>
+          </div>
+          <div class="move-info">
+            <div id="move-type">TYPE/FIRE</div>
+            <div id="move-pp">PP 25/25</div>
+          </div>
+        </div>
+
+        <!-- Items panel -->
+        <div class="items-panel" id="items-panel">
+          <div class="items-list">
+            <div class="item-btn" data-item="potion">POTION<span class="item-count">x3</span></div>
+            <div class="item-btn" data-item="super-potion">SUPERPOTION<span class="item-count">x2</span></div>
+            <div class="item-btn" data-item="max-potion">MAXPOTION<span class="item-count">x1</span></div>
+            <div class="item-btn" data-item="cancel">BACK</div>
+          </div>
+          <div class="move-info">
+            <div>Use on<br>BAGUETTE?</div>
           </div>
         </div>
       </div>
-
-      <!-- Player stat box - bottom right -->
-      <div class="stat-box player">
-        <div class="stat-name">BAGUETTE<span class="stat-level">Lv50</span></div>
-        <div class="stat-bar-container">
-          <span class="stat-label">HP</span>
-          <div class="stat-bar">
-            <div class="stat-bar-fill" id="player-hp" style="width: 100%"></div>
-          </div>
-        </div>
-        <div class="stat-hp-text"><span id="player-hp-num">100</span> / 100</div>
-      </div>
-
-      <canvas id="battle-canvas"></canvas>
-
-      <div class="arena-floor"></div>
-      <div class="crt-overlay"></div>
-
-      <!-- Message box -->
-      <div class="message-box">
-        <div class="message-text" id="battle-message">What will BAGUETTE do?</div>
-      </div>
-
-      <!-- Action box -->
-      <div class="action-box">
-        <div class="action-btn" data-action="fight">FIGHT</div>
-        <div class="action-btn" data-action="magic">MAGIC</div>
-        <div class="action-btn" data-action="item">ITEM</div>
-        <div class="action-btn" data-action="run">RUN</div>
-      </div>
-
-        </div>
-      </div>
-      <div class="power-led"></div>
-      <div class="dpad-area">
-        <div class="btn-hint b"></div>
-        <div class="btn-hint a"></div>
-      </div>
-      <div class="footer">
-        <a href="mailto:hello@baguette.art" class="x-link">hello@baguette.art</a>
-        <span class="link-divider">/</span>
-        <a href="https://x.com/baguetteanon" target="_blank" rel="noopener" class="x-link">@baguetteanon</a>
-      </div>
+    </div>
+    <div class="power-led"></div>
+    <div class="footer">
+      <a href="mailto:hello@baguette.art" class="x-link">hello@baguette.art</a>
+      <span class="link-divider">/</span>
+      <a href="https://x.com/baguetteanon" target="_blank" rel="noopener" class="x-link">@baguetteanon</a>
     </div>
   </div>
 
-  <script type="importmap">
-  { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-  </script>
-  <script type="module">
-    import * as THREE from 'three';
-
-    const canvas = document.getElementById('battle-canvas');
+  <script>
     const viewport = document.getElementById('viewport');
     const enemyHpBar = document.getElementById('enemy-hp');
     const playerHpBar = document.getElementById('player-hp');
-
-    let enemyHp = 100;
-    let playerHp = 100;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-    camera.position.z = 5;
-
-    // Orb shader
-    const orbVertexShader = `
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-      void main() {
-        vNormal = normalize(normalMatrix * normal);
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `;
-
-    const createOrbFragmentShader = (baseColor, accentColor) => `
-      uniform float uTime;
-      uniform float uHit;
-      varying vec3 vNormal;
-      varying vec3 vPosition;
-
-      vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-      vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-      vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-      vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-
-      float snoise(vec3 v) {
-        const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-        const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-        vec3 i = floor(v + dot(v, C.yyy));
-        vec3 x0 = v - i + dot(i, C.xxx);
-        vec3 g = step(x0.yzx, x0.xyz);
-        vec3 l = 1.0 - g;
-        vec3 i1 = min(g.xyz, l.zxy);
-        vec3 i2 = max(g.xyz, l.zxy);
-        vec3 x1 = x0 - i1 + C.xxx;
-        vec3 x2 = x0 - i2 + C.yyy;
-        vec3 x3 = x0 - D.yyy;
-        i = mod289(i);
-        vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-        float n_ = 0.142857142857;
-        vec3 ns = n_ * D.wyz - D.xzx;
-        vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-        vec4 x_ = floor(j * ns.z);
-        vec4 y_ = floor(j - 7.0 * x_);
-        vec4 x = x_ * ns.x + ns.yyyy;
-        vec4 y = y_ * ns.x + ns.yyyy;
-        vec4 h = 1.0 - abs(x) - abs(y);
-        vec4 b0 = vec4(x.xy, y.xy);
-        vec4 b1 = vec4(x.zw, y.zw);
-        vec4 s0 = floor(b0) * 2.0 + 1.0;
-        vec4 s1 = floor(b1) * 2.0 + 1.0;
-        vec4 sh = -step(h, vec4(0.0));
-        vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
-        vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
-        vec3 p0 = vec3(a0.xy, h.x);
-        vec3 p1 = vec3(a0.zw, h.y);
-        vec3 p2 = vec3(a1.xy, h.z);
-        vec3 p3 = vec3(a1.zw, h.w);
-        vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-        p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
-        vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-        m = m * m;
-        return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-      }
-
-      void main() {
-        float noise = snoise(vPosition * 2.5 + uTime * 0.4);
-        float t = noise * 0.5 + 0.5;
-
-        vec3 baseCol = ${baseColor};
-        vec3 accentCol = ${accentColor};
-        vec3 color = mix(baseCol, accentCol, t);
-
-        vec3 viewDir = normalize(cameraPosition - vPosition);
-        float fresnel = pow(1.0 - max(dot(vNormal, viewDir), 0.0), 2.5);
-        color += fresnel * accentCol * 0.6;
-
-        // Hit flash (white) or heal flash (green)
-        if (uHit > 0.0) {
-          color = mix(color, vec3(1.0), uHit * 0.8);
-        } else if (uHit < 0.0) {
-          color = mix(color, vec3(0.3, 1.0, 0.5), -uHit * 0.8);
-        }
-
-        gl_FragColor = vec4(color, 1.0);
-      }
-    `;
-
-    // Player orb (flame)
-    const playerMaterial = new THREE.ShaderMaterial({
-      vertexShader: orbVertexShader,
-      fragmentShader: createOrbFragmentShader('vec3(1.0, 0.35, 0.15)', 'vec3(1.0, 0.85, 0.3)'),
-      uniforms: { uTime: { value: 0 }, uHit: { value: 0 } }
-    });
-
-    // Enemy orb (void)
-    const enemyMaterial = new THREE.ShaderMaterial({
-      vertexShader: orbVertexShader,
-      fragmentShader: createOrbFragmentShader('vec3(0.45, 0.15, 0.75)', 'vec3(0.8, 0.5, 1.0)'),
-      uniforms: { uTime: { value: 0 }, uHit: { value: 0 } }
-    });
-
-    const orbGeometry = new THREE.SphereGeometry(0.6, 48, 48);
-
-    // Glow shader for outer aura
-    const glowVertexShader = `
-      varying vec3 vNormal;
-      varying vec3 vPositionNormal;
-      void main() {
-        vNormal = normalize(normalMatrix * normal);
-        vPositionNormal = normalize((modelViewMatrix * vec4(position, 1.0)).xyz);
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `;
-
-    const createGlowFragmentShader = (color1, color2) => `
-      uniform float uTime;
-      uniform float uIntensity;
-      varying vec3 vNormal;
-      varying vec3 vPositionNormal;
-      void main() {
-        float intensity = pow(0.7 - dot(vNormal, vPositionNormal), 2.0);
-        intensity *= uIntensity;
-        float pulse = 0.8 + 0.2 * sin(uTime * 3.0);
-        vec3 color1 = ${color1};
-        vec3 color2 = ${color2};
-        vec3 glow = mix(color1, color2, intensity) * pulse;
-        gl_FragColor = vec4(glow, intensity * 0.8);
-      }
-    `;
-
-    // Player glow
-    const playerGlowMaterial = new THREE.ShaderMaterial({
-      vertexShader: glowVertexShader,
-      fragmentShader: createGlowFragmentShader('vec3(1.0, 0.4, 0.1)', 'vec3(1.0, 0.9, 0.3)'),
-      uniforms: { uTime: { value: 0 }, uIntensity: { value: 1.5 } },
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      depthWrite: false
-    });
-
-    // Enemy glow
-    const enemyGlowMaterial = new THREE.ShaderMaterial({
-      vertexShader: glowVertexShader,
-      fragmentShader: createGlowFragmentShader('vec3(0.5, 0.1, 0.8)', 'vec3(0.8, 0.4, 1.0)'),
-      uniforms: { uTime: { value: 0 }, uIntensity: { value: 1.5 } },
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      depthWrite: false
-    });
-
-    const glowGeometry = new THREE.SphereGeometry(0.85, 32, 32);
-
-    // Player orb + glow
-    const playerOrb = new THREE.Mesh(orbGeometry, playerMaterial);
-    playerOrb.position.set(-1.5, -0.5, 0);
-    playerOrb.userData = { type: 'player', baseY: -0.5 };
-    scene.add(playerOrb);
-
-    const playerGlow = new THREE.Mesh(glowGeometry, playerGlowMaterial);
-    playerGlow.position.copy(playerOrb.position);
-    scene.add(playerGlow);
-
-    // Enemy orb + glow
-    const enemyOrb = new THREE.Mesh(orbGeometry, enemyMaterial);
-    enemyOrb.position.set(1.5, 0.5, 0);
-    enemyOrb.userData = { type: 'enemy', baseY: 0.5 };
-    scene.add(enemyOrb);
-
-    const enemyGlow = new THREE.Mesh(glowGeometry, enemyGlowMaterial);
-    enemyGlow.position.copy(enemyOrb.position);
-    scene.add(enemyGlow);
-
-    // Attack particles
-    const attackParticles = [];
-
-    function createAttackParticle(from, to, color) {
-      const geometry = new THREE.SphereGeometry(0.08, 16, 16);
-      const material = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(color),
-        transparent: true,
-        opacity: 1
-      });
-      const particle = new THREE.Mesh(geometry, material);
-      particle.position.copy(from);
-      particle.userData = {
-        start: from.clone(),
-        end: to.clone(),
-        progress: 0,
-        speed: 3
-      };
-      scene.add(particle);
-      attackParticles.push(particle);
-      return particle;
-    }
-
-    // Burst particles on hit
-    const burstParticles = [];
-
-    function createBurstParticles(position, color, count = 12) {
-      for (let i = 0; i < count; i++) {
-        const geometry = new THREE.SphereGeometry(0.05, 8, 8);
-        const material = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(color),
-          transparent: true,
-          opacity: 1
-        });
-        const particle = new THREE.Mesh(geometry, material);
-        particle.position.copy(position);
-
-        const angle = (i / count) * Math.PI * 2;
-        const speed = 0.5 + Math.random() * 0.5;
-        particle.userData = {
-          velocity: new THREE.Vector3(
-            Math.cos(angle) * speed,
-            Math.sin(angle) * speed + 0.3,
-            (Math.random() - 0.5) * speed
-          ),
-          life: 1
-        };
-        scene.add(particle);
-        burstParticles.push(particle);
-      }
-    }
-
-    // Raycaster for tap detection
-    const raycaster = new THREE.Raycaster();
-    const pointer = new THREE.Vector2();
-
-    function onTap(event) {
-      const rect = canvas.getBoundingClientRect();
-      const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left;
-      const y = (event.touches ? event.touches[0].clientY : event.clientY) - rect.top;
-
-      pointer.x = (x / rect.width) * 2 - 1;
-      pointer.y = -(y / rect.height) * 2 + 1;
-
-      raycaster.setFromCamera(pointer, camera);
-      const intersects = raycaster.intersectObjects([playerOrb, enemyOrb]);
-
-      if (intersects.length > 0) {
-        const hit = intersects[0].object;
-
-        if (hit.userData.type === 'player') {
-          // Player attacks enemy
-          createAttackParticle(
-            playerOrb.position.clone(),
-            enemyOrb.position.clone(),
-            '#ff6b35'
-          );
-        } else {
-          // Enemy attacks player
-          createAttackParticle(
-            enemyOrb.position.clone(),
-            playerOrb.position.clone(),
-            '#9d4edd'
-          );
-        }
-      }
-    }
-
-    canvas.addEventListener('click', onTap);
-    canvas.addEventListener('touchstart', onTap, { passive: true });
-
-    function showDamage(position, amount, isEnemy) {
-      const div = document.createElement('div');
-      div.className = 'damage-text';
-      div.textContent = `-${amount}`;
-      div.style.color = isEnemy ? '#c77dff' : '#ff6b35';
-
-      // Project 3D position to screen
-      const vector = position.clone();
-      vector.project(camera);
-
-      const rect = viewport.getBoundingClientRect();
-      const x = ((vector.x + 1) / 2) * rect.width;
-      const y = ((-vector.y + 1) / 2) * rect.height;
-
-      div.style.left = x + 'px';
-      div.style.top = y + 'px';
-
-      viewport.appendChild(div);
-      setTimeout(() => div.remove(), 800);
-    }
-
     const playerHpNum = document.getElementById('player-hp-num');
     const battleMessage = document.getElementById('battle-message');
+    const mainPanel = document.getElementById('main-panel');
+    const fightPanel = document.getElementById('fight-panel');
+    const itemsPanel = document.getElementById('items-panel');
+    const playerCreature = document.getElementById('player-creature');
+    const enemyCreature = document.getElementById('enemy-creature');
+    const impactFlash = document.getElementById('impact-flash');
 
-    function updateHpBar(bar, hp) {
-      bar.style.width = hp + '%';
-      bar.classList.remove('medium', 'low');
-      if (hp <= 25) bar.classList.add('low');
-      else if (hp <= 50) bar.classList.add('medium');
+    let playerHp = 100;
+    let enemyHp = 100;
+    let playerLevel = 50;
+    let playerExp = 0;
+    let currentMenu = 'main';
+    let isAnimating = false;
+    let currentEnemy = 0;
 
-      // Update numeric display for player
-      if (bar === playerHpBar) {
-        playerHpNum.textContent = Math.round(hp);
+    const enemies = [
+      { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', attack: 'SHADOW SNEAK', damage: [10, 18] },
+      { name: 'SLIME', level: 52, hp: 120, maxHp: 120, exp: 180, sprite: 'slime', attack: 'SLUDGE BOMB', damage: [12, 20] }
+    ];
+
+    const moves = {
+      'ember': { pp: 25, maxPp: 25, type: 'FIRE', power: 15, particles: 'ember' },
+      'flamethrower': { pp: 15, maxPp: 15, type: 'FIRE', power: 25, particles: 'flamethrower' },
+      'shadow-ball': { pp: 15, maxPp: 15, type: 'GHOST', power: 20, particles: 'shadow' },
+      'fire-blast': { pp: 5, maxPp: 5, type: 'FIRE', power: 35, particles: 'blast' }
+    };
+
+    const items = {
+      'potion': { count: 3, heal: 20, particles: 'heal' },
+      'super-potion': { count: 2, heal: 50, particles: 'super-heal' },
+      'max-potion': { count: 1, heal: 100, particles: 'max-heal' }
+    };
+
+    // Particle system
+    function spawnParticle(type, x, y, extraStyles = {}) {
+      const p = document.createElement('div');
+      p.className = `particle ${type}-particle`;
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      Object.assign(p.style, extraStyles);
+      viewport.appendChild(p);
+      setTimeout(() => p.remove(), 1200);
+    }
+
+    function spawnParticleBurst(type, x, y, count, spread) {
+      for (let i = 0; i < count; i++) {
+        const angle = (Math.PI * 2 / count) * i;
+        const dist = spread * (0.5 + Math.random() * 0.5);
+        const px = x + Math.cos(angle) * dist;
+        const py = y + Math.sin(angle) * dist;
+        const delay = Math.random() * 100;
+        setTimeout(() => spawnParticle(type, px, py, {
+          '--dx': (Math.random() - 0.5) * 40 + 'px'
+        }), delay);
       }
     }
 
-    function showBattleMessage(msg) {
-      battleMessage.textContent = msg;
+    function spawnHealParticles(type, targetEl, count) {
+      const rect = targetEl.getBoundingClientRect();
+      const viewRect = viewport.getBoundingClientRect();
+      const cx = rect.left - viewRect.left + rect.width / 2;
+      const cy = rect.top - viewRect.top + rect.height / 2;
+
+      for (let i = 0; i < count; i++) {
+        const delay = i * 80;
+        const x = cx + (Math.random() - 0.5) * 60;
+        const y = cy + (Math.random() - 0.5) * 60;
+        setTimeout(() => {
+          if (type === 'max-heal') {
+            const hue = (i / count) * 360;
+            spawnParticle(type, x, y, {
+              background: `hsl(${hue}, 100%, 60%)`,
+              boxShadow: `0 0 15px hsl(${hue}, 100%, 70%)`
+            });
+          } else {
+            spawnParticle(type, x, y);
+          }
+        }, delay);
+      }
+    }
+
+    function screenShake() {
+      viewport.classList.add('shake');
+      setTimeout(() => viewport.classList.remove('shake'), 300);
+    }
+
+    function triggerImpactFlash() {
+      impactFlash.classList.remove('active');
+      void impactFlash.offsetWidth;
+      impactFlash.classList.add('active');
+    }
+
+    function createScreenSplat() {
+      const splat = document.createElement('div');
+      splat.className = 'screen-splat';
+
+      // Create random splat blobs
+      for (let i = 0; i < 5; i++) {
+        const blob = document.createElement('div');
+        blob.className = 'splat-blob';
+        const size = 30 + Math.random() * 50;
+        blob.style.width = size + 'px';
+        blob.style.height = size * (0.6 + Math.random() * 0.4) + 'px';
+        blob.style.left = (Math.random() * 80 + 10) + '%';
+        blob.style.top = (Math.random() * 60 + 10) + '%';
+        blob.style.transform = `rotate(${Math.random() * 360}deg)`;
+        splat.appendChild(blob);
+
+        // Add drips
+        const dripCount = Math.floor(Math.random() * 3) + 1;
+        for (let j = 0; j < dripCount; j++) {
+          const drip = document.createElement('div');
+          drip.className = 'splat-drip';
+          drip.style.width = (4 + Math.random() * 6) + 'px';
+          drip.style.height = (15 + Math.random() * 20) + 'px';
+          drip.style.left = (parseFloat(blob.style.left) + Math.random() * 10 - 5) + '%';
+          drip.style.top = (parseFloat(blob.style.top) + size * 0.3 / 5) + '%';
+          drip.style.animationDelay = (Math.random() * 0.3) + 's';
+          splat.appendChild(drip);
+        }
+      }
+
+      viewport.appendChild(splat);
+      splat.classList.add('active');
+      setTimeout(() => splat.remove(), 2500);
+    }
+
+    function showMenu(menu) {
+      if (isAnimating) return;
+      currentMenu = menu;
+      mainPanel.style.display = menu === 'main' ? 'flex' : 'none';
+      fightPanel.classList.toggle('active', menu === 'fight');
+      itemsPanel.classList.toggle('active', menu === 'items');
+    }
+
+    function updateHpBar(bar, hp, isPlayer) {
+      bar.style.width = hp + '%';
+      bar.classList.remove('medium', 'low');
+      if (hp <= 20) bar.classList.add('low');
+      else if (hp <= 50) bar.classList.add('medium');
+      if (isPlayer) playerHpNum.textContent = Math.max(0, Math.round(hp));
+    }
+
+    function showMessage(msg) {
+      battleMessage.innerHTML = msg;
+    }
+
+    function createProjectile(fromX, fromY, toX, toY, type, onHit) {
+      const proj = document.createElement('div');
+      proj.className = `projectile ${type}`;
+      proj.style.left = fromX + 'px';
+      proj.style.top = fromY + 'px';
+      viewport.appendChild(proj);
+
+      // Trail particles
+      const trailInterval = setInterval(() => {
+        const currentX = parseFloat(proj.style.left);
+        const currentY = parseFloat(proj.style.top);
+        if (type === 'void') {
+          spawnParticle('void', currentX, currentY);
+        } else if (type === 'shadow-ball') {
+          spawnParticle('shadow', currentX, currentY);
+        } else if (type === 'sludge') {
+          spawnParticle('sludge', currentX + (Math.random() - 0.5) * 12, currentY + (Math.random() - 0.5) * 12);
+        } else {
+          spawnParticle('fire', currentX + (Math.random() - 0.5) * 10, currentY + (Math.random() - 0.5) * 10);
+        }
+      }, 50);
+
+      const duration = type === 'fire-blast' ? 400 : 300;
+      const startTime = Date.now();
+
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+
+        proj.style.left = fromX + (toX - fromX) * eased + 'px';
+        proj.style.top = fromY + (toY - fromY) * eased + 'px';
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          clearInterval(trailInterval);
+          proj.remove();
+          if (onHit) onHit();
+        }
+      }
+      animate();
+    }
+
+    function showDamage(x, y, amount, isCrit = false, isHeal = false) {
+      const dmg = document.createElement('div');
+      dmg.className = 'damage-num' + (isCrit ? ' crit' : '') + (isHeal ? ' heal' : '');
+      dmg.textContent = (isHeal ? '+' : '') + amount;
+      dmg.style.left = x + 'px';
+      dmg.style.top = y + 'px';
+      viewport.appendChild(dmg);
+      setTimeout(() => dmg.remove(), 1000);
+    }
+
+    function hitCreature(creature) {
+      creature.classList.add('hit');
+      setTimeout(() => creature.classList.remove('hit'), 400);
+    }
+
+    function useMove(moveName) {
+      if (isAnimating) return;
+      const move = moves[moveName];
+      if (!move || move.pp <= 0) return;
+
+      isAnimating = true;
+      move.pp--;
+      const displayName = moveName.replace('-', ' ').toUpperCase();
+      showMessage(`BAGUETTE used<br>${displayName}!`);
+      showMenu('main');
+
+      const playerRect = playerCreature.getBoundingClientRect();
+      const enemyRect = enemyCreature.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+
+      const fromX = playerRect.left - viewportRect.left + playerRect.width / 2;
+      const fromY = playerRect.top - viewportRect.top + playerRect.height / 2;
+      const toX = enemyRect.left - viewportRect.left + enemyRect.width / 2;
+      const toY = enemyRect.top - viewportRect.top + enemyRect.height / 2;
+
+      // Charge up particles
+      setTimeout(() => {
+        spawnParticleBurst('ember', fromX, fromY, 8, 30);
+      }, 200);
+
+      setTimeout(() => {
+        createProjectile(fromX, fromY, toX, toY, moveName, () => {
+          hitCreature(enemyCreature);
+          screenShake();
+          triggerImpactFlash();
+
+          const isCrit = Math.random() < 0.15;
+          const damage = move.power + Math.floor(Math.random() * 10) + (isCrit ? 15 : 0);
+          enemyHp = Math.max(0, enemyHp - damage);
+          updateHpBar(enemyHpBar, enemyHp, false);
+          showDamage(toX, toY - 30, damage, isCrit);
+
+          // Impact particles based on move type
+          if (move.particles === 'blast') {
+            spawnParticleBurst('blast', toX, toY, 12, 50);
+            spawnParticleBurst('fire', toX, toY, 20, 70);
+          } else if (move.particles === 'flamethrower') {
+            spawnParticleBurst('flame-stream', toX, toY, 10, 40);
+          } else if (move.particles === 'shadow') {
+            spawnParticleBurst('shadow', toX, toY, 15, 45);
+          } else {
+            spawnParticleBurst('ember', toX, toY, 8, 35);
+          }
+
+          if (enemyHp <= 0) {
+            const enemy = enemies[currentEnemy];
+            showMessage(`Wild ${enemy.name}<br>fainted!`);
+            enemyCreature.classList.add('fainting');
+
+            setTimeout(() => {
+              // Award EXP
+              const expGain = enemy.exp;
+              showMessage(`BAGUETTE gained<br>${expGain} EXP!`);
+              playerExp += expGain;
+              const expPercent = Math.min(100, (playerExp % 300) / 3);
+              document.getElementById('exp-bar').style.width = expPercent + '%';
+
+              // Level up check
+              if (playerExp >= 300) {
+                setTimeout(() => {
+                  playerExp = playerExp % 300;
+                  playerLevel++;
+                  showMessage(`BAGUETTE grew to<br>Lv${playerLevel}!`);
+                  document.querySelector('.stat-box.player .stat-level').textContent = playerLevel;
+                  spawnHealParticles('max-heal', playerCreature, 15);
+                }, 1500);
+              }
+
+              setTimeout(() => {
+                // Check for next enemy
+                if (currentEnemy < enemies.length - 1) {
+                  currentEnemy++;
+                  const nextEnemy = enemies[currentEnemy];
+                  showMessage(`Trainer sends out<br>${nextEnemy.name}!`);
+
+                  // Update enemy stats
+                  document.querySelector('.stat-box.enemy .stat-name').textContent = nextEnemy.name;
+                  document.querySelector('.stat-box.enemy .stat-level').textContent = nextEnemy.level;
+
+                  // Swap sprite
+                  const spriteContainer = enemyCreature.querySelector('div');
+                  spriteContainer.className = nextEnemy.sprite + '-sprite';
+
+                  enemyHp = nextEnemy.maxHp;
+                  updateHpBar(enemyHpBar, 100, false);
+
+                  enemyCreature.classList.remove('fainting');
+                  enemyCreature.classList.add('appearing');
+
+                  setTimeout(() => {
+                    enemyCreature.classList.remove('appearing');
+                    isAnimating = false;
+                    showMessage('What will<br>BAGUETTE do?');
+                  }, 1000);
+                } else {
+                  // All enemies defeated - victory!
+                  showMessage('You defeated<br>the trainer!');
+                  setTimeout(() => {
+                    showMessage('VICTORY!<br>Tap to restart');
+                    // Reset for replay
+                    currentEnemy = 0;
+                    const firstEnemy = enemies[0];
+                    document.querySelector('.stat-box.enemy .stat-name').textContent = firstEnemy.name;
+                    document.querySelector('.stat-box.enemy .stat-level').textContent = firstEnemy.level;
+                    const spriteContainer = enemyCreature.querySelector('div');
+                    spriteContainer.className = firstEnemy.sprite + '-sprite';
+                    enemyCreature.classList.remove('fainting');
+
+                    viewport.onclick = () => {
+                      viewport.onclick = null;
+                      enemyHp = firstEnemy.maxHp;
+                      playerHp = 100;
+                      updateHpBar(enemyHpBar, 100, false);
+                      updateHpBar(playerHpBar, 100, true);
+                      isAnimating = false;
+                      showMessage('What will<br>BAGUETTE do?');
+                    };
+                  }, 2000);
+                }
+              }, playerExp >= 300 ? 3500 : 2000);
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              isAnimating = false;
+              enemyAttack();
+            }, 800);
+          }
+        });
+      }, 500);
+    }
+
+    function enemyAttack() {
+      isAnimating = true;
+      const enemy = enemies[currentEnemy];
+      showMessage(`Wild ${enemy.name}<br>used ${enemy.attack}!`);
+
+      const playerRect = playerCreature.getBoundingClientRect();
+      const enemyRect = enemyCreature.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+
+      const fromX = enemyRect.left - viewportRect.left + enemyRect.width / 2;
+      const fromY = enemyRect.top - viewportRect.top + enemyRect.height / 2;
+      const toX = playerRect.left - viewportRect.left + playerRect.width / 2;
+      const toY = playerRect.top - viewportRect.top + playerRect.height / 2;
+
+      // Enemy charge particles
+      setTimeout(() => {
+        spawnParticleBurst('void', fromX, fromY, 6, 25);
+      }, 200);
+
+      setTimeout(() => {
+        const projType = enemy.sprite === 'slime' ? 'sludge' : 'void';
+        const particleType = enemy.sprite === 'slime' ? 'sludge' : 'void';
+
+        createProjectile(fromX, fromY, toX, toY, projType, () => {
+          hitCreature(playerCreature);
+          screenShake();
+          triggerImpactFlash();
+
+          const damage = enemy.damage[0] + Math.floor(Math.random() * (enemy.damage[1] - enemy.damage[0]));
+          playerHp = Math.max(0, playerHp - damage);
+          updateHpBar(playerHpBar, playerHp, true);
+          showDamage(toX, toY - 30, damage);
+          spawnParticleBurst(particleType, toX, toY, 10, 40);
+
+          // Screen splat for sludge attacks
+          if (particleType === 'sludge') {
+            createScreenSplat();
+          }
+
+          if (playerHp <= 15 && playerHp > 0) {
+            isAnimating = false;
+            setTimeout(() => useMaxPotion(), 800);
+          } else if (playerHp <= 0) {
+            showMessage('BAGUETTE<br>fainted!');
+            isAnimating = false;
+            setTimeout(() => {
+              playerHp = 100;
+              updateHpBar(playerHpBar, 100, true);
+              showMessage('BAGUETTE woke up!');
+              setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+            }, 2000);
+          } else {
+            isAnimating = false;
+            setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1000);
+          }
+        });
+      }, 500);
     }
 
     function useMaxPotion() {
-      // Show message sequence
-      showBattleMessage('BAGUETTE used MAX POTION!');
+      isAnimating = true;
+      showMessage('BAGUETTE used<br>MAX POTION!');
 
-      // Create healing particles
-      createHealParticles(playerOrb.position);
+      const playerRect = playerCreature.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+      const cx = playerRect.left - viewportRect.left + playerRect.width / 2;
+      const cy = playerRect.top - viewportRect.top + playerRect.height / 2;
 
-      // Delay the heal effect
       setTimeout(() => {
+        spawnHealParticles('max-heal', playerCreature, 20);
         playerHp = 100;
-        updateHpBar(playerHpBar, 100);
-        showBattleMessage('BAGUETTE\'s HP was fully restored!');
+        updateHpBar(playerHpBar, 100, true);
+        showDamage(cx, cy - 30, 100, false, true);
+        showMessage("BAGUETTE's HP<br>was restored!");
+        isAnimating = false;
+        setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+      }, 500);
+    }
 
-        // Flash the orb green
-        playerMaterial.uniforms.uHit.value = -1; // negative for green flash
+    function useItem(itemName) {
+      if (isAnimating) return;
+      const item = items[itemName];
+      if (!item || item.count <= 0) return;
 
-        setTimeout(() => {
-          showBattleMessage('What will BAGUETTE do?');
-        }, 1500);
+      isAnimating = true;
+      item.count--;
+      const btn = document.querySelector(`[data-item="${itemName}"]`);
+      if (btn) btn.querySelector('.item-count').textContent = `x${item.count}`;
+
+      const displayName = itemName.toUpperCase().replace('-', ' ');
+      showMessage(`BAGUETTE used<br>${displayName}!`);
+      showMenu('main');
+
+      const playerRect = playerCreature.getBoundingClientRect();
+      const viewportRect = viewport.getBoundingClientRect();
+      const cx = playerRect.left - viewportRect.left + playerRect.width / 2;
+      const cy = playerRect.top - viewportRect.top + playerRect.height / 2;
+
+      setTimeout(() => {
+        const healAmount = Math.min(item.heal, 100 - playerHp);
+        playerHp = Math.min(100, playerHp + item.heal);
+        updateHpBar(playerHpBar, playerHp, true);
+
+        // Different particles for different potions
+        if (item.particles === 'max-heal') {
+          spawnHealParticles('max-heal', playerCreature, 20);
+        } else if (item.particles === 'super-heal') {
+          spawnHealParticles('super-heal', playerCreature, 15);
+        } else {
+          spawnHealParticles('heal', playerCreature, 10);
+        }
+
+        showDamage(cx, cy - 30, healAmount, false, true);
+        showMessage(`Restored<br>${healAmount} HP!`);
+
+        isAnimating = false;
+        setTimeout(() => enemyAttack(), 1000);
       }, 800);
     }
 
-    function createHealParticles(position) {
-      for (let i = 0; i < 20; i++) {
-        const geometry = new THREE.SphereGeometry(0.04, 8, 8);
-        const material = new THREE.MeshBasicMaterial({
-          color: new THREE.Color('#4ade80'),
-          transparent: true,
-          opacity: 1
-        });
-        const particle = new THREE.Mesh(geometry, material);
-
-        // Start from below and rise up
-        particle.position.set(
-          position.x + (Math.random() - 0.5) * 0.8,
-          position.y - 0.5,
-          position.z + (Math.random() - 0.5) * 0.8
-        );
-
-        particle.userData = {
-          velocity: new THREE.Vector3(
-            (Math.random() - 0.5) * 0.3,
-            1.5 + Math.random() * 0.5,
-            (Math.random() - 0.5) * 0.3
-          ),
-          life: 1,
-          isHeal: true
-        };
-        scene.add(particle);
-        burstParticles.push(particle);
-      }
-    }
-
-    function resize() {
-      const rect = canvas.getBoundingClientRect();
-      renderer.setSize(rect.width, rect.height);
-      camera.aspect = rect.width / rect.height;
-      camera.updateProjectionMatrix();
-    }
-
-    resize();
-    window.addEventListener('resize', resize);
-
-    let lastTime = 0;
-    function animate(time) {
-      const delta = (time - lastTime) / 1000;
-      lastTime = time;
-      const t = time * 0.001;
-
-      // Update orb shaders
-      playerMaterial.uniforms.uTime.value = t;
-      enemyMaterial.uniforms.uTime.value = t;
-
-      // Decay hit flash
-      playerMaterial.uniforms.uHit.value *= 0.9;
-      enemyMaterial.uniforms.uHit.value *= 0.9;
-
-      // Update glow shaders
-      playerGlowMaterial.uniforms.uTime.value = t;
-      enemyGlowMaterial.uniforms.uTime.value = t;
-
-      // Idle animation
-      playerOrb.position.y = playerOrb.userData.baseY + Math.sin(t * 2) * 0.1;
-      enemyOrb.position.y = enemyOrb.userData.baseY + Math.sin(t * 2 + 1) * 0.1;
-
-      // Sync glow positions
-      playerGlow.position.copy(playerOrb.position);
-      enemyGlow.position.copy(enemyOrb.position);
-
-      // Update attack particles
-      for (let i = attackParticles.length - 1; i >= 0; i--) {
-        const p = attackParticles[i];
-        p.userData.progress += delta * p.userData.speed;
-
-        if (p.userData.progress >= 1) {
-          // Hit!
-          const target = p.userData.end;
-          const isEnemy = target.x > 0;
-
-          if (isEnemy) {
-            enemyMaterial.uniforms.uHit.value = 1;
-            const damage = 8 + Math.floor(Math.random() * 7);
-            enemyHp = Math.max(0, enemyHp - damage);
-            updateHpBar(enemyHpBar, enemyHp);
-            showDamage(enemyOrb.position, damage, true);
-            createBurstParticles(enemyOrb.position, '#c77dff');
-          } else {
-            playerMaterial.uniforms.uHit.value = 1;
-            const damage = 8 + Math.floor(Math.random() * 7);
-            playerHp = Math.max(0, playerHp - damage);
-            updateHpBar(playerHpBar, playerHp);
-            showDamage(playerOrb.position, damage, false);
-            createBurstParticles(playerOrb.position, '#ff6b35');
-
-            // Max Potion when about to die!
-            if (playerHp <= 15 && playerHp > 0) {
-              useMaxPotion();
-            }
-          }
-
-          scene.remove(p);
-          attackParticles.splice(i, 1);
-
-          // Reset enemy when defeated
-          if (enemyHp <= 0) {
-            showBattleMessage('VOID SPECTER fainted!');
-            setTimeout(() => {
-              enemyHp = 100;
-              updateHpBar(enemyHpBar, 100);
-              showBattleMessage('A new VOID SPECTER appeared!');
-            }, 2000);
-          }
-        } else {
-          p.position.lerpVectors(p.userData.start, p.userData.end, p.userData.progress);
-          p.scale.setScalar(1 + Math.sin(p.userData.progress * Math.PI) * 0.5);
+    // Event listeners
+    document.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isAnimating) return;
+        const action = btn.dataset.action;
+        if (action === 'fight') showMenu('fight');
+        else if (action === 'bag') showMenu('items');
+        else if (action === 'run') {
+          showMessage("Can't escape!");
+          setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
         }
-      }
-
-      // Update burst particles
-      for (let i = burstParticles.length - 1; i >= 0; i--) {
-        const p = burstParticles[i];
-        p.position.add(p.userData.velocity.clone().multiplyScalar(delta));
-
-        // Heal particles rise, damage particles fall
-        if (p.userData.isHeal) {
-          p.userData.velocity.y *= 0.98; // slow down rise
-          p.userData.life -= delta * 1.5;
-        } else {
-          p.userData.velocity.y -= delta * 2;
-          p.userData.life -= delta * 2;
+        else if (action === 'pokemon') {
+          showMessage('BAGUETTE is<br>already out!');
+          setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
         }
+      });
+    });
 
-        p.material.opacity = p.userData.life;
-
-        if (p.userData.life <= 0) {
-          scene.remove(p);
-          burstParticles.splice(i, 1);
+    document.querySelectorAll('.move-btn').forEach(btn => {
+      btn.addEventListener('click', () => useMove(btn.dataset.move));
+      btn.addEventListener('mouseenter', () => {
+        const move = moves[btn.dataset.move];
+        if (move) {
+          document.getElementById('move-type').textContent = `TYPE/${move.type}`;
+          document.getElementById('move-pp').textContent = `PP ${move.pp}/${move.maxPp}`;
         }
+      });
+    });
+
+    document.querySelectorAll('.item-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.item === 'cancel') showMenu('main');
+        else useItem(btn.dataset.item);
+      });
+    });
+
+    // Tap creatures
+    playerCreature.addEventListener('click', () => {
+      if (currentMenu === 'main' && !isAnimating) showMenu('fight');
+    });
+
+    enemyCreature.addEventListener('click', () => {
+      if (currentMenu === 'main' && !isAnimating) {
+        showMessage('Wild SPECTER<br>looks angry!');
+        spawnParticleBurst('void',
+          enemyCreature.getBoundingClientRect().left - viewport.getBoundingClientRect().left + 40,
+          enemyCreature.getBoundingClientRect().top - viewport.getBoundingClientRect().top + 40,
+          6, 30);
+        setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
       }
-
-      renderer.render(scene, camera);
-      requestAnimationFrame(animate);
-    }
-
-    animate(0);
+    });
   </script>
 </body>
 </html>
