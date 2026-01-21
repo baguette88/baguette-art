@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Baguette</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-dark: #0d0d12;
+      --bg-battle: #1a1a24;
+      --pixel-scale: 4px;
+      --flame-core: #ff6b35;
+      --flame-mid: #f7931e;
+      --flame-outer: #ffd23f;
+      --void-core: #7b2cbf;
+      --void-mid: #9d4edd;
+      --void-outer: #c77dff;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+
+    @keyframes voidPulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px var(--void-core)) drop-shadow(0 0 20px var(--void-mid));
+        transform: scale(1);
+      }
+      50% {
+        filter: drop-shadow(0 0 15px var(--void-core)) drop-shadow(0 0 35px var(--void-mid)) drop-shadow(0 0 50px var(--void-outer));
+        transform: scale(1.03);
+      }
+    }
+
+    @keyframes flameDance {
+      0%, 100% {
+        filter: drop-shadow(0 0 6px var(--flame-core)) drop-shadow(0 0 15px var(--flame-mid));
+      }
+      25% {
+        filter: drop-shadow(0 0 10px var(--flame-core)) drop-shadow(0 0 25px var(--flame-mid)) drop-shadow(0 0 40px var(--flame-outer));
+      }
+      50% {
+        filter: drop-shadow(0 0 8px var(--flame-core)) drop-shadow(0 0 20px var(--flame-mid));
+      }
+      75% {
+        filter: drop-shadow(0 0 12px var(--flame-core)) drop-shadow(0 0 30px var(--flame-mid)) drop-shadow(0 0 45px var(--flame-outer));
+      }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes battleIdle {
+      0%, 100% { transform: translateY(0) scaleX(1); }
+      25% { transform: translateY(-2px) scaleX(1); }
+      50% { transform: translateY(0) scaleX(1.01); }
+      75% { transform: translateY(-1px) scaleX(1); }
+    }
+
+    @keyframes scanline {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+
+    @keyframes glitchShift {
+      0%, 90%, 100% { transform: translateX(0); }
+      92% { transform: translateX(-2px); }
+      94% { transform: translateX(2px); }
+      96% { transform: translateX(-1px); }
+      98% { transform: translateX(1px); }
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-dark);
+      font-family: 'Press Start 2P', cursive;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.1) 2px,
+          rgba(0, 0, 0, 0.1) 4px
+        );
+    }
+
+    .crt-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        transparent 50%,
+        rgba(0, 0, 0, 0.02) 50%
+      );
+      background-size: 100% 4px;
+      animation: scanline 8s linear infinite;
+      opacity: 0.3;
+    }
+
+    .battle-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .battle-scene {
+      width: 100%;
+      max-width: 900px;
+      aspect-ratio: 16 / 10;
+      background:
+        linear-gradient(180deg,
+          #1a1a2e 0%,
+          #16213e 40%,
+          #1a1a2e 100%
+        );
+      border: 4px solid #2a2a3a;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 4px #0d0d12,
+        0 0 60px rgba(123, 44, 191, 0.2),
+        0 0 100px rgba(255, 107, 53, 0.1);
+    }
+
+    /* Battle arena floor */
+    .arena-floor {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 35%;
+      background:
+        linear-gradient(180deg,
+          transparent 0%,
+          rgba(20, 20, 35, 0.8) 20%,
+          #14142380 100%
+        );
+    }
+
+    .arena-floor::before {
+      content: '';
+      position: absolute;
+      bottom: 20%;
+      left: 10%;
+      width: 25%;
+      height: 8px;
+      background: #2a2a4a;
+      border-radius: 50%;
+      box-shadow: 0 0 20px 10px rgba(123, 44, 191, 0.3);
+    }
+
+    .arena-floor::after {
+      content: '';
+      position: absolute;
+      bottom: 35%;
+      right: 15%;
+      width: 20%;
+      height: 6px;
+      background: #2a2a4a;
+      border-radius: 50%;
+      box-shadow: 0 0 20px 10px rgba(255, 107, 53, 0.3);
+    }
+
+    /* Monster containers */
+    .monster {
+      position: absolute;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .monster-player {
+      bottom: 15%;
+      left: 8%;
+      animation: battleIdle 2s ease-in-out infinite, flameDance 0.5s ease-in-out infinite;
+      transform-origin: bottom center;
+    }
+
+    .monster-enemy {
+      top: 15%;
+      right: 12%;
+      animation: float 3s ease-in-out infinite, voidPulse 2s ease-in-out infinite;
+    }
+
+    /* Pixel art monsters using box-shadow technique */
+    .pixel-canvas {
+      width: 1px;
+      height: 1px;
+      transform-origin: top left;
+    }
+
+    /* FLAME BEAST - Player monster */
+    .flame-beast {
+      transform: scale(5);
+    }
+
+    .flame-beast .pixel-canvas {
+      box-shadow:
+        /* Body core */
+        6px 8px 0 #ff6b35,
+        7px 8px 0 #ff6b35,
+        8px 8px 0 #ff6b35,
+        9px 8px 0 #ff6b35,
+        5px 9px 0 #ff6b35,
+        6px 9px 0 #f7931e,
+        7px 9px 0 #ffd23f,
+        8px 9px 0 #f7931e,
+        9px 9px 0 #ff6b35,
+        10px 9px 0 #ff6b35,
+        5px 10px 0 #ff6b35,
+        6px 10px 0 #f7931e,
+        7px 10px 0 #ffd23f,
+        8px 10px 0 #ffd23f,
+        9px 10px 0 #f7931e,
+        10px 10px 0 #ff6b35,
+        5px 11px 0 #ff6b35,
+        6px 11px 0 #ff6b35,
+        7px 11px 0 #f7931e,
+        8px 11px 0 #f7931e,
+        9px 11px 0 #ff6b35,
+        10px 11px 0 #ff6b35,
+        /* Legs */
+        5px 12px 0 #cc5529,
+        6px 12px 0 #cc5529,
+        9px 12px 0 #cc5529,
+        10px 12px 0 #cc5529,
+        5px 13px 0 #992200,
+        6px 13px 0 #992200,
+        9px 13px 0 #992200,
+        10px 13px 0 #992200,
+        /* Head flames */
+        7px 5px 0 #ffd23f,
+        8px 5px 0 #ffd23f,
+        6px 6px 0 #ffd23f,
+        7px 6px 0 #ff6b35,
+        8px 6px 0 #ff6b35,
+        9px 6px 0 #ffd23f,
+        5px 7px 0 #f7931e,
+        6px 7px 0 #ff6b35,
+        7px 7px 0 #ff6b35,
+        8px 7px 0 #ff6b35,
+        9px 7px 0 #ff6b35,
+        10px 7px 0 #f7931e,
+        /* Eyes */
+        6px 8px 0 #1a1a24,
+        9px 8px 0 #1a1a24,
+        /* Top flames */
+        7px 3px 0 #ffd23f,
+        8px 2px 0 #ffd23f,
+        6px 4px 0 #f7931e,
+        9px 4px 0 #f7931e,
+        8px 4px 0 #ffd23f,
+        /* Tail */
+        11px 9px 0 #ff6b35,
+        12px 8px 0 #f7931e,
+        13px 7px 0 #ffd23f,
+        13px 6px 0 #ffd23f,
+        /* Flame particles */
+        4px 6px 0 #ffd23f,
+        3px 5px 0 #f7931e,
+        11px 5px 0 #ffd23f,
+        12px 4px 0 #f7931e;
+    }
+
+    /* VOID SPECTER - Enemy monster */
+    .void-specter {
+      transform: scale(5);
+    }
+
+    .void-specter .pixel-canvas {
+      box-shadow:
+        /* Main body */
+        7px 6px 0 #7b2cbf,
+        8px 6px 0 #7b2cbf,
+        6px 7px 0 #7b2cbf,
+        7px 7px 0 #9d4edd,
+        8px 7px 0 #9d4edd,
+        9px 7px 0 #7b2cbf,
+        5px 8px 0 #7b2cbf,
+        6px 8px 0 #9d4edd,
+        7px 8px 0 #c77dff,
+        8px 8px 0 #c77dff,
+        9px 8px 0 #9d4edd,
+        10px 8px 0 #7b2cbf,
+        5px 9px 0 #7b2cbf,
+        6px 9px 0 #9d4edd,
+        7px 9px 0 #c77dff,
+        8px 9px 0 #c77dff,
+        9px 9px 0 #9d4edd,
+        10px 9px 0 #7b2cbf,
+        5px 10px 0 #5a189a,
+        6px 10px 0 #7b2cbf,
+        7px 10px 0 #9d4edd,
+        8px 10px 0 #9d4edd,
+        9px 10px 0 #7b2cbf,
+        10px 10px 0 #5a189a,
+        /* Eyes - glowing */
+        6px 8px 0 #e0aaff,
+        7px 8px 0 #ffffff,
+        9px 8px 0 #ffffff,
+        10px 8px 0 #e0aaff,
+        /* Crown/horns */
+        6px 5px 0 #9d4edd,
+        9px 5px 0 #9d4edd,
+        5px 4px 0 #c77dff,
+        10px 4px 0 #c77dff,
+        5px 3px 0 #e0aaff,
+        10px 3px 0 #e0aaff,
+        /* Wispy bottom */
+        6px 11px 0 #5a189a,
+        7px 11px 0 #7b2cbf,
+        8px 11px 0 #7b2cbf,
+        9px 11px 0 #5a189a,
+        6px 12px 0 #3c096c,
+        8px 12px 0 #3c096c,
+        7px 13px 0 #240046,
+        /* Floating particles */
+        3px 6px 0 #c77dff,
+        4px 4px 0 #9d4edd,
+        12px 5px 0 #c77dff,
+        11px 7px 0 #9d4edd,
+        4px 10px 0 #7b2cbf,
+        11px 11px 0 #7b2cbf,
+        2px 8px 0 #5a189a,
+        13px 9px 0 #5a189a;
+    }
+
+    /* Shader aura effects */
+    .aura {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .flame-aura {
+      width: 120px;
+      height: 120px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background:
+        radial-gradient(ellipse at center,
+          rgba(255, 210, 63, 0.4) 0%,
+          rgba(247, 147, 30, 0.2) 30%,
+          rgba(255, 107, 53, 0.1) 50%,
+          transparent 70%
+        );
+      animation: flicker 0.3s ease-in-out infinite;
+    }
+
+    .flame-aura::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      background:
+        radial-gradient(ellipse at center,
+          transparent 40%,
+          rgba(255, 107, 53, 0.1) 60%,
+          rgba(247, 147, 30, 0.05) 80%,
+          transparent 100%
+        );
+      animation: flicker 0.5s ease-in-out infinite reverse;
+    }
+
+    .void-aura {
+      width: 100px;
+      height: 100px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background:
+        radial-gradient(ellipse at center,
+          rgba(199, 125, 255, 0.3) 0%,
+          rgba(157, 78, 221, 0.2) 30%,
+          rgba(123, 44, 191, 0.1) 50%,
+          transparent 70%
+        );
+    }
+
+    .void-aura::before {
+      content: '';
+      position: absolute;
+      inset: -30px;
+      background:
+        conic-gradient(
+          from 0deg,
+          transparent,
+          rgba(123, 44, 191, 0.2),
+          transparent,
+          rgba(157, 78, 221, 0.15),
+          transparent,
+          rgba(199, 125, 255, 0.1),
+          transparent
+        );
+      animation: spin 8s linear infinite;
+      border-radius: 50%;
+    }
+
+    .void-aura::after {
+      content: '';
+      position: absolute;
+      inset: -15px;
+      border: 2px solid rgba(199, 125, 255, 0.2);
+      border-radius: 50%;
+      animation: voidRing 2s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes voidRing {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
+    /* UI Elements */
+    .header {
+      position: absolute;
+      top: 1.5rem;
+      left: 0;
+      right: 0;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .title {
+      font-size: clamp(0.6rem, 2vw, 0.9rem);
+      color: #e8e8e8;
+      letter-spacing: 0.3em;
+      text-shadow:
+        2px 2px 0 #0d0d12,
+        0 0 20px rgba(199, 125, 255, 0.5);
+      animation: glitchShift 5s ease-in-out infinite;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 1rem;
+      right: 1.5rem;
+      z-index: 10;
+    }
+
+    .x-link {
+      font-size: 0.5rem;
+      color: #666;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .x-link:hover {
+      color: #c77dff;
+      text-shadow: 0 0 10px rgba(199, 125, 255, 0.5);
+    }
+
+    .link-divider {
+      color: #444;
+      margin: 0 0.5rem;
+      font-size: 0.5rem;
+    }
+
+    /* Health bars - classic Pokemon style */
+    .health-bar {
+      position: absolute;
+      background: #1a1a24;
+      border: 3px solid #3a3a4a;
+      padding: 8px 12px;
+      min-width: 140px;
+    }
+
+    .health-bar-enemy {
+      top: 8%;
+      left: 5%;
+    }
+
+    .health-bar-player {
+      bottom: 25%;
+      right: 5%;
+    }
+
+    .monster-name {
+      font-size: 0.45rem;
+      color: #e8e8e8;
+      margin-bottom: 4px;
+      letter-spacing: 0.05em;
+    }
+
+    .hp-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hp-label {
+      font-size: 0.35rem;
+      color: #f7931e;
+    }
+
+    .hp-bar-bg {
+      flex: 1;
+      height: 6px;
+      background: #2a2a3a;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+
+    .hp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4ade80, #22c55e);
+      transition: width 0.5s ease;
+    }
+
+    .hp-bar-fill.medium {
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    }
+
+    .hp-bar-fill.low {
+      background: linear-gradient(90deg, #f87171, #ef4444);
+      animation: lowHpFlash 0.5s ease-in-out infinite;
+    }
+
+    @keyframes lowHpFlash {
+      50% { opacity: 0.7; }
+    }
+
+    /* Ambient particles */
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .particle-flame {
+      background: #ffd23f;
+      box-shadow: 0 0 6px #ff6b35;
+      animation: riseParticle 2s ease-out infinite;
+    }
+
+    .particle-void {
+      background: #c77dff;
+      box-shadow: 0 0 6px #7b2cbf;
+      animation: floatParticle 3s ease-in-out infinite;
+    }
+
+    @keyframes riseParticle {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0);
+      }
+    }
+
+    @keyframes floatParticle {
+      0%, 100% {
+        opacity: 0.5;
+        transform: translate(0, 0);
+      }
+      25% {
+        opacity: 1;
+        transform: translate(5px, -10px);
+      }
+      50% {
+        opacity: 0.7;
+        transform: translate(-3px, -5px);
+      }
+      75% {
+        opacity: 1;
+        transform: translate(8px, -15px);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .battle-scene {
+        aspect-ratio: 4 / 5;
+      }
+
+      .monster-player {
+        left: 5%;
+        bottom: 20%;
+      }
+
+      .monster-enemy {
+        right: 8%;
+        top: 12%;
+      }
+
+      .flame-beast,
+      .void-specter {
+        transform: scale(3.5);
+      }
+
+      .health-bar {
+        min-width: 100px;
+        padding: 6px 8px;
+      }
+
+      .health-bar-enemy {
+        top: 5%;
+        left: 3%;
+      }
+
+      .health-bar-player {
+        bottom: 30%;
+        right: 3%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="crt-overlay"></div>
+
+  <div class="battle-container">
+    <div class="battle-scene">
+      <div class="header">
+        <h1 class="title">BAGUETTE</h1>
+      </div>
+
+      <div class="arena-floor"></div>
+
+      <!-- Enemy health bar -->
+      <div class="health-bar health-bar-enemy">
+        <div class="monster-name">VOID SPECTER</div>
+        <div class="hp-container">
+          <span class="hp-label">HP</span>
+          <div class="hp-bar-bg">
+            <div class="hp-bar-fill medium" style="width: 65%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Player health bar -->
+      <div class="health-bar health-bar-player">
+        <div class="monster-name">FLAME BEAST</div>
+        <div class="hp-container">
+          <span class="hp-label">HP</span>
+          <div class="hp-bar-bg">
+            <div class="hp-bar-fill" style="width: 82%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enemy monster -->
+      <div class="monster monster-enemy">
+        <div class="aura void-aura"></div>
+        <div class="void-specter">
+          <div class="pixel-canvas"></div>
+        </div>
+      </div>
+
+      <!-- Player monster -->
+      <div class="monster monster-player">
+        <div class="aura flame-aura"></div>
+        <div class="flame-beast">
+          <div class="pixel-canvas"></div>
+        </div>
+      </div>
+
+      <!-- Ambient particles -->
+      <div class="particle particle-flame" style="bottom: 25%; left: 12%; animation-delay: 0s;"></div>
+      <div class="particle particle-flame" style="bottom: 28%; left: 18%; animation-delay: 0.3s;"></div>
+      <div class="particle particle-flame" style="bottom: 22%; left: 15%; animation-delay: 0.7s;"></div>
+      <div class="particle particle-void" style="top: 20%; right: 18%; animation-delay: 0s;"></div>
+      <div class="particle particle-void" style="top: 25%; right: 22%; animation-delay: 1s;"></div>
+      <div class="particle particle-void" style="top: 18%; right: 15%; animation-delay: 2s;"></div>
+
+      <div class="footer">
+        <a href="mailto:hello@baguette.art" class="x-link">hello@baguette.art</a>
+        <span class="link-divider">/</span>
+        <a href="https://x.com/baguetteanon" target="_blank" rel="noopener" class="x-link">@baguetteanon</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
