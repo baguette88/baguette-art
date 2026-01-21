@@ -566,8 +566,12 @@
         float fresnel = pow(1.0 - max(dot(vNormal, viewDir), 0.0), 2.5);
         color += fresnel * accentCol * 0.6;
 
-        // Hit flash
-        color = mix(color, vec3(1.0), uHit * 0.8);
+        // Hit flash (white) or heal flash (green)
+        if (uHit > 0.0) {
+          color = mix(color, vec3(1.0), uHit * 0.8);
+        } else if (uHit < 0.0) {
+          color = mix(color, vec3(0.3, 1.0, 0.5), -uHit * 0.8);
+        }
 
         gl_FragColor = vec4(color, 1.0);
       }
@@ -772,11 +776,76 @@
       setTimeout(() => div.remove(), 800);
     }
 
+    const playerHpNum = document.getElementById('player-hp-num');
+    const battleMessage = document.getElementById('battle-message');
+
     function updateHpBar(bar, hp) {
       bar.style.width = hp + '%';
       bar.classList.remove('medium', 'low');
       if (hp <= 25) bar.classList.add('low');
       else if (hp <= 50) bar.classList.add('medium');
+
+      // Update numeric display for player
+      if (bar === playerHpBar) {
+        playerHpNum.textContent = Math.round(hp);
+      }
+    }
+
+    function showBattleMessage(msg) {
+      battleMessage.textContent = msg;
+    }
+
+    function useMaxPotion() {
+      // Show message sequence
+      showBattleMessage('BAGUETTE used MAX POTION!');
+
+      // Create healing particles
+      createHealParticles(playerOrb.position);
+
+      // Delay the heal effect
+      setTimeout(() => {
+        playerHp = 100;
+        updateHpBar(playerHpBar, 100);
+        showBattleMessage('BAGUETTE\'s HP was fully restored!');
+
+        // Flash the orb green
+        playerMaterial.uniforms.uHit.value = -1; // negative for green flash
+
+        setTimeout(() => {
+          showBattleMessage('What will BAGUETTE do?');
+        }, 1500);
+      }, 800);
+    }
+
+    function createHealParticles(position) {
+      for (let i = 0; i < 20; i++) {
+        const geometry = new THREE.SphereGeometry(0.04, 8, 8);
+        const material = new THREE.MeshBasicMaterial({
+          color: new THREE.Color('#4ade80'),
+          transparent: true,
+          opacity: 1
+        });
+        const particle = new THREE.Mesh(geometry, material);
+
+        // Start from below and rise up
+        particle.position.set(
+          position.x + (Math.random() - 0.5) * 0.8,
+          position.y - 0.5,
+          position.z + (Math.random() - 0.5) * 0.8
+        );
+
+        particle.userData = {
+          velocity: new THREE.Vector3(
+            (Math.random() - 0.5) * 0.3,
+            1.5 + Math.random() * 0.5,
+            (Math.random() - 0.5) * 0.3
+          ),
+          life: 1,
+          isHeal: true
+        };
+        scene.add(particle);
+        burstParticles.push(particle);
+      }
     }
 
     function resize() {
@@ -839,19 +908,24 @@
             updateHpBar(playerHpBar, playerHp);
             showDamage(playerOrb.position, damage, false);
             createBurstParticles(playerOrb.position, '#ff6b35');
+
+            // Max Potion when about to die!
+            if (playerHp <= 15 && playerHp > 0) {
+              useMaxPotion();
+            }
           }
 
           scene.remove(p);
           attackParticles.splice(i, 1);
 
-          // Reset HP when one dies
-          if (enemyHp <= 0 || playerHp <= 0) {
+          // Reset enemy when defeated
+          if (enemyHp <= 0) {
+            showBattleMessage('VOID SPECTER fainted!');
             setTimeout(() => {
               enemyHp = 100;
-              playerHp = 100;
               updateHpBar(enemyHpBar, 100);
-              updateHpBar(playerHpBar, 100);
-            }, 1000);
+              showBattleMessage('A new VOID SPECTER appeared!');
+            }, 2000);
           }
         } else {
           p.position.lerpVectors(p.userData.start, p.userData.end, p.userData.progress);
@@ -863,8 +937,16 @@
       for (let i = burstParticles.length - 1; i >= 0; i--) {
         const p = burstParticles[i];
         p.position.add(p.userData.velocity.clone().multiplyScalar(delta));
-        p.userData.velocity.y -= delta * 2;
-        p.userData.life -= delta * 2;
+
+        // Heal particles rise, damage particles fall
+        if (p.userData.isHeal) {
+          p.userData.velocity.y *= 0.98; // slow down rise
+          p.userData.life -= delta * 1.5;
+        } else {
+          p.userData.velocity.y -= delta * 2;
+          p.userData.life -= delta * 2;
+        }
+
         p.material.opacity = p.userData.life;
 
         if (p.userData.life <= 0) {
