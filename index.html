@@ -352,36 +352,44 @@
       animation: evolve-glow 2.5s ease-in-out forwards, evolve-silhouette 2.5s ease-in-out forwards;
     }
 
-    /* Evolution white screen */
-    .evolution-screen {
+    /* Pokemon-style evolution screen */
+    .evolution-overlay {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: #fff;
+      background: #000;
       z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    .evolution-screen .evolving-sprite {
-      position: relative;
-      width: 100px;
-      height: 100px;
+    .evo-sprite-container {
+      position: absolute;
+      bottom: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 51;
     }
 
-    @keyframes evo-morph {
-      0%, 20% { transform: scale(1); filter: brightness(1); }
-      25%, 45% { transform: scale(1.1); filter: brightness(0) drop-shadow(0 0 30px #88f); }
-      50%, 70% { transform: scale(1.2); filter: brightness(0) drop-shadow(0 0 50px #fff); }
-      75%, 95% { transform: scale(1.3); filter: brightness(0) drop-shadow(0 0 40px #ff0); }
-      100% { transform: scale(1.2); filter: brightness(1); }
+    .evo-sprite-glow {
+      filter: brightness(0) drop-shadow(0 0 15px #fff) drop-shadow(0 0 30px #fff);
     }
 
-    .evo-morphing {
-      animation: evo-morph 3s ease-in-out forwards;
+    /* Tornado particle */
+    .evo-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #fff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 52;
+    }
+
+    @keyframes tornado-spin {
+      0% { transform: rotate(0deg) translateX(80px) rotate(0deg) scale(1); opacity: 1; }
+      50% { transform: rotate(360deg) translateX(40px) rotate(-360deg) scale(0.8); opacity: 1; }
+      100% { transform: rotate(720deg) translateX(10px) rotate(-720deg) scale(0.3); opacity: 0; }
     }
 
     /* VOID SPECTER - Enemy sprite */
@@ -1539,57 +1547,70 @@
                   }, 4500);
 
                   // Evolution check - evolve after first victory
-                  let evoScreen = null;
+                  let evoOverlay = null;
                   setTimeout(() => {
                     const playerSpriteContainer = playerCreature.querySelector('div');
                     if (!playerSpriteContainer.classList.contains('mega-flame-sprite')) {
                       hasEvolved = true;
-                      showMessage('WHAT!<br>BAGUETTE is evolving!');
+                      showMessage('What?<br>BAGUETTE is evolving!');
                     }
                   }, 6500);
 
-                  // White screen with sprite
+                  // Create dark overlay with sprite
                   setTimeout(() => {
                     if (hasEvolved) {
-                      evoScreen = document.createElement('div');
-                      evoScreen.className = 'evolution-screen';
-                      evoScreen.innerHTML = '<div class="evolving-sprite"><div class="creature-sprite"><div class="pixel-sprite"></div></div></div>';
-                      const evoSprite = evoScreen.querySelector('.creature-sprite > div');
-                      evoSprite.className = 'flame-sprite';
-                      viewport.appendChild(evoScreen);
+                      evoOverlay = document.createElement('div');
+                      evoOverlay.className = 'evolution-overlay';
 
-                      // Start morph animation
-                      setTimeout(() => {
-                        evoScreen.querySelector('.creature-sprite').classList.add('evo-morphing');
-                      }, 100);
+                      // Clone sprite to overlay
+                      const evoSprite = document.createElement('div');
+                      evoSprite.className = 'evo-sprite-container';
+                      evoSprite.innerHTML = '<div class="creature-sprite evo-sprite-glow"><div class="flame-sprite"><div class="pixel-sprite"></div></div></div>';
+                      evoOverlay.appendChild(evoSprite);
+                      viewport.appendChild(evoOverlay);
+
+                      // Spawn tornado particles
+                      const spawnTornado = () => {
+                        for (let i = 0; i < 12; i++) {
+                          setTimeout(() => {
+                            const p = document.createElement('div');
+                            p.className = 'evo-particle';
+                            const centerX = viewport.offsetWidth / 2;
+                            const centerY = viewport.offsetHeight * 0.65;
+                            p.style.left = centerX + 'px';
+                            p.style.top = centerY + 'px';
+                            p.style.animation = `tornado-spin 2s ease-in forwards`;
+                            p.style.animationDelay = (i * 0.15) + 's';
+                            evoOverlay.appendChild(p);
+                            setTimeout(() => p.remove(), 2500);
+                          }, i * 80);
+                        }
+                      };
+                      spawnTornado();
+                      setTimeout(spawnTornado, 800);
+                      setTimeout(spawnTornado, 1600);
                     }
                   }, 8000);
 
-                  // Swap to mega form mid-animation
+                  // Swap to mega form
                   setTimeout(() => {
-                    if (hasEvolved && evoScreen) {
-                      const evoSprite = evoScreen.querySelector('.creature-sprite > div');
-                      evoSprite.className = 'mega-flame-sprite';
+                    if (hasEvolved && evoOverlay) {
+                      const evoSpriteInner = evoOverlay.querySelector('.creature-sprite > div');
+                      evoSpriteInner.className = 'mega-flame-sprite';
                     }
-                  }, 10000);
+                  }, 11500);
 
-                  // Remove white screen, show result
+                  // Remove overlay, show result
                   setTimeout(() => {
-                    if (hasEvolved && evoScreen) {
-                      evoScreen.remove();
+                    if (hasEvolved && evoOverlay) {
+                      evoOverlay.remove();
                       const playerSpriteContainer = playerCreature.querySelector('div');
                       playerSpriteContainer.className = 'mega-flame-sprite';
-                      showMessage('Congratulations!<br>BAGUETTE evolved!');
+                      showMessage('Congratulations!<br>BAGUETTE evolved<br>into MEGA BAGUETTE!');
                       document.querySelector('.stat-box.player .stat-name').textContent = 'MEGA BAGUETTE';
                       spawnHealParticles('super-heal', playerCreature, 20);
                     }
-                  }, 12000);
-
-                  setTimeout(() => {
-                    if (hasEvolved) {
-                      showMessage('MEGA BAGUETTE<br>is ready to fight!');
-                    }
-                  }, 14000);
+                  }, 13000);
 
                   setTimeout(() => {
                     showMessage('Want to battle<br>again? TAP!');
@@ -1623,7 +1644,7 @@
                         }, 800);
                       }, 1500);
                     };
-                  }, 16000);
+                  }, 15000);
                 }
               }, playerExp >= 300 ? 3500 : 2000);
             }, 1000);
