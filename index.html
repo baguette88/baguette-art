@@ -38,11 +38,45 @@
       position: relative;
     }
 
-    .gameboy-label {
+    .gameboy-header {
       position: absolute;
       top: 0.4rem;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .mode-switch {
+      width: 32px;
+      height: 16px;
+      background: #3a3a4a;
+      border-radius: 8px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .mode-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      background: linear-gradient(145deg, #ff6b6b, #9d65c9);
+      border-radius: 50%;
+      transition: left 0.2s, background 0.2s;
+    }
+
+    .mode-switch.dmg::after {
+      left: 18px;
+      background: linear-gradient(145deg, #8b956d, #6b7550);
+    }
+
+    .gameboy-label {
       font-size: 8px;
       color: rgba(255,255,255,0.7);
       white-space: nowrap;
@@ -52,6 +86,36 @@
       background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #9d65c9);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* DMG Mode - Classic grey Game Boy */
+    .gameboy-shell.dmg-mode {
+      background: linear-gradient(145deg, #c0c0c0 0%, #a8a8a8 50%, #909090 100%);
+    }
+
+    .gameboy-shell.dmg-mode .gameboy-label {
+      color: #4a4a5a;
+    }
+
+    .gameboy-shell.dmg-mode .gameboy-label span {
+      background: none;
+      -webkit-text-fill-color: #2a2a3a;
+      color: #2a2a3a;
+    }
+
+    .gameboy-shell.dmg-mode .viewport {
+      filter: sepia(100%) hue-rotate(50deg) saturate(60%) brightness(90%) contrast(110%);
+      background: linear-gradient(180deg, #8bac0f 0%, #9bbc0f 30%, #306230 60%, #0f380f 100%);
+    }
+
+    .gameboy-shell.dmg-mode .screen-bezel {
+      background: #5a5a5a;
+    }
+
+    .gameboy-shell.dmg-mode .power-led {
+      background: #aa0000;
+      box-shadow: 0 0 4px #ff0000;
     }
 
     .screen-bezel {
@@ -632,6 +696,75 @@
       top: 22%;
       right: 18%;
       transform: translateX(50%);
+    }
+
+    /* Ending screen */
+    .ending-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, #98d8a0 0%, #68a870 100%);
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fade-in 1s ease-out;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .ending-logo {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 28px;
+      color: #2a4a2a;
+      text-shadow: 2px 2px 0 #1a3a1a, -1px -1px 0 #4a6a4a;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+
+    .ending-logo-sub {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: #c8483c;
+      letter-spacing: 4px;
+      margin-bottom: 40px;
+    }
+
+    .ending-sprite {
+      margin-bottom: 30px;
+    }
+
+    .ending-text {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: #2a4a2a;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    .ending-links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ending-links a {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 9px;
+      color: #1a3a1a;
+      text-decoration: none;
+    }
+
+    .ending-links a:hover {
+      color: #c8483c;
     }
 
     /* EXP bar */
@@ -1319,8 +1452,11 @@
   </style>
 </head>
 <body>
-  <div class="gameboy-shell">
-    <div class="gameboy-label">GAME BOY <span>COLOR</span></div>
+  <div class="gameboy-shell" id="gameboy-shell">
+    <div class="gameboy-header">
+      <div class="mode-switch" id="mode-switch" title="Toggle DMG/GBC"></div>
+      <div class="gameboy-label" id="gameboy-label">GAME BOY <span>COLOR</span></div>
+    </div>
     <div class="screen-bezel">
       <div class="viewport" id="viewport">
         <div class="impact-flash" id="impact-flash"></div>
@@ -1443,6 +1579,21 @@
     const playerCreature = document.getElementById('player-creature');
     const enemyCreature = document.getElementById('enemy-creature');
     const impactFlash = document.getElementById('impact-flash');
+
+    // DMG/GBC Mode Toggle
+    const gameboyShell = document.getElementById('gameboy-shell');
+    const modeSwitch = document.getElementById('mode-switch');
+    const gameboyLabel = document.getElementById('gameboy-label');
+
+    modeSwitch.addEventListener('click', () => {
+      modeSwitch.classList.toggle('dmg');
+      gameboyShell.classList.toggle('dmg-mode');
+      if (gameboyShell.classList.contains('dmg-mode')) {
+        gameboyLabel.innerHTML = 'GAME BOY';
+      } else {
+        gameboyLabel.innerHTML = 'GAME BOY <span>COLOR</span>';
+      }
+    });
 
     let playerHp = 100;
     let enemyHp = 100;
@@ -1887,13 +2038,13 @@
                                   ], () => {
                                     document.querySelector('.stat-box.player .stat-name').textContent = 'BAGUETTE';
                                     spawnHealParticles('super-heal', playerCreature, 20);
-                                    showRematchPrompt();
+                                    showEndingScreen();
                                   });
                                 }, 3000);
                               });
                             }, 500);
                           } else {
-                            showRematchPrompt();
+                            showEndingScreen();
                           }
                         });
                       }, 500);
@@ -1912,35 +2063,26 @@
       }, 500);
     }
 
-    function showRematchPrompt() {
-      // Reset for replay
-      currentEnemy = 0;
-      const firstEnemy = enemies[0];
-      document.querySelector('.stat-box.enemy .stat-name').textContent = firstEnemy.name;
-      document.querySelector('.stat-box.enemy .stat-level').textContent = firstEnemy.level;
-      const spriteContainer = enemyCreature.querySelector('div');
-      spriteContainer.className = firstEnemy.sprite + '-sprite';
-      enemyCreature.classList.remove('fainting');
-
-      // Reset PP
-      Object.values(moves).forEach(m => m.pp = m.maxPp);
-
-      // Reset HP and start new battle
-      enemyHp = firstEnemy.maxHp;
-      playerHp = 100;
-      updateHpBar(enemyHpBar, 100, false);
-      updateHpBar(playerHpBar, 100, true);
-
-      showAnnounce('TRAINER GHOST<br>wants to battle!', () => {
-        showAnnounce(`TRAINER GHOST<br>sent out ${firstEnemy.name}!`, () => {
-          enemyCreature.classList.add('appearing');
-          setTimeout(() => {
-            enemyCreature.classList.remove('appearing');
-            isAnimating = false;
-            showMessage('What will<br>SWEETBUN do?');
-          }, 800);
-        });
-      });
+    function showEndingScreen() {
+      const ending = document.createElement('div');
+      ending.className = 'ending-screen';
+      ending.innerHTML = `
+        <div class="ending-logo">BAGUETTE</div>
+        <div class="ending-logo-sub">ART</div>
+        <div class="ending-sprite">
+          <div class="creature-sprite">
+            <div class="flame-sprite">
+              <div class="pixel-sprite"></div>
+            </div>
+          </div>
+        </div>
+        <div class="ending-text">Thanks for playing!</div>
+        <div class="ending-links">
+          <a href="mailto:hello@baguette.art">hello@baguette.art</a>
+          <a href="https://x.com/baguetteanon" target="_blank">@baguetteanon</a>
+        </div>
+      `;
+      viewport.appendChild(ending);
     }
 
     function enemyAttack() {
