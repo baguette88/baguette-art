@@ -532,6 +532,76 @@
         5px 13px 0 #ff6600, 6px 13px 0 #cc3300, 10px 13px 0 #660000, 11px 13px 0 #440000;
     }
 
+    /* TRAINER GHOST - Mysterious hooded figure */
+    .trainer-ghost-sprite {
+      transform: scale(4);
+      filter: drop-shadow(0 0 2px #8844ff) drop-shadow(0 0 4px #6622cc) drop-shadow(0 0 8px #4400aa);
+      animation: ghost-float 3s ease-in-out infinite, ghost-flicker 0.1s ease-in-out infinite;
+    }
+
+    @keyframes ghost-float {
+      0%, 100% { transform: scale(4) translateY(0); }
+      50% { transform: scale(4) translateY(-4px); }
+    }
+
+    @keyframes ghost-flicker {
+      0%, 90%, 100% { opacity: 1; }
+      92%, 98% { opacity: 0.8; }
+    }
+
+    .trainer-ghost-sprite .pixel-sprite {
+      box-shadow:
+        /* TRAINER GHOST - Hooded spectral figure */
+        /* Hood/head */
+        7px 2px 0 #2a1a4a, 8px 2px 0 #2a1a4a, 9px 2px 0 #2a1a4a,
+        6px 3px 0 #1a0a3a, 7px 3px 0 #3a2a5a, 8px 3px 0 #4a3a6a, 9px 3px 0 #3a2a5a, 10px 3px 0 #1a0a3a,
+        5px 4px 0 #1a0a3a, 6px 4px 0 #3a2a5a, 7px 4px 0 #5a4a7a, 8px 4px 0 #6a5a8a, 9px 4px 0 #5a4a7a, 10px 4px 0 #3a2a5a, 11px 4px 0 #1a0a3a,
+        5px 5px 0 #2a1a4a, 6px 5px 0 #4a3a6a, 7px 5px 0 #5a4a7a, 8px 5px 0 #6a5a8a, 9px 5px 0 #5a4a7a, 10px 5px 0 #4a3a6a, 11px 5px 0 #2a1a4a,
+
+        /* Face area - dark void with glowing eyes */
+        5px 6px 0 #2a1a4a, 6px 6px 0 #0a0020, 7px 6px 0 #0a0020, 8px 6px 0 #0a0020, 9px 6px 0 #0a0020, 10px 6px 0 #0a0020, 11px 6px 0 #2a1a4a,
+        5px 7px 0 #3a2a5a, 6px 7px 0 #0a0020, 7px 7px 0 #0a0020, 8px 7px 0 #0a0020, 9px 7px 0 #0a0020, 10px 7px 0 #0a0020, 11px 7px 0 #3a2a5a,
+
+        /* Glowing eyes */
+        6px 6px 0 #ff44ff, 7px 6px 0 #ff88ff,
+        9px 6px 0 #ff44ff, 10px 6px 0 #ff88ff,
+        6px 7px 0 #cc22cc, 9px 7px 0 #cc22cc,
+
+        /* Cloak body */
+        4px 8px 0 #1a0a3a, 5px 8px 0 #2a1a4a, 6px 8px 0 #3a2a5a, 7px 8px 0 #4a3a6a, 8px 8px 0 #4a3a6a, 9px 8px 0 #3a2a5a, 10px 8px 0 #2a1a4a, 11px 8px 0 #2a1a4a, 12px 8px 0 #1a0a3a,
+        4px 9px 0 #2a1a4a, 5px 9px 0 #3a2a5a, 6px 9px 0 #4a3a6a, 7px 9px 0 #5a4a7a, 8px 9px 0 #5a4a7a, 9px 9px 0 #4a3a6a, 10px 9px 0 #3a2a5a, 11px 9px 0 #2a1a4a, 12px 9px 0 #1a0a3a,
+        4px 10px 0 #2a1a4a, 5px 10px 0 #3a2a5a, 6px 10px 0 #4a3a6a, 7px 10px 0 #4a3a6a, 8px 10px 0 #4a3a6a, 9px 10px 0 #4a3a6a, 10px 10px 0 #3a2a5a, 11px 10px 0 #2a1a4a, 12px 10px 0 #1a0a3a,
+        5px 11px 0 #2a1a4a, 6px 11px 0 #3a2a5a, 7px 11px 0 #3a2a5a, 8px 11px 0 #3a2a5a, 9px 11px 0 #3a2a5a, 10px 11px 0 #2a1a4a, 11px 11px 0 #1a0a3a,
+
+        /* Wispy bottom - fading into nothing */
+        5px 12px 0 #1a0a3a, 7px 12px 0 #2a1a4a, 9px 12px 0 #2a1a4a, 11px 12px 0 #1a0a3a,
+        6px 13px 0 #1a0a3a, 8px 13px 0 #1a0a3a, 10px 13px 0 #1a0a3a,
+        7px 14px 0 #0a0020, 9px 14px 0 #0a0020,
+
+        /* Spectral aura particles */
+        3px 6px 0 #8844ff, 13px 6px 0 #8844ff,
+        2px 8px 0 #6622cc, 14px 8px 0 #6622cc,
+        3px 10px 0 #4400aa, 13px 10px 0 #4400aa;
+    }
+
+    /* Trainer appear overlay */
+    .trainer-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 55;
+    }
+
+    .trainer-sprite-container {
+      position: relative;
+    }
+
     /* EXP bar */
     .exp-bar-container {
       position: absolute;
@@ -1351,10 +1421,19 @@
     let currentEnemy = 0;
 
     const enemies = [
-      { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', attack: 'SHADOW SNEAK', damage: [10, 18] },
-      { name: 'SLIME', level: 52, hp: 120, maxHp: 120, exp: 180, sprite: 'slime', attack: 'SLUDGE BOMB', damage: [12, 20] },
-      { name: 'INFERNO', level: 55, hp: 150, maxHp: 150, exp: 250, sprite: 'inferno', attack: 'FLAME BURST', damage: [15, 25] }
+      { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', type: 'GHOST', attack: 'SHADOW SNEAK', damage: [10, 18] },
+      { name: 'SLIME', level: 52, hp: 120, maxHp: 120, exp: 180, sprite: 'slime', type: 'POISON', attack: 'SLUDGE BOMB', damage: [12, 20] },
+      { name: 'INFERNO', level: 55, hp: 150, maxHp: 150, exp: 250, sprite: 'inferno', type: 'FIRE', attack: 'FLAME BURST', damage: [15, 25] }
     ];
+
+    // Type effectiveness
+    function getTypeMultiplier(moveType, enemyType) {
+      const chart = {
+        'FIRE': { 'FIRE': 0.5, 'GHOST': 1, 'POISON': 1 },
+        'GHOST': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1 }
+      };
+      return chart[moveType]?.[enemyType] || 1;
+    }
 
     const moves = {
       'ember': { pp: 25, maxPp: 25, type: 'FIRE', power: 15, particles: 'ember' },
@@ -1618,7 +1697,9 @@
           const isCrit = Math.random() < 0.15;
           const isEvolved = playerCreature.querySelector('div').classList.contains('flame-sprite');
           const evoBonus = isEvolved ? 200 : 0; // BAGUETTE one-shots!
-          const damage = move.power + Math.floor(Math.random() * 10) + (isCrit ? 15 : 0) + evoBonus;
+          const enemy = enemies[currentEnemy];
+          const typeMultiplier = getTypeMultiplier(move.type, enemy.type);
+          let damage = Math.floor((move.power + Math.floor(Math.random() * 10) + (isCrit ? 15 : 0)) * typeMultiplier) + evoBonus;
           enemyHp = Math.max(0, enemyHp - damage);
           updateHpBar(enemyHpBar, enemyHp, false);
           showDamage(toX, toY - 30, damage, isCrit);
@@ -1693,71 +1774,99 @@
                 isAnimating = true;
                 const totalExp = enemies.reduce((sum, e) => sum + e.exp, 0);
                 const prizeMoney = 3600;
-
-                // Victory announcements
-                const victoryMsgs = [
-                  'Player defeated<br>TRAINER GHOST!',
-                  `SWEETBUN gained<br>${totalExp} total EXP!`,
-                  `Got $${prizeMoney}<br>for winning!`
-                ];
-
-                // Check if evolution will happen
                 const playerSpriteContainer = playerCreature.querySelector('div');
                 const willEvolve = playerSpriteContainer.classList.contains('sweetbun-sprite');
 
-                if (willEvolve) {
-                  victoryMsgs.push('What?<br>SWEETBUN is evolving!');
-                }
+                // Step 1: Victory announcement
+                showAnnounce('Player defeated<br>TRAINER GHOST!', () => {
 
-                showAnnounce(victoryMsgs, () => {
-                  spawnHealParticles('super-heal', playerCreature, 12);
+                  // Step 2: Trainer Ghost appears
+                  const trainerOverlay = document.createElement('div');
+                  trainerOverlay.className = 'trainer-overlay';
+                  trainerOverlay.innerHTML = `
+                    <div class="trainer-sprite-container">
+                      <div class="creature-sprite">
+                        <div class="trainer-ghost-sprite">
+                          <div class="pixel-sprite"></div>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                  viewport.appendChild(trainerOverlay);
 
-                  if (willEvolve) {
-                    // Start evolution animation
-                    playerCreature.classList.add('evo-flashing');
+                  setTimeout(() => {
+                    // Step 3: Trainer one-liner
+                    showAnnounce([
+                      'TRAINER GHOST:<br>"Impressive..."',
+                      '"Your bond with your<br>partner is strong."',
+                      '"Until we meet<br>again..."'
+                    ], () => {
+                      // Trainer fades away
+                      trainerOverlay.style.transition = 'opacity 1s';
+                      trainerOverlay.style.opacity = '0';
+                      setTimeout(() => trainerOverlay.remove(), 1000);
 
-                    const rect = playerCreature.getBoundingClientRect();
-                    const vRect = viewport.getBoundingClientRect();
-                    const cx = rect.left - vRect.left + rect.width / 2;
-                    const cy = rect.top - vRect.top + rect.height / 2;
+                      // Step 4: EXP and Money
+                      setTimeout(() => {
+                        showAnnounce([
+                          `SWEETBUN gained<br>${totalExp} total EXP!`,
+                          `Got $${prizeMoney}<br>for winning!`
+                        ], () => {
+                          spawnHealParticles('super-heal', playerCreature, 12);
 
-                    const spawnTornado = () => {
-                      for (let i = 0; i < 8; i++) {
-                        setTimeout(() => {
-                          const p = document.createElement('div');
-                          p.className = 'evo-particle';
-                          p.style.left = cx + 'px';
-                          p.style.top = cy + 'px';
-                          p.style.animation = `tornado-spin 1.5s ease-in-out forwards`;
-                          p.style.animationDelay = (i * 0.1) + 's';
-                          viewport.appendChild(p);
-                          setTimeout(() => p.remove(), 2000);
-                        }, i * 60);
-                      }
-                    };
-                    spawnTornado();
-                    setTimeout(spawnTornado, 600);
-                    setTimeout(spawnTornado, 1200);
+                          // Step 5: Evolution (last thing!)
+                          if (willEvolve) {
+                            setTimeout(() => {
+                              showAnnounce('What?<br>SWEETBUN is evolving!', () => {
+                                playerCreature.classList.add('evo-flashing');
 
-                    // Transform after animation
-                    setTimeout(() => {
-                      playerSpriteContainer.className = 'flame-sprite';
-                    }, 2000);
+                                const rect = playerCreature.getBoundingClientRect();
+                                const vRect = viewport.getBoundingClientRect();
+                                const cx = rect.left - vRect.left + rect.width / 2;
+                                const cy = rect.top - vRect.top + rect.height / 2;
 
-                    setTimeout(() => {
-                      playerCreature.classList.remove('evo-flashing');
-                      showAnnounce([
-                        'Congratulations!',
-                        'SWEETBUN evolved<br>into BAGUETTE!'
-                      ], () => {
-                        document.querySelector('.stat-box.player .stat-name').textContent = 'BAGUETTE';
-                        spawnHealParticles('super-heal', playerCreature, 20);
-                        showRematchPrompt();
-                      });
-                    }, 3000);
-                  } else {
-                    showRematchPrompt();
-                  }
+                                const spawnTornado = () => {
+                                  for (let i = 0; i < 8; i++) {
+                                    setTimeout(() => {
+                                      const p = document.createElement('div');
+                                      p.className = 'evo-particle';
+                                      p.style.left = cx + 'px';
+                                      p.style.top = cy + 'px';
+                                      p.style.animation = `tornado-spin 1.5s ease-in-out forwards`;
+                                      p.style.animationDelay = (i * 0.1) + 's';
+                                      viewport.appendChild(p);
+                                      setTimeout(() => p.remove(), 2000);
+                                    }, i * 60);
+                                  }
+                                };
+                                spawnTornado();
+                                setTimeout(spawnTornado, 600);
+                                setTimeout(spawnTornado, 1200);
+
+                                setTimeout(() => {
+                                  playerSpriteContainer.className = 'flame-sprite';
+                                }, 2000);
+
+                                setTimeout(() => {
+                                  playerCreature.classList.remove('evo-flashing');
+                                  showAnnounce([
+                                    'Congratulations!',
+                                    'SWEETBUN evolved<br>into BAGUETTE!'
+                                  ], () => {
+                                    document.querySelector('.stat-box.player .stat-name').textContent = 'BAGUETTE';
+                                    spawnHealParticles('super-heal', playerCreature, 20);
+                                    showRematchPrompt();
+                                  });
+                                }, 3000);
+                              });
+                            }, 500);
+                          } else {
+                            showRematchPrompt();
+                          }
+                        });
+                      }, 500);
+                    });
+                  }, 800);
                 });
               }
             });
