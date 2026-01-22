@@ -688,21 +688,179 @@
             scene.add(line);
           }
 
-          // === 90s RETRO DESK DETAILS ===
+          // === MANHATTAN APARTMENT - 50TH FLOOR ===
 
-          // Stack of textbooks (left side, varied sizes)
+          // Large window behind desk with city view
+          const windowWidth = 10, windowHeight = 6;
+          const windowGeom = new THREE.PlaneGeometry(windowWidth, windowHeight);
+
+          // Create city skyline canvas texture
+          const cityCanvas = document.createElement('canvas');
+          cityCanvas.width = 512;
+          cityCanvas.height = 320;
+          const cityCtx = cityCanvas.getContext('2d');
+
+          // Night sky gradient
+          const skyGrad = cityCtx.createLinearGradient(0, 0, 0, 320);
+          skyGrad.addColorStop(0, '#0a0a1a');
+          skyGrad.addColorStop(0.4, '#1a1a2a');
+          skyGrad.addColorStop(1, '#2a2a3a');
+          cityCtx.fillStyle = skyGrad;
+          cityCtx.fillRect(0, 0, 512, 320);
+
+          // Snowflakes
+          cityCtx.fillStyle = 'rgba(255,255,255,0.6)';
+          for (let i = 0; i < 80; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 320;
+            const r = Math.random() * 2 + 0.5;
+            cityCtx.beginPath();
+            cityCtx.arc(x, y, r, 0, Math.PI * 2);
+            cityCtx.fill();
+          }
+
+          // Draw buildings (Manhattan skyline from 50th floor)
+          const buildings = [];
+          for (let i = 0; i < 35; i++) {
+            buildings.push({
+              x: i * 15 + Math.random() * 8,
+              w: 8 + Math.random() * 12,
+              h: 80 + Math.random() * 200,
+              lit: Math.random() > 0.3
+            });
+          }
+          buildings.sort((a, b) => b.h - a.h); // Draw tallest first (farther)
+
+          buildings.forEach(b => {
+            // Building silhouette
+            cityCtx.fillStyle = `rgb(${15 + Math.random() * 20}, ${15 + Math.random() * 15}, ${25 + Math.random() * 20})`;
+            cityCtx.fillRect(b.x, 320 - b.h, b.w, b.h);
+
+            // Windows (lit randomly)
+            if (b.lit) {
+              for (let wy = 320 - b.h + 5; wy < 315; wy += 8) {
+                for (let wx = b.x + 2; wx < b.x + b.w - 2; wx += 4) {
+                  if (Math.random() > 0.4) {
+                    const warm = Math.random() > 0.3;
+                    cityCtx.fillStyle = warm ? 'rgba(255,220,150,0.8)' : 'rgba(200,220,255,0.6)';
+                    cityCtx.fillRect(wx, wy, 2, 4);
+                  }
+                }
+              }
+            }
+          });
+
+          // Empire State Building silhouette (center-right)
+          cityCtx.fillStyle = '#1a1a2a';
+          cityCtx.fillRect(340, 40, 25, 280);
+          cityCtx.fillRect(345, 20, 15, 20);
+          cityCtx.fillRect(350, 5, 5, 15);
+          // Antenna light
+          cityCtx.fillStyle = '#ff3333';
+          cityCtx.beginPath();
+          cityCtx.arc(352, 5, 2, 0, Math.PI * 2);
+          cityCtx.fill();
+
+          const cityTexture = new THREE.CanvasTexture(cityCanvas);
+          const windowMat = new THREE.MeshBasicMaterial({ map: cityTexture });
+          const windowMesh = new THREE.Mesh(windowGeom, windowMat);
+          windowMesh.position.set(0, 1.5, -4.5);  // Closer and higher
+          scene.add(windowMesh);
+
+          // Window frame
+          const frameMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.6, roughness: 0.4 });
+          const frameThick = 0.1;
+          const windowZ = -4.45;
+          const windowY = 1.5;
+          // Top frame
+          const frameTop = new THREE.Mesh(new THREE.BoxGeometry(windowWidth + 0.3, frameThick, 0.15), frameMat);
+          frameTop.position.set(0, windowY + windowHeight/2, windowZ);
+          scene.add(frameTop);
+          // Bottom frame (window sill)
+          const frameBotGeom = new THREE.BoxGeometry(windowWidth + 0.4, 0.15, 0.3);
+          const frameBot = new THREE.Mesh(frameBotGeom, frameMat);
+          frameBot.position.set(0, windowY - windowHeight/2, windowZ + 0.1);
+          scene.add(frameBot);
+          // Side frames
+          const frameL = new THREE.Mesh(new THREE.BoxGeometry(frameThick, windowHeight + 0.2, 0.15), frameMat);
+          frameL.position.set(-windowWidth/2, windowY, windowZ);
+          scene.add(frameL);
+          const frameR = new THREE.Mesh(new THREE.BoxGeometry(frameThick, windowHeight + 0.2, 0.15), frameMat);
+          frameR.position.set(windowWidth/2, windowY, windowZ);
+          scene.add(frameR);
+          // Center dividers (cross pattern)
+          const frameVert = new THREE.Mesh(new THREE.BoxGeometry(0.05, windowHeight, 0.08), frameMat);
+          frameVert.position.set(0, windowY, windowZ);
+          scene.add(frameVert);
+          const frameHorz = new THREE.Mesh(new THREE.BoxGeometry(windowWidth, 0.05, 0.08), frameMat);
+          frameHorz.position.set(0, windowY, windowZ);
+          scene.add(frameHorz);
+
+          // === DESK DETAILS ===
+
+          // Stack of textbooks with spine details
           const books = [
-            { color: 0x8B0000, w: 1.3, h: 0.18, d: 1.0 },  // Dark red - thick
-            { color: 0x00008B, w: 1.2, h: 0.12, d: 0.9 },  // Navy
-            { color: 0x2F4F2F, w: 1.25, h: 0.15, d: 0.95 }, // Dark green
-            { color: 0x4B0082, w: 1.15, h: 0.10, d: 0.85 }, // Indigo - thin
-            { color: 0x8B4513, w: 1.1, h: 0.14, d: 0.88 },  // Brown
+            { color: 0x8B0000, w: 1.3, h: 0.18, d: 1.0, title: 'GLSL' },
+            { color: 0x00008B, w: 1.2, h: 0.12, d: 0.9, title: 'THREE' },
+            { color: 0x2F4F2F, w: 1.25, h: 0.15, d: 0.95, title: 'HLSL' },
+            { color: 0x4B0082, w: 1.15, h: 0.10, d: 0.85, title: 'GPU' },
+            { color: 0x8B4513, w: 1.1, h: 0.14, d: 0.88, title: 'MATH' },
           ];
+
+          // Create book spine texture
+          function createBookSpine(title, baseColor, height) {
+            const spineCanvas = document.createElement('canvas');
+            spineCanvas.width = 64;
+            spineCanvas.height = 256;
+            const ctx = spineCanvas.getContext('2d');
+
+            // Base color
+            const r = (baseColor >> 16) & 255;
+            const g = (baseColor >> 8) & 255;
+            const b = baseColor & 255;
+            ctx.fillStyle = `rgb(${r},${g},${b})`;
+            ctx.fillRect(0, 0, 64, 256);
+
+            // Wear/texture
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            for (let i = 0; i < 20; i++) {
+              ctx.fillRect(Math.random() * 64, Math.random() * 256, Math.random() * 10, 1);
+            }
+
+            // Gold foil title
+            ctx.save();
+            ctx.translate(32, 128);
+            ctx.rotate(-Math.PI / 2);
+            ctx.font = 'bold 18px serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#d4af37';
+            ctx.fillText(title, 0, 6);
+            ctx.restore();
+
+            // Decorative lines
+            ctx.strokeStyle = '#d4af37';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(8, 20); ctx.lineTo(56, 20);
+            ctx.moveTo(8, 236); ctx.lineTo(56, 236);
+            ctx.stroke();
+
+            return new THREE.CanvasTexture(spineCanvas);
+          }
+
           let bookY = -1.98;
           books.forEach((b, i) => {
             const bookGeom = new THREE.BoxGeometry(b.w, b.h, b.d);
-            const bookMat = new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 });
-            const book = new THREE.Mesh(bookGeom, bookMat);
+            const spineTexture = createBookSpine(b.title, b.color, b.h);
+            const bookMaterials = [
+              new THREE.MeshStandardMaterial({ map: spineTexture }), // right (spine)
+              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // left
+              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // top
+              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // bottom
+              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // front
+              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // back
+            ];
+            const book = new THREE.Mesh(bookGeom, bookMaterials);
             bookY += b.h / 2;
             book.position.set(-2.5, bookY, -1.2);
             book.rotation.y = (i % 2 === 0 ? 0.08 : -0.05);
@@ -1195,60 +1353,83 @@
             crtTexture.needsUpdate = true;
           }
 
-          // Gameboy plane from captured texture - RESPONSIVE sizing
+          // Gameboy plane from captured texture - PROPER SCALE relative to desk
           const texture = new THREE.CanvasTexture(canvas);
           texture.minFilter = THREE.LinearFilter;
           const aspect = canvas.width / canvas.height;
 
-          // Calculate size based on screen - bigger on mobile to fill screen
+          // Scale gameboy to be realistic size on desk (about 1.5 units = ~15cm real size)
           const isMobile = window.innerWidth < 768;
           const isSmallMobile = window.innerWidth < 480;
-          let gbScale = 3;
-          if (isSmallMobile) gbScale = 4.5;  // Much bigger on small phones
-          else if (isMobile) gbScale = 3.8;  // Bigger on tablets/phones
+          let gbScale = 1.8;  // Realistic desk scale
 
+          // Adjust camera distance instead of gameboy size for mobile
           const gbGeom = new THREE.PlaneGeometry(gbScale * aspect, gbScale);
           const gbMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
           const gameboy = new THREE.Mesh(gbGeom, gbMat);
           scene.add(gameboy);
 
           // === IMPROVED LIGHTING ===
-          // Dim ambient for mood
-          const ambient = new THREE.AmbientLight(0x332211, 0.3);
+          // Brighter ambient for visibility
+          const ambient = new THREE.AmbientLight(0x443333, 0.5);
           scene.add(ambient);
 
-          // Warm key light from desk lamp (right side)
-          const keyLight = new THREE.PointLight(0xffaa44, 1.8, 12);
-          keyLight.position.set(3.5, 2, -1);
-          scene.add(keyLight);
+          // City light from window (blue ambient from outside)
+          const cityLight = new THREE.PointLight(0x6688bb, 0.8, 15);
+          cityLight.position.set(0, 1, -4);
+          scene.add(cityLight);
 
-          // Cool fill light from left (subtle)
-          const fillLight = new THREE.PointLight(0x4466aa, 0.4, 15);
-          fillLight.position.set(-4, 3, 2);
+          // Warm key light FROM the desk lamp position
+          const lampLight = new THREE.PointLight(0xffcc66, 2.0, 10);
+          lampLight.position.set(2.8, -0.6, -2.2);
+          scene.add(lampLight);
+
+          // Secondary lamp fill (bounced light)
+          const lampFill = new THREE.PointLight(0xffaa44, 0.6, 6);
+          lampFill.position.set(2.0, -1.5, -1.5);
+          scene.add(lampFill);
+
+          // Lamp glow cone (visible light emission)
+          const lampGlowGeom = new THREE.ConeGeometry(0.5, 0.8, 16, 1, true);
+          const lampGlowMat = new THREE.MeshBasicMaterial({
+            color: 0xffdd88,
+            transparent: true,
+            opacity: 0.2,
+            side: THREE.DoubleSide
+          });
+          const lampGlow = new THREE.Mesh(lampGlowGeom, lampGlowMat);
+          lampGlow.position.set(2.8, -1.3, -2.2);
+          scene.add(lampGlow);
+
+          // Light bulb inside lamp (glowing sphere)
+          const bulbGeom = new THREE.SphereGeometry(0.1, 16, 16);
+          const bulbMat = new THREE.MeshBasicMaterial({ color: 0xffffdd });
+          const bulb = new THREE.Mesh(bulbGeom, bulbMat);
+          bulb.position.set(2.8, -0.75, -2.2);
+          scene.add(bulb);
+
+          // Cool fill light from left
+          const fillLight = new THREE.PointLight(0x5577aa, 0.5, 15);
+          fillLight.position.set(-4, 2, 1);
           scene.add(fillLight);
 
-          // Rim light from behind for depth
-          const rimLight = new THREE.PointLight(0xff6633, 0.6, 10);
-          rimLight.position.set(0, 1, -5);
-          scene.add(rimLight);
-
-          // Soft overhead fill
+          // Soft overhead ambient
           const topLight = new THREE.DirectionalLight(0xffeedd, 0.3);
           topLight.position.set(0, 10, 0);
           scene.add(topLight);
 
-          // Camera state for zoom - LOWER ANGLE, CLOSER
+          // Camera state for zoom - adjust distance for mobile
           let camDistance = 5;
           let camHeight = 0;
-          let targetDistance = isMobile ? 3.2 : 3.5;  // Closer on mobile
-          let targetHeight = isMobile ? 2.5 : 3;      // Lower on mobile
+          let targetDistance = isSmallMobile ? 2.8 : isMobile ? 3.0 : 3.5;
+          let targetHeight = isSmallMobile ? 2.0 : isMobile ? 2.2 : 2.8;
           let animationDone = false;
 
           camera.position.set(0, 0.5, camDistance);
           camera.lookAt(0, -0.5, 0);
 
-          // Add fog for depth
-          scene.fog = new THREE.Fog(0x1a0a00, 6, 14);
+          // Light fog for depth (not too dark)
+          scene.fog = new THREE.Fog(0x1a1520, 8, 18);
 
           // Animation: lay gameboy down on desk
           const duration = 2500;
