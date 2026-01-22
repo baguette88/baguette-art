@@ -109,11 +109,11 @@
     }
 
     const enemies = [
-      { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', type: 'GHOST', attack: 'SHADOW SNEAK', damage: [10, 18] },
+      { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', type: 'GHOST', attack: 'SHADOW SNEAK', damage: [10, 18], shader: 'spectre' },
       { name: 'MOLDSPORE', level: 52, hp: 110, maxHp: 110, exp: 170, sprite: 'moldspore', type: 'POISON', attack: 'TOXIC SPORE', damage: [10, 16], shader: 'toxic' },
       { name: 'CRYSTOWL', level: 54, hp: 130, maxHp: 130, exp: 200, sprite: 'crystowl', type: 'ICE', attack: 'FROST WING', damage: [14, 22], shader: 'ice' },
-      { name: 'SLIME', level: 56, hp: 140, maxHp: 140, exp: 220, sprite: 'slime', type: 'POISON', attack: 'SLUDGE BOMB', damage: [14, 22] },
-      { name: 'INFERNO', level: 58, hp: 160, maxHp: 160, exp: 280, sprite: 'inferno', type: 'FIRE', attack: 'FLAME BURST', damage: [16, 26] }
+      { name: 'SLIME', level: 56, hp: 140, maxHp: 140, exp: 220, sprite: 'slime', type: 'POISON', attack: 'SLUDGE BOMB', damage: [14, 22], shader: 'slime' },
+      { name: 'INFERNO', level: 58, hp: 160, maxHp: 160, exp: 280, sprite: 'inferno', type: 'FIRE', attack: 'FLAME BURST', damage: [16, 26], shader: 'fire' }
     ];
 
     // Type effectiveness
