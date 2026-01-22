@@ -3448,25 +3448,99 @@
           canTop.position.set(2.8, -1.59, 0.8);
           scene.add(canTop);
 
-          // Coffee mug (near books)
-          const mugGeom = new THREE.CylinderGeometry(0.14, 0.12, 0.32, 16);
-          const mugMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.4 });
+          // Coffee mug (bigger, near books)
+          const mugX = -1.7, mugZ = -1.6;
+          const mugGeom = new THREE.CylinderGeometry(0.22, 0.18, 0.45, 16);
+          const mugMat = new THREE.MeshStandardMaterial({ color: 0xf8f8f8, roughness: 0.3 });
           const mug = new THREE.Mesh(mugGeom, mugMat);
-          mug.position.set(-1.8, -1.82, -1.8);
+          mug.position.set(mugX, -1.76, mugZ);
           scene.add(mug);
-          // Mug handle
-          const handleGeom = new THREE.TorusGeometry(0.08, 0.025, 8, 12, Math.PI);
+          // Mug handle (bigger)
+          const handleGeom = new THREE.TorusGeometry(0.12, 0.035, 8, 12, Math.PI);
           const handle = new THREE.Mesh(handleGeom, mugMat);
-          handle.position.set(-1.65, -1.82, -1.8);
+          handle.position.set(mugX + 0.22, -1.76, mugZ);
           handle.rotation.y = Math.PI / 2;
           handle.rotation.x = Math.PI / 2;
           scene.add(handle);
           // Coffee inside
-          const coffeeGeom = new THREE.CylinderGeometry(0.12, 0.12, 0.02, 16);
-          const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x3c2415, roughness: 0.9 });
+          const coffeeGeom = new THREE.CylinderGeometry(0.19, 0.19, 0.03, 16);
+          const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x3c2415, roughness: 0.8 });
           const coffee = new THREE.Mesh(coffeeGeom, coffeeMat);
-          coffee.position.set(-1.8, -1.67, -1.8);
+          coffee.position.set(mugX, -1.55, mugZ);
           scene.add(coffee);
+
+          // Steam particles with custom shader
+          const steamParticles = [];
+          const steamCount = 12;
+          const steamVertShader = `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `;
+          const steamFragShader = `
+            uniform float opacity;
+            varying vec2 vUv;
+            void main() {
+              float dist = length(vUv - vec2(0.5));
+              float alpha = smoothstep(0.5, 0.1, dist) * opacity;
+              gl_FragColor = vec4(1.0, 1.0, 1.0, alpha * 0.4);
+            }
+          `;
+
+          for (let i = 0; i < steamCount; i++) {
+            const steamGeo = new THREE.PlaneGeometry(0.12, 0.2);
+            const steamMat = new THREE.ShaderMaterial({
+              uniforms: { opacity: { value: 0.6 } },
+              vertexShader: steamVertShader,
+              fragmentShader: steamFragShader,
+              transparent: true,
+              side: THREE.DoubleSide,
+              depthWrite: false
+            });
+            const steam = new THREE.Mesh(steamGeo, steamMat);
+            steam.position.set(
+              mugX + (Math.random() - 0.5) * 0.15,
+              -1.5 + Math.random() * 0.3,
+              mugZ + (Math.random() - 0.5) * 0.15
+            );
+            steam.userData = {
+              baseY: -1.5,
+              speed: 0.003 + Math.random() * 0.002,
+              drift: (Math.random() - 0.5) * 0.001,
+              phase: Math.random() * Math.PI * 2
+            };
+            scene.add(steam);
+            steamParticles.push(steam);
+          }
+
+          // Steam animation function
+          function updateSteam(time) {
+            steamParticles.forEach(s => {
+              s.position.y += s.userData.speed;
+              s.position.x += Math.sin(time * 2 + s.userData.phase) * 0.001 + s.userData.drift;
+              s.position.z += Math.cos(time * 1.5 + s.userData.phase) * 0.0008;
+
+              // Fade out as it rises
+              const height = s.position.y - s.userData.baseY;
+              s.material.uniforms.opacity.value = Math.max(0, 0.7 - height * 1.5);
+
+              // Scale up as it rises
+              const scale = 1 + height * 2;
+              s.scale.set(scale, scale, 1);
+
+              // Reset when faded
+              if (height > 0.5) {
+                s.position.y = s.userData.baseY;
+                s.position.x = mugX + (Math.random() - 0.5) * 0.15;
+                s.position.z = mugZ + (Math.random() - 0.5) * 0.15;
+              }
+
+              // Billboard - face camera
+              s.lookAt(camera.position);
+            });
+          }
 
           // Link cable (coiled, front left)
           const cableMat = new THREE.MeshStandardMaterial({ color: 0x4a4a6a, roughness: 0.8 });
@@ -3799,6 +3873,9 @@
             // Update CRT static (every 3 frames for that choppy retro feel)
             crtFrame++;
             if (crtFrame % 3 === 0) updateCRTStatic();
+
+            // Animate steam
+            updateSteam(elapsed * 0.001);
 
             renderer.render(scene, camera);
 
