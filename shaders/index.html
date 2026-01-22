@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shader Gallery - baguette.art</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      color: #e0e0e0;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 2rem;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 1rem;
+      color: #fff;
+      letter-spacing: 2px;
+    }
+
+    .back-link {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: #fff; }
+
+    .shader-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    .shader-card {
+      background: #111118;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #222;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .shader-card:hover {
+      border-color: #444;
+      transform: translateY(-4px);
+    }
+
+    .shader-canvas-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+    }
+
+    .shader-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .shader-info {
+      padding: 1.5rem;
+    }
+
+    .shader-name {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.75rem;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .shader-type {
+      font-size: 0.6rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: #2a2a35;
+      color: #888;
+    }
+
+    .shader-type.tsl { background: #1a2a1a; color: #4a8; }
+
+    .shader-description {
+      font-size: 0.85rem;
+      color: #888;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .shader-features {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-tag {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      background: #1a1a22;
+      color: #666;
+    }
+
+    .view-source {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: #4a9eff;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      border: 1px solid #4a9eff33;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .view-source:hover {
+      background: #4a9eff11;
+      border-color: #4a9eff66;
+    }
+
+    /* Shader-specific accent colors */
+    .shader-card.toxic { --accent: #9955bb; }
+    .shader-card.toxic .shader-name { color: #cc88ee; }
+    .shader-card.toxic .feature-tag { background: #2a1a2a; color: #9966bb; }
+
+    .shader-card.ice { --accent: #4499dd; }
+    .shader-card.ice .shader-name { color: #77ccff; }
+    .shader-card.ice .feature-tag { background: #1a2a3a; color: #6699bb; }
+
+    .shader-card.fire { --accent: #dd6633; }
+    .shader-card.fire .shader-name { color: #ff9966; }
+    .shader-card.fire .feature-tag { background: #2a1a1a; color: #bb6644; }
+
+    .shader-card.spectre { --accent: #6677aa; }
+    .shader-card.spectre .shader-name { color: #99aadd; }
+    .shader-card.spectre .feature-tag { background: #1a1a2a; color: #7788bb; }
+
+    .shader-card.slime { --accent: #44aa44; }
+    .shader-card.slime .shader-name { color: #77dd77; }
+    .shader-card.slime .feature-tag { background: #1a2a1a; color: #55aa55; }
+
+    footer {
+      padding: 2rem;
+      text-align: center;
+      color: #444;
+      font-size: 0.75rem;
+      border-top: 1px solid #1a1a1a;
+    }
+
+    footer a {
+      color: #666;
+      text-decoration: none;
+    }
+
+    footer a:hover { color: #999; }
+
+    /* Technical breakdown section */
+    .tech-section {
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .tech-section h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 0.7rem;
+      color: #666;
+      margin-bottom: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .tech-item {
+      background: #111118;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #222;
+    }
+
+    .tech-item h3 {
+      font-size: 0.8rem;
+      color: #999;
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-item p {
+      font-size: 0.75rem;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    code {
+      background: #1a1a22;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.85em;
+      color: #4a9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SHADER GALLERY</h1>
+    <a href="../" class="back-link">← back to game</a>
+  </header>
+
+  <main class="shader-grid">
+    <!-- Toxic Shader -->
+    <article class="shader-card toxic">
+      <div class="shader-canvas-container">
+        <canvas class="shader-canvas" id="toxic-canvas"></canvas>
+      </div>
+      <div class="shader-info">
+        <h2 class="shader-name">
+          TOXIC SPORE
+          <span class="shader-type tsl">TSL</span>
+        </h2>
+        <p class="shader-description">
+          Procedural poison cloud effect with animated swirling noise layers.
+          Features organic movement patterns and floating spore particles.
+        </p>
+        <div class="shader-features">
+          <span class="feature-tag">FBM Noise</span>
+          <span class="feature-tag">Swirl Distortion</span>
+          <span class="feature-tag">Particle System</span>
+          <span class="feature-tag">Gradient Mapping</span>
+        </div>
+        <a href="toxic.tsl.js" class="view-source">View Source →</a>
+      </div>
+    </article>
+
+    <!-- Ice Shader -->
+    <article class="shader-card ice">
+      <div class="shader-canvas-container">
+        <canvas class="shader-canvas" id="ice-canvas"></canvas>
+      </div>
+      <div class="shader-info">
+        <h2 class="shader-name">
+          ICE CRYSTAL
+          <span class="shader-type tsl">TSL</span>
+        </h2>
+        <p class="shader-description">
+          Procedural frost crystallization effect using Voronoi-based patterns.
+          Simulates ice formation with refraction-like color shifts and sparkle highlights.
+        </p>
+        <div class="shader-features">
+          <span class="feature-tag">Voronoi Cells</span>
+          <span class="feature-tag">Edge Detection</span>
+          <span class="feature-tag">Sparkle Effect</span>
+          <span class="feature-tag">Radial Expansion</span>
+        </div>
+        <a href="ice.tsl.js" class="view-source">View Source →</a>
+      </div>
+    </article>
+
+    <!-- Fire Shader -->
+    <article class="shader-card fire">
+      <div class="shader-canvas-container">
+        <canvas class="shader-canvas" id="fire-canvas"></canvas>
+      </div>
+      <div class="shader-info">
+        <h2 class="shader-name">
+          FIRE BURST
+          <span class="shader-type tsl">TSL</span>
+        </h2>
+        <p class="shader-description">
+          Multi-layered procedural flame effect with realistic turbulence.
+          Temperature-based color gradient from core white to outer red with ember particles.
+        </p>
+        <div class="shader-features">
+          <span class="feature-tag">Layered Noise</span>
+          <span class="feature-tag">Heat Distortion</span>
+          <span class="feature-tag">Ember Particles</span>
+          <span class="feature-tag">Temperature Gradient</span>
+        </div>
+        <a href="fire.tsl.js" class="view-source">View Source →</a>
+      </div>
+    </article>
+
+    <!-- Spectre Shader -->
+    <article class="shader-card spectre">
+      <div class="shader-canvas-container">
+        <canvas class="shader-canvas" id="spectre-canvas"></canvas>
+      </div>
+      <div class="shader-info">
+        <h2 class="shader-name">
+          SPECTRE
+          <span class="shader-type tsl">TSL</span>
+        </h2>
+        <p class="shader-description">
+          Ethereal ghost effect with wispy directional trails.
+          Features floating soul orbs and haunting fade gradients.
+        </p>
+        <div class="shader-features">
+          <span class="feature-tag">Directional Noise</span>
+          <span class="feature-tag">Wisp Trails</span>
+          <span class="feature-tag">Soul Orbs</span>
+          <span class="feature-tag">Ethereal Glow</span>
+        </div>
+        <a href="spectre.tsl.js" class="view-source">View Source →</a>
+      </div>
+    </article>
+
+    <!-- Slime Shader -->
+    <article class="shader-card slime">
+      <div class="shader-canvas-container">
+        <canvas class="shader-canvas" id="slime-canvas"></canvas>
+      </div>
+      <div class="shader-info">
+        <h2 class="shader-name">
+          SLIME SLUDGE
+          <span class="shader-type tsl">TSL</span>
+        </h2>
+        <p class="shader-description">
+          Gooey metaball effect with organic blob merging.
+          Features subsurface scattering, drips, bubbles, and iridescent sheen.
+        </p>
+        <div class="shader-features">
+          <span class="feature-tag">Metaballs</span>
+          <span class="feature-tag">SSS</span>
+          <span class="feature-tag">Drip Animation</span>
+          <span class="feature-tag">Iridescence</span>
+        </div>
+        <a href="slime.tsl.js" class="view-source">View Source →</a>
+      </div>
+    </article>
+  </main>
+
+  <section class="tech-section">
+    <h2>TECHNICAL APPROACH</h2>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <h3>TSL (Three.js Shading Language)</h3>
+        <p>
+          Using Three.js r167's node-based shader system. TSL compiles to both
+          WebGL (GLSL) and WebGPU (WGSL), making these shaders future-proof.
+        </p>
+      </div>
+      <div class="tech-item">
+        <h3>Procedural Noise</h3>
+        <p>
+          All effects use procedural noise functions - no textures required.
+          <code>fBm</code> for organic movement, <code>voronoi</code> for crystals.
+        </p>
+      </div>
+      <div class="tech-item">
+        <h3>GPU-Driven Particles</h3>
+        <p>
+          Particle effects calculated entirely in the fragment shader using
+          hash functions and time-based animation. Zero CPU overhead.
+        </p>
+      </div>
+      <div class="tech-item">
+        <h3>Optimized for Real-time</h3>
+        <p>
+          Designed for 60fps gameplay. Noise octaves and particle counts
+          tuned for performance. Early-out patterns where applicable.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      <a href="mailto:hello@baguette.art">hello@baguette.art</a> ·
+      <a href="https://x.com/baguetteanon" target="_blank">@baguetteanon</a>
+    </p>
+  </footer>
+
+  <script type="module">
+    import * as THREE from 'three';
+
+    // ===========================================
+    // GLSL SHADER CODE
+    // ===========================================
+
+    // Shared GLSL utility functions
+    const glslUtils = `
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        float a = hash(i);
+        float b = hash(i + vec2(1.0, 0.0));
+        float c = hash(i + vec2(0.0, 1.0));
+        float d = hash(i + vec2(1.0, 1.0));
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+      }
+
+      float fbm(vec2 p, int octaves) {
+        float value = 0.0;
+        float amplitude = 0.5;
+        for (int i = 0; i < 4; i++) {
+          if (i >= octaves) break;
+          value += noise(p) * amplitude;
+          p *= 2.0;
+          amplitude *= 0.5;
+        }
+        return value;
+      }
+    `;
+
+    // TOXIC SHADER
+    const toxicShader = {
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${glslUtils}
+
+        void main() {
+          vec2 centered = (vUv - 0.5) * 2.0;
+          float dist = length(centered);
+          float angle = atan(centered.y, centered.x);
+
+          // Organic edge distortion using noise
+          float edgeNoise = fbm(vec2(angle * 2.0, uTime * 0.5), 3) * 0.3;
+          float organicDist = dist - edgeNoise;
+
+          // Swirl distortion for internal movement
+          float swirlAngle = dist * 4.0 + uTime * 0.5;
+          vec2 swirled = vec2(
+            centered.x * cos(swirlAngle) - centered.y * sin(swirlAngle),
+            centered.x * sin(swirlAngle) + centered.y * cos(swirlAngle)
+          );
+
+          // Layered turbulent noise
+          float n1 = fbm(swirled * 2.0 + uTime * 0.2, 4);
+          float n2 = fbm(swirled * 3.5 - vec2(uTime * 0.15, uTime * 0.1), 3);
+          float n3 = fbm(centered * 1.5 + uTime * 0.08, 2);
+          float combined = n1 * 0.4 + n2 * 0.35 + n3 * 0.25;
+
+          // Purple to green toxic gradient
+          vec3 deepPurple = vec3(0.4, 0.1, 0.5);
+          vec3 purple = vec3(0.6, 0.2, 0.8);
+          vec3 green = vec3(0.2, 0.7, 0.1);
+          vec3 brightGreen = vec3(0.4, 1.0, 0.3);
+
+          vec3 color = mix(deepPurple, purple, combined);
+          color = mix(color, green, combined * combined);
+          color = mix(color, brightGreen, pow(combined, 3.0) * 0.5);
+
+          // Soft circular glow with organic edge
+          float glow = smoothstep(1.0, 0.0, organicDist);
+          float innerGlow = smoothstep(0.6, 0.0, organicDist) * 0.5;
+
+          // Floating spore particles
+          float spores = 0.0;
+          for (int i = 0; i < 6; i++) {
+            float fi = float(i);
+            vec2 sporePos = vec2(
+              sin(uTime * (0.3 + fi * 0.1) + fi * 1.5) * 0.35,
+              cos(uTime * (0.25 + fi * 0.12) + fi * 2.1) * 0.35
+            );
+            float sporeDist = length(centered - sporePos);
+            float sporeGlow = smoothstep(0.08, 0.0, sporeDist);
+            spores += sporeGlow * (sin(uTime * 2.0 + fi) * 0.3 + 0.7);
+          }
+
+          // Pulsing effect
+          float pulse = sin(uTime * 1.5) * 0.1 + 0.9;
+
+          vec3 finalColor = color * (glow + innerGlow) * pulse;
+          finalColor += vec3(0.5, 1.0, 0.3) * spores * 0.4;
+
+          float alpha = glow * (combined * 0.5 + 0.5);
+          alpha = clamp(alpha + spores * 0.3, 0.0, 1.0);
+
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `
+    };
+
+    // ICE SHADER
+    const iceShader = {
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${glslUtils}
+
+        void main() {
+          vec2 centered = (vUv - 0.5) * 2.0;
+          float dist = length(centered);
+
+          // Voronoi for crystals
+          vec2 scaledUv = vUv * 6.0;
+          vec2 cellId = floor(scaledUv);
+          vec2 cellUv = fract(scaledUv);
+
+          float minDist = 1.0;
+          for (int y = -1; y <= 1; y++) {
+            for (int x = -1; x <= 1; x++) {
+              vec2 neighbor = vec2(float(x), float(y));
+              vec2 point = vec2(hash(cellId + neighbor)) * 0.5 + 0.25;
+              float d = length(neighbor + point - cellUv);
+              minDist = min(minDist, d);
+            }
+          }
+
+          // Crystal edges
+          float edge = smoothstep(0.02, 0.05, minDist);
+
+          // Ice colors
+          vec3 iceBlue = vec3(0.4, 0.7, 1.0);
+          vec3 iceCyan = vec3(0.6, 0.95, 1.0);
+          vec3 iceWhite = vec3(0.95, 0.98, 1.0);
+
+          vec3 iceColor = mix(iceWhite, iceCyan, minDist * 2.0);
+          iceColor = mix(iceColor, iceBlue, smoothstep(0.3, 0.6, minDist));
+
+          // Expansion animation
+          float expansion = mod(uTime * 0.3, 1.5);
+          float reveal = smoothstep(dist + 0.2, dist, expansion);
+
+          // Sparkles
+          vec2 sparklePos = vUv * 20.0;
+          float sparkle = step(0.98, hash(floor(sparklePos) + floor(uTime * 3.0)));
+
+          float fade = smoothstep(1.2, 0.3, dist);
+
+          vec3 finalColor = iceColor * edge + sparkle * 0.5;
+          float alpha = fade * reveal;
+
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `
+    };
+
+    // FIRE SHADER
+    const fireShader = {
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${glslUtils}
+
+        void main() {
+          vec2 fireUv = vec2(vUv.x, 1.0 - vUv.y);
+
+          // Turbulence
+          vec2 turbulence = vec2(
+            fbm(fireUv * 4.0 + vec2(uTime * 0.5, uTime * 1.5), 3) - 0.5,
+            fbm(fireUv * 3.0 + vec2(-uTime * 0.3, uTime * 2.0), 3) - 0.5
+          ) * 0.3;
+
+          vec2 distorted = fireUv + turbulence;
+
+          // Fire shape
+          float fireShape = smoothstep(0.8, 0.0, length((distorted - vec2(0.5, 0.3)) * vec2(1.5, 1.0)));
+          float n = fbm(distorted * 6.0 + vec2(0.0, uTime * 3.0), 4);
+          float intensity = fireShape * (n + 0.3);
+
+          // Temperature gradient
+          vec3 red = vec3(0.9, 0.1, 0.0);
+          vec3 orange = vec3(1.0, 0.5, 0.0);
+          vec3 yellow = vec3(1.0, 0.9, 0.2);
+          vec3 white = vec3(1.0, 1.0, 0.9);
+
+          vec3 fireColor = mix(red, orange, smoothstep(0.2, 0.4, intensity));
+          fireColor = mix(fireColor, yellow, smoothstep(0.4, 0.6, intensity));
+          fireColor = mix(fireColor, white, smoothstep(0.7, 0.9, intensity));
+
+          // Embers
+          vec2 emberPos = vUv * 15.0 + vec2(0.0, -uTime * 2.0);
+          float ember = step(0.97, hash(floor(emberPos)));
+          float emberFade = fract(emberPos.y + uTime * 2.0) * vUv.y;
+
+          vec3 finalColor = fireColor + vec3(1.0, 0.5, 0.1) * ember * emberFade;
+
+          gl_FragColor = vec4(finalColor, intensity);
+        }
+      `
+    };
+
+    // SPECTRE SHADER
+    const spectreShader = {
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${glslUtils}
+
+        void main() {
+          vec2 centered = (vUv - 0.5) * 2.0;
+          float dist = length(centered);
+
+          // Wispy trails with directional stretch
+          float wisp1 = fbm((vUv + vec2(uTime * 0.1, uTime * 0.2)) * vec2(4.0, 1.0), 3);
+          float wisp2 = fbm((vUv + vec2(-uTime * 0.15, uTime * 0.25)) * vec2(3.0, 1.0), 3);
+          float wisps = wisp1 * 0.5 + wisp2 * 0.5;
+
+          // Soul orbs
+          float orbs = 0.0;
+          for (int i = 0; i < 4; i++) {
+            float seed = float(i) * 17.31;
+            vec2 orbCenter = vec2(
+              0.5 + sin(uTime * (0.5 + float(i) * 0.1) + seed) * 0.3,
+              0.5 + cos(uTime * (0.4 + float(i) * 0.15) + seed * 2.0) * 0.3
+            );
+            float orbDist = length(vUv - orbCenter);
+            float orbGlow = smoothstep(0.08, 0.0, orbDist);
+            orbs += orbGlow * (sin(uTime * (2.0 + float(i) * 0.5) + seed) * 0.3 + 0.7);
+          }
+          orbs = clamp(orbs, 0.0, 1.0);
+
+          // Ethereal glow
+          float hover = sin(uTime * 1.5) * 0.05;
+          float glow = smoothstep(1.2, hover, dist);
+
+          // Ghostly colors
+          vec3 paleBlue = vec3(0.7, 0.8, 0.95);
+          vec3 ghostPurple = vec3(0.6, 0.5, 0.85);
+          vec3 spectralWhite = vec3(0.95, 0.95, 1.0);
+          vec3 voidDark = vec3(0.1, 0.1, 0.2);
+
+          vec3 color = mix(voidDark, paleBlue, wisps);
+          color = mix(color, ghostPurple, wisps * 0.5 + 0.2);
+          color = mix(color, spectralWhite, orbs * 0.8);
+
+          float pulse = sin(uTime * 0.8) * 0.15 + 0.85;
+          vec3 finalColor = color * glow * pulse;
+          float alpha = clamp(glow * (wisps + 0.3) * 0.9 + orbs * 0.3, 0.0, 1.0);
+
+          gl_FragColor = vec4(finalColor, alpha);
+        }
+      `
+    };
+
+    // SLIME SHADER
+    const slimeShader = {
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${glslUtils}
+
+        float metaball(vec2 p, vec2 center, float radius) {
+          float d = length(p - center);
+          return radius * radius / (d * d + 0.001);
+        }
+
+        void main() {
+          vec2 centered = vUv - 0.5;
+
+          // Metaball field
+          float field = metaball(centered, vec2(0.0), 0.15);
+
+          // Orbiting blobs
+          for (int i = 0; i < 5; i++) {
+            float idx = float(i);
+            float speed = 0.5 + idx * 0.1;
+            float radius = 0.15 + idx * 0.03;
+            float phase = idx * 1.2566;
+
+            vec2 blobPos = vec2(
+              cos(uTime * speed + phase) * radius,
+              sin(uTime * speed * 1.3 + phase) * radius * 0.8
+            );
+            float blobSize = 0.08 + sin(uTime + idx) * 0.02;
+            field += metaball(centered, blobPos, blobSize);
+          }
+
+          // Dripping blobs
+          for (int i = 0; i < 3; i++) {
+            float idx = float(i);
+            float dripX = sin(idx * 2.1) * 0.1;
+            float dripPhase = fract(uTime * 0.3 + idx * 0.33);
+            float dripY = -dripPhase * 0.4;
+            float dripSize = 0.05 * (1.0 - dripPhase * 0.5);
+            field += metaball(centered, vec2(dripX, dripY), dripSize) * (1.0 - dripPhase);
+          }
+
+          // Surface
+          float surface = smoothstep(0.5, 0.8, field);
+          float edge = smoothstep(0.65, 0.7, field) * smoothstep(0.85, 0.7, field);
+
+          // Colors
+          vec3 slimeLight = vec3(0.4, 0.9, 0.3);
+          vec3 slimeMid = vec3(0.2, 0.7, 0.2);
+          vec3 slimeDeep = vec3(0.1, 0.4, 0.15);
+          vec3 highlight = vec3(0.8, 1.0, 0.7);
+
+          float depth = smoothstep(0.8, 2.5, field);
+          vec3 color = mix(slimeDeep, slimeMid, depth);
+          color = mix(color, slimeLight, depth * depth);
+          color = mix(color, highlight, edge * 0.4);
+
+          // Iridescence
+          float iridAngle = edge * sin(uTime * 2.0 + vUv.y * 10.0);
+          vec3 irid = vec3(
+            sin(iridAngle * 3.0) * 0.5 + 0.5,
+            sin(iridAngle * 3.0 + 2.094) * 0.5 + 0.5,
+            sin(iridAngle * 3.0 + 4.189) * 0.5 + 0.5
+          ) * 0.15;
+
+          float pulse = sin(uTime * 1.5) * 0.1 + 0.9;
+          vec3 finalColor = (color + irid * edge) * pulse;
+
+          gl_FragColor = vec4(finalColor, surface);
+        }
+      `
+    };
+
+    // ===========================================
+    // SCENE SETUP
+    // ===========================================
+    function initShaderCanvas(canvasId, shaderDef) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      const rect = canvas.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+      const geometry = new THREE.PlaneGeometry(2, 2);
+      const material = new THREE.ShaderMaterial({
+        vertexShader: shaderDef.vertexShader,
+        fragmentShader: shaderDef.fragmentShader,
+        uniforms: { uTime: { value: 0 } },
+        transparent: true
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      scene.add(mesh);
+
+      const clock = new THREE.Clock();
+
+      function animate() {
+        requestAnimationFrame(animate);
+        material.uniforms.uTime.value = clock.getElapsedTime();
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      const resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+          renderer.setSize(width, height, false);
+        }
+      });
+      resizeObserver.observe(canvas.parentElement);
+    }
+
+    // Initialize all shader canvases
+    initShaderCanvas('toxic-canvas', toxicShader);
+    initShaderCanvas('ice-canvas', iceShader);
+    initShaderCanvas('fire-canvas', fireShader);
+    initShaderCanvas('spectre-canvas', spectreShader);
+    initShaderCanvas('slime-canvas', slimeShader);
+  </script>
+</body>
+</html>
