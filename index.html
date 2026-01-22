@@ -54,20 +54,6 @@
       border-radius: 2px;
     }
 
-    /* Speaker grille */
-    .gameboy-shell::after {
-      content: '';
-      position: absolute;
-      bottom: 1.8rem;
-      right: 1rem;
-      width: 50px;
-      height: 50px;
-      background:
-        repeating-linear-gradient(45deg, #3a2a54 0px, #3a2a54 2px, #4a3a64 2px, #4a3a64 4px);
-      border-radius: 50%;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
-    }
-
     /* Mode switch - top of shell */
     .mode-switch-container {
       position: absolute;
@@ -189,22 +175,6 @@
       border-radius: 2px;
     }
 
-    .gameboy-shell.dmg-mode::after {
-      /* Speaker grille - horizontal slots like real DMG-001 */
-      right: 1.2rem;
-      bottom: 2rem;
-      width: 50px;
-      height: 40px;
-      background:
-        repeating-linear-gradient(
-          180deg,
-          #606058 0px, #606058 5px,
-          #98988c 5px, #98988c 7px
-        );
-      border-radius: 3px;
-      box-shadow: inset 0 2px 3px rgba(0,0,0,0.5);
-    }
-
     .gameboy-shell.dmg-mode .power-switch {
       background: linear-gradient(180deg, #808078 0%, #707068 50%, #606058 100%);
       border-radius: 3px 3px 1px 1px;
@@ -275,13 +245,11 @@
     .gameboy-shell.dmg-mode .battery-label {
       display: block;
       position: absolute;
-      bottom: 1.1rem;
-      left: 1.2rem;
+      top: 6px;
+      left: 88px;
       font-size: 4px;
       color: #707068;
       letter-spacing: 0.5px;
-      transform: translateX(-50%);
-      margin-left: 18px;
     }
 
     /* Nintendo GAME BOY brand below screen for DMG */
@@ -1685,7 +1653,7 @@
 
     /* Bottom rim - control area */
     .bottom-rim {
-      height: 90px;
+      height: 120px;
       margin-top: 0.8rem;
       position: relative;
       background: linear-gradient(180deg, rgba(0,0,0,0.05) 0%, transparent 30%);
@@ -1693,14 +1661,184 @@
     }
 
     .gameboy-shell.dmg-mode .bottom-rim {
-      height: 100px;
+      height: 130px;
       border-radius: 0 0 16px 16px;
+    }
+
+    /* D-Pad */
+    .dpad {
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      width: 50px;
+      height: 50px;
+    }
+
+    .dpad-horizontal, .dpad-vertical {
+      position: absolute;
+      background: linear-gradient(180deg, #3a3a4a 0%, #2a2a3a 50%, #1a1a2a 100%);
+      border-radius: 3px;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.1),
+        0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .dpad-horizontal {
+      width: 50px;
+      height: 16px;
+      top: 17px;
+      left: 0;
+    }
+
+    .dpad-vertical {
+      width: 16px;
+      height: 50px;
+      top: 0;
+      left: 17px;
+    }
+
+    .dpad-center {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #4a4a5a 0%, #2a2a3a 100%);
+      border-radius: 50%;
+      top: 19px;
+      left: 19px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* DMG D-Pad - darker black */
+    .gameboy-shell.dmg-mode .dpad-horizontal,
+    .gameboy-shell.dmg-mode .dpad-vertical {
+      background: linear-gradient(180deg, #2a2a28 0%, #1a1a18 50%, #0a0a08 100%);
+    }
+
+    .gameboy-shell.dmg-mode .dpad-center {
+      background: radial-gradient(circle, #3a3a38 0%, #1a1a18 100%);
+    }
+
+    /* A/B Buttons */
+    .ab-buttons {
+      position: absolute;
+      top: 18px;
+      right: 75px;
+      transform: rotate(-25deg);
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-a, .btn-b {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      box-shadow:
+        inset 0 2px 3px rgba(255,255,255,0.3),
+        inset 0 -2px 3px rgba(0,0,0,0.3),
+        0 3px 6px rgba(0,0,0,0.4);
+      position: relative;
+    }
+
+    .btn-a {
+      background: linear-gradient(180deg, #9060b0 0%, #7040a0 50%, #503080 100%);
+    }
+
+    .btn-b {
+      background: linear-gradient(180deg, #9060b0 0%, #7040a0 50%, #503080 100%);
+    }
+
+    .btn-label {
+      position: absolute;
+      bottom: -14px;
+      left: 50%;
+      transform: translateX(-50%) rotate(25deg);
+      font-size: 6px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* DMG A/B - maroon/dark red */
+    .gameboy-shell.dmg-mode .btn-a,
+    .gameboy-shell.dmg-mode .btn-b {
+      background: linear-gradient(180deg, #a04858 0%, #803040 50%, #602030 100%);
+    }
+
+    .gameboy-shell.dmg-mode .btn-label {
+      color: rgba(60,60,56,0.7);
+    }
+
+    /* START/SELECT */
+    .start-select {
+      position: absolute;
+      top: 45px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 20px;
+    }
+
+    .btn-start, .btn-select {
+      width: 32px;
+      height: 8px;
+      background: linear-gradient(180deg, #5a5a6a 0%, #4a4a5a 50%, #3a3a4a 100%);
+      border-radius: 4px;
+      box-shadow:
+        inset 0 1px 1px rgba(255,255,255,0.2),
+        0 2px 3px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .ss-label {
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 5px;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+    }
+
+    .gameboy-shell.dmg-mode .btn-start,
+    .gameboy-shell.dmg-mode .btn-select {
+      background: linear-gradient(180deg, #808078 0%, #707068 50%, #606058 100%);
+    }
+
+    .gameboy-shell.dmg-mode .ss-label {
+      color: rgba(60,60,56,0.6);
+    }
+
+    /* Speaker grille in bottom rim */
+    .speaker-grille {
+      position: absolute;
+      top: 15px;
+      right: 18px;
+      width: 45px;
+      height: 45px;
+      background:
+        repeating-linear-gradient(
+          45deg,
+          #4a3a64 0px, #4a3a64 2px,
+          #3a2a54 2px, #3a2a54 5px
+        );
+      border-radius: 50%;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .gameboy-shell.dmg-mode .speaker-grille {
+      background:
+        repeating-linear-gradient(
+          180deg,
+          #606058 0px, #606058 4px,
+          #808078 4px, #808078 6px
+        );
+      border-radius: 4px;
+      width: 50px;
+      height: 40px;
     }
 
     /* Footer links - positioned in bottom rim */
     .footer {
       position: absolute;
-      bottom: 20px;
+      bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
@@ -1737,13 +1875,13 @@
     /* Power LED */
     .power-led {
       position: absolute;
-      bottom: 55px;
-      left: 1.2rem;
-      width: 8px;
-      height: 8px;
+      top: 8px;
+      left: 78px;
+      width: 6px;
+      height: 6px;
       background: #58f858;
       border-radius: 50%;
-      box-shadow: 0 0 8px #58f858;
+      box-shadow: 0 0 6px #58f858;
       animation: ledPulse 2s ease-in-out infinite;
     }
 
@@ -1888,6 +2026,28 @@
     <div class="bottom-rim">
       <div class="power-led"></div>
       <div class="battery-label">BATTERY</div>
+
+      <!-- D-Pad -->
+      <div class="dpad">
+        <div class="dpad-horizontal"></div>
+        <div class="dpad-vertical"></div>
+        <div class="dpad-center"></div>
+      </div>
+
+      <!-- A/B Buttons -->
+      <div class="ab-buttons">
+        <div class="btn-b"><span class="btn-label">B</span></div>
+        <div class="btn-a"><span class="btn-label">A</span></div>
+      </div>
+
+      <!-- START/SELECT -->
+      <div class="start-select">
+        <div class="btn-select"><span class="ss-label">SELECT</span></div>
+        <div class="btn-start"><span class="ss-label">START</span></div>
+      </div>
+      <!-- Speaker grille indicator -->
+      <div class="speaker-grille"></div>
+
       <div class="footer">
         <a href="mailto:hello@baguette.art" class="x-link">hello@baguette.art</a>
         <span class="link-divider">/</span>
