@@ -31,55 +31,100 @@
     }
 
     .gameboy-shell {
-      background: linear-gradient(145deg, #6b5b95 0%, #5a4a84 50%, #4a3a74 100%);
-      padding: 1.2rem 0.8rem 2rem 0.8rem;
-      border-radius: 15px 15px 50px 50px;
-      box-shadow: inset 0 2px 4px rgba(255,255,255,0.2), 0 10px 40px rgba(0,0,0,0.5);
+      background: linear-gradient(145deg, #7b6ba5 0%, #6b5b95 30%, #5a4a84 70%, #4a3a74 100%);
+      padding: 1.4rem 1rem 2.5rem 1rem;
+      border-radius: 12px 12px 45px 45px;
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.3),
+        inset 0 -2px 6px rgba(0,0,0,0.3),
+        0 12px 50px rgba(0,0,0,0.6),
+        0 0 0 3px #3a2a54;
       position: relative;
+    }
+
+    /* Shell ridge details */
+    .gameboy-shell::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      height: 4px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 20%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.1) 80%, transparent 100%);
+      border-radius: 2px;
+    }
+
+    /* Speaker grille */
+    .gameboy-shell::after {
+      content: '';
+      position: absolute;
+      bottom: 1.8rem;
+      right: 1rem;
+      width: 50px;
+      height: 50px;
+      background:
+        repeating-linear-gradient(45deg, #3a2a54 0px, #3a2a54 2px, #4a3a64 2px, #4a3a64 4px);
+      border-radius: 50%;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Power switch - top left corner */
+    .power-switch {
+      position: absolute;
+      top: -8px;
+      left: 20px;
+      width: 40px;
+      height: 18px;
+      background: linear-gradient(180deg, #4a4a5a 0%, #3a3a4a 50%, #2a2a3a 100%);
+      border-radius: 4px 4px 2px 2px;
+      cursor: pointer;
+      box-shadow:
+        inset 0 1px 2px rgba(255,255,255,0.2),
+        0 2px 4px rgba(0,0,0,0.4);
+      z-index: 100;
+    }
+
+    .power-switch::before {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 12px;
+      background: linear-gradient(180deg, #6a6a7a 0%, #5a5a6a 100%);
+      border-radius: 2px;
+      transition: left 0.15s ease-out;
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.3);
+    }
+
+    .power-switch.on::before {
+      left: 21px;
+      background: linear-gradient(180deg, #58c858 0%, #40a040 100%);
+    }
+
+    .power-switch-label {
+      position: absolute;
+      top: -5px;
+      left: 65px;
+      font-size: 5px;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 1px;
     }
 
     .gameboy-header {
-      position: absolute;
-      top: 0.4rem;
-      left: 0;
-      right: 0;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-    }
-
-    .mode-switch {
-      width: 32px;
-      height: 16px;
-      background: #3a3a4a;
-      border-radius: 8px;
-      cursor: pointer;
-      position: relative;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
-    }
-
-    .mode-switch::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 12px;
-      height: 12px;
-      background: linear-gradient(145deg, #ff6b6b, #9d65c9);
-      border-radius: 50%;
-      transition: left 0.2s, background 0.2s;
-    }
-
-    .mode-switch.dmg::after {
-      left: 18px;
-      background: linear-gradient(145deg, #8b956d, #6b7550);
+      margin-bottom: 0.3rem;
+      padding-top: 0.2rem;
     }
 
     .gameboy-label {
       font-size: 8px;
-      color: rgba(255,255,255,0.7);
+      color: rgba(255,255,255,0.8);
       white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
     .gameboy-label span {
@@ -89,40 +134,119 @@
       background-clip: text;
     }
 
-    /* DMG Mode - Classic grey Game Boy */
+    /* DMG Mode - Classic grey Game Boy (blockier, squared design) */
     .gameboy-shell.dmg-mode {
-      background: linear-gradient(145deg, #c0c0c0 0%, #a8a8a8 50%, #909090 100%);
+      background: linear-gradient(180deg, #d4d4c8 0%, #c8c8bc 15%, #bcbcb0 50%, #b0b0a4 85%, #a0a094 100%);
+      border-radius: 8px 8px 20px 20px;
+      box-shadow:
+        inset 0 2px 4px rgba(255,255,255,0.6),
+        inset -2px 0 3px rgba(0,0,0,0.1),
+        inset 2px 0 3px rgba(0,0,0,0.1),
+        inset 0 -3px 6px rgba(0,0,0,0.15),
+        0 12px 50px rgba(0,0,0,0.5),
+        0 0 0 2px #909088;
+      padding: 1.6rem 1.2rem 2.8rem 1.2rem;
+    }
+
+    /* DMG has vertical lines/ridges on sides */
+    .gameboy-shell.dmg-mode::before {
+      content: '';
+      position: absolute;
+      top: 60px;
+      left: 6px;
+      width: 6px;
+      height: calc(100% - 100px);
+      background: repeating-linear-gradient(180deg,
+        #b8b8ac 0px, #b8b8ac 3px,
+        #a8a89c 3px, #a8a89c 6px);
+      border-radius: 2px;
+    }
+
+    .gameboy-shell.dmg-mode::after {
+      /* Speaker grille - more rectangular for DMG */
+      right: 1.2rem;
+      bottom: 2rem;
+      width: 45px;
+      height: 45px;
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          #888880 0px, #888880 2px,
+          #98988c 2px, #98988c 5px
+        );
+      border-radius: 4px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .gameboy-shell.dmg-mode .power-switch {
+      background: linear-gradient(180deg, #808078 0%, #707068 50%, #606058 100%);
+      border-radius: 3px 3px 1px 1px;
+    }
+
+    .gameboy-shell.dmg-mode .power-switch::before {
+      background: linear-gradient(180deg, #a0a098 0%, #909088 100%);
+    }
+
+    .gameboy-shell.dmg-mode .power-switch.on::before {
+      background: linear-gradient(180deg, #c84040 0%, #a83030 100%);
+    }
+
+    .gameboy-shell.dmg-mode .power-switch-label {
+      color: rgba(80, 80, 72, 0.6);
     }
 
     .gameboy-shell.dmg-mode .gameboy-label {
-      color: #4a4a5a;
+      color: #505048;
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 1px rgba(255,255,255,0.6);
     }
 
     .gameboy-shell.dmg-mode .gameboy-label span {
       background: none;
-      -webkit-text-fill-color: #2a2a3a;
-      color: #2a2a3a;
+      -webkit-text-fill-color: #404038;
+      color: #404038;
     }
 
     .gameboy-shell.dmg-mode .viewport {
       filter: sepia(100%) hue-rotate(50deg) saturate(60%) brightness(90%) contrast(110%);
       background: linear-gradient(180deg, #8bac0f 0%, #9bbc0f 30%, #306230 60%, #0f380f 100%);
+      border-radius: 2px;
     }
 
     .gameboy-shell.dmg-mode .screen-bezel {
-      background: #5a5a5a;
+      background: linear-gradient(180deg, #505048 0%, #606058 100%);
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.7);
+      border-radius: 4px;
+      padding: 0.6rem;
+    }
+
+    .gameboy-shell.dmg-mode .screen-bezel::before {
+      content: 'DOT MATRIX WITH STEREO SOUND';
+      position: absolute;
+      top: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 4px;
+      color: #707068;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      font-weight: normal;
     }
 
     .gameboy-shell.dmg-mode .power-led {
-      background: #aa0000;
-      box-shadow: 0 0 4px #ff0000;
+      background: #cc3030;
+      box-shadow: 0 0 8px #ff4040;
+      width: 6px;
+      height: 6px;
     }
 
     .screen-bezel {
       background: #1a1a24;
-      padding: 0.4rem;
-      border-radius: 6px;
-      box-shadow: inset 0 3px 8px rgba(0,0,0,0.8);
+      padding: 0.5rem;
+      border-radius: 8px;
+      box-shadow: inset 0 4px 12px rgba(0,0,0,0.8);
+      position: relative;
     }
 
     .viewport {
@@ -1453,8 +1577,9 @@
 </head>
 <body>
   <div class="gameboy-shell" id="gameboy-shell">
+    <div class="power-switch on" id="power-switch" title="Toggle DMG/GBC"></div>
+    <div class="power-switch-label">OFF ◀ ▶ ON</div>
     <div class="gameboy-header">
-      <div class="mode-switch" id="mode-switch" title="Toggle DMG/GBC"></div>
       <div class="gameboy-label" id="gameboy-label">GAME BOY <span>COLOR</span></div>
     </div>
     <div class="screen-bezel">
@@ -1582,11 +1707,11 @@
 
     // DMG/GBC Mode Toggle
     const gameboyShell = document.getElementById('gameboy-shell');
-    const modeSwitch = document.getElementById('mode-switch');
+    const powerSwitch = document.getElementById('power-switch');
     const gameboyLabel = document.getElementById('gameboy-label');
 
-    modeSwitch.addEventListener('click', () => {
-      modeSwitch.classList.toggle('dmg');
+    powerSwitch.addEventListener('click', () => {
+      powerSwitch.classList.toggle('on');
       gameboyShell.classList.toggle('dmg-mode');
       if (gameboyShell.classList.contains('dmg-mode')) {
         gameboyLabel.innerHTML = 'GAME BOY';
