@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -147,32 +149,28 @@
       background-clip: text;
     }
 
-    /* DMG Mode - Classic grey Game Boy (blockier, squared design) */
+    /* DMG Mode - Classic grey Game Boy (colors only, no layout changes) */
     .gameboy-shell.dmg-mode {
       background: linear-gradient(180deg, #d4d4c8 0%, #c8c8bc 15%, #bcbcb0 50%, #b0b0a4 85%, #a0a094 100%);
-      border-radius: 8px 8px 20px 20px;
       box-shadow:
         inset 0 2px 4px rgba(255,255,255,0.6),
         inset -2px 0 3px rgba(0,0,0,0.1),
         inset 2px 0 3px rgba(0,0,0,0.1),
         inset 0 -3px 6px rgba(0,0,0,0.15),
         0 12px 50px rgba(0,0,0,0.5),
-        0 0 0 2px #909088;
-      padding: 1.6rem 1.2rem 0.5rem 1.2rem;
+        0 0 0 3px #909088;
     }
 
-    /* DMG has vertical lines/ridges on sides */
+    /* DMG vertical lines/ridges overlay */
     .gameboy-shell.dmg-mode::before {
-      content: '';
-      position: absolute;
-      top: 60px;
+      top: 8px;
       left: 6px;
+      right: auto;
       width: 6px;
-      height: calc(100% - 100px);
+      height: calc(100% - 50px);
       background: repeating-linear-gradient(180deg,
         #b8b8ac 0px, #b8b8ac 3px,
         #a8a89c 3px, #a8a89c 6px);
-      border-radius: 2px;
     }
 
     .gameboy-shell.dmg-mode .power-switch {
@@ -204,16 +202,11 @@
     .gameboy-shell.dmg-mode .viewport {
       filter: sepia(100%) hue-rotate(50deg) saturate(60%) brightness(90%) contrast(110%);
       background: linear-gradient(180deg, #8bac0f 0%, #9bbc0f 30%, #306230 60%, #0f380f 100%);
-      border-radius: 2px;
-      margin-top: 10px;
     }
 
     .gameboy-shell.dmg-mode .screen-bezel {
       background: linear-gradient(180deg, #505048 0%, #606058 100%);
       box-shadow: inset 0 4px 12px rgba(0,0,0,0.7);
-      border-radius: 8px 8px 8px 20px;
-      padding: 0.6rem;
-      position: relative;
     }
 
     .gameboy-shell.dmg-mode .screen-bezel::before {
@@ -286,12 +279,10 @@
       color: #3a3a38;
     }
 
-    /* Hide GBC header label in DMG mode */
+    /* Hide GBC header label in DMG mode (keep space) */
     .gameboy-shell.dmg-mode .gameboy-header {
-      visibility: hidden;
-      height: 0;
-      margin: 0;
-      padding: 0;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .screen-bezel {
@@ -1278,6 +1269,98 @@
       transform: scale(0.98);
     }
 
+    /* 3D End Screen */
+    #three-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      background: linear-gradient(180deg, #2a1a0a 0%, #1a0a00 100%);
+    }
+
+    .ending-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 5%;
+      pointer-events: none;
+      opacity: 0;
+      animation: fadeInOverlay 1s ease-out 2s forwards;
+    }
+
+    @keyframes fadeInOverlay {
+      to { opacity: 1; }
+    }
+
+    .ending-overlay .ending-text {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 16px;
+      color: #f8f0d8;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+      margin-bottom: 15px;
+    }
+
+    .ending-overlay .ending-links {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .ending-overlay .ending-links a {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      color: #c8a868;
+      text-decoration: none;
+      pointer-events: auto;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+      padding: 10px;
+    }
+
+    .ending-overlay .ending-links a:hover {
+      color: #f8d888;
+    }
+
+    .ending-overlay .play-again-btn {
+      pointer-events: auto;
+      padding: 16px 32px;
+      background: linear-gradient(180deg, #4a3a2a 0%, #3a2a1a 100%);
+      border: 3px solid #6a5a4a;
+      border-radius: 8px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      color: #f8f0d8;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .ending-overlay .play-again-btn:hover,
+    .ending-overlay .play-again-btn:active {
+      background: linear-gradient(180deg, #5a4a3a 0%, #4a3a2a 100%);
+      transform: scale(1.05);
+    }
+
+    .ending-overlay .zoom-hint {
+      position: absolute;
+      bottom: 20px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 8px;
+      color: rgba(200,168,104,0.5);
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    }
+
     /* EXP bar */
     .exp-bar-container {
       position: absolute;
@@ -1589,6 +1672,13 @@
     }
 
     .item-count { color: #606060; }
+
+    /* BACK button in items menu needs spacing */
+    .item-btn[data-item="cancel"] {
+      margin-top: 6px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
 
     /* PARTICLE SYSTEMS */
     .particle {
@@ -3009,7 +3099,7 @@
           const typeMultiplier = getTypeMultiplier(move.type, enemy.type);
           let damage = Math.floor((move.power + Math.floor(Math.random() * 10) + (isCrit ? 15 : 0)) * typeMultiplier) + evoBonus;
           enemyHp = Math.max(0, enemyHp - damage);
-          updateHpBar(enemyHpBar, enemyHp, false);
+          updateHpBar(enemyHpBar, (enemyHp / enemy.maxHp) * 100, false);
           showDamage(toX, toY - 30, damage, isCrit);
 
           // Critical hit shader
@@ -3199,30 +3289,441 @@
     }
 
     function showEndingScreen() {
-      const ending = document.createElement('div');
-      ending.className = 'ending-screen';
-      ending.innerHTML = `
-        <div class="ending-logo">BAGUETTE</div>
-        <div class="ending-logo-sub">ART</div>
-        <div class="ending-sprite">
-          <div class="creature-sprite">
-            <div class="flame-sprite">
-              <div class="pixel-sprite"></div>
-            </div>
-          </div>
-        </div>
-        <div class="ending-text">Thanks for playing!</div>
-        <div class="ending-links">
-          <a href="mailto:hello@baguette.art">hello@baguette.art</a>
-          <a href="https://x.com/baguetteanon" target="_blank">@baguetteanon</a>
-        </div>
-        <div class="play-again-btn" id="play-again">PLAY AGAIN</div>
-      `;
-      viewport.appendChild(ending);
+      // Set up epic battle scene before capturing
+      try {
+        const playerSpriteContainer = playerCreature.querySelector('div');
+        if (playerSpriteContainer) playerSpriteContainer.className = 'flame-sprite';
 
-      document.getElementById('play-again').addEventListener('click', () => {
-        location.reload();
-      });
+        const enemySpriteContainer = enemyCreature.querySelector('div');
+        if (enemySpriteContainer) enemySpriteContainer.className = 'inferno-sprite';
+
+        const enemyName = document.querySelector('.stat-box.enemy .stat-name');
+        const enemyLevel = document.querySelector('.stat-box.enemy .stat-level');
+        const playerName = document.querySelector('.stat-box.player .stat-name');
+        if (enemyName) enemyName.textContent = 'INFERNO';
+        if (enemyLevel) enemyLevel.textContent = '58';
+        if (playerName) playerName.textContent = 'BAGUETTE';
+
+        showMessage('What will<br>BAGUETTE do?');
+        showMenu('fight');
+      } catch(e) { console.log('Setup error:', e); }
+
+      // Longer delay to let sprites render before capture
+      setTimeout(() => {
+        const shell = document.querySelector('.gameboy-shell');
+        if (!shell) { console.error('Shell not found'); return; }
+        if (typeof html2canvas === 'undefined') { console.error('html2canvas not loaded'); return; }
+        if (typeof THREE === 'undefined') { console.error('THREE.js not loaded'); return; }
+
+        html2canvas(shell, {
+          backgroundColor: null,
+          scale: 2,
+          logging: false
+        }).then(canvas => {
+          try {
+          // Create Three.js scene
+          const container = document.createElement('div');
+          container.id = 'three-container';
+          document.body.appendChild(container);
+
+          const scene = new THREE.Scene();
+          const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+          const renderer = new THREE.WebGLRenderer({ antialias: true });
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          renderer.setClearColor(0x1a0a00);
+          container.appendChild(renderer.domElement);
+
+          // Desk surface
+          const deskGeom = new THREE.PlaneGeometry(20, 20);
+          const deskMat = new THREE.MeshStandardMaterial({
+            color: 0x4a3020,
+            roughness: 0.8,
+            metalness: 0.1
+          });
+          const desk = new THREE.Mesh(deskGeom, deskMat);
+          desk.rotation.x = -Math.PI / 2;
+          desk.position.y = -2;
+          scene.add(desk);
+
+          // Wood grain lines
+          for (let i = 0; i < 8; i++) {
+            const lineGeom = new THREE.PlaneGeometry(20, 0.05);
+            const lineMat = new THREE.MeshBasicMaterial({ color: 0x3a2010, transparent: true, opacity: 0.3 });
+            const line = new THREE.Mesh(lineGeom, lineMat);
+            line.rotation.x = -Math.PI / 2;
+            line.position.y = -1.99;
+            line.position.z = -8 + i * 2 + Math.random();
+            scene.add(line);
+          }
+
+          // === 90s RETRO DESK DETAILS ===
+
+          // Stack of textbooks (left side)
+          const bookColors = [0x8B0000, 0x00008B, 0x006400, 0x4B0082, 0x8B4513];
+          for (let i = 0; i < 5; i++) {
+            const bookGeom = new THREE.BoxGeometry(1.2, 0.15, 0.9);
+            const bookMat = new THREE.MeshStandardMaterial({ color: bookColors[i], roughness: 0.9 });
+            const book = new THREE.Mesh(bookGeom, bookMat);
+            book.position.set(-2.5, -1.92 + i * 0.15, -1);
+            book.rotation.y = 0.1 + Math.random() * 0.1;
+            scene.add(book);
+          }
+
+          // Spiral notebook (open, near books)
+          const notebookGeom = new THREE.BoxGeometry(0.8, 0.02, 1.1);
+          const notebookMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc, roughness: 0.95 });
+          const notebook = new THREE.Mesh(notebookGeom, notebookMat);
+          notebook.position.set(-1.2, -1.98, -0.8);
+          notebook.rotation.y = -0.3;
+          scene.add(notebook);
+          // Spiral binding
+          for (let i = 0; i < 8; i++) {
+            const spiralGeom = new THREE.TorusGeometry(0.03, 0.008, 6, 12);
+            const spiralMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 });
+            const spiral = new THREE.Mesh(spiralGeom, spiralMat);
+            spiral.position.set(-1.55, -1.97, -1.25 + i * 0.14);
+            spiral.rotation.y = Math.PI / 2;
+            scene.add(spiral);
+          }
+
+          // Pencil cup (right side)
+          const cupGeom = new THREE.CylinderGeometry(0.15, 0.12, 0.4, 12);
+          const cupMat = new THREE.MeshStandardMaterial({ color: 0x2F4F4F, roughness: 0.7 });
+          const cup = new THREE.Mesh(cupGeom, cupMat);
+          cup.position.set(2.2, -1.8, -1.5);
+          scene.add(cup);
+          // Pencils in cup
+          const pencilColors = [0xFFD700, 0xFF6347, 0x4169E1];
+          for (let i = 0; i < 3; i++) {
+            const pencilGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 6);
+            const pencilMat = new THREE.MeshStandardMaterial({ color: pencilColors[i] });
+            const pencil = new THREE.Mesh(pencilGeom, pencilMat);
+            pencil.position.set(2.2 + (i - 1) * 0.05, -1.55, -1.5);
+            pencil.rotation.z = 0.1 * (i - 1);
+            scene.add(pencil);
+          }
+
+          // Game cartridges (stacked neatly near gameboy)
+          const cartColors = [0x808080, 0x505050, 0x606060];
+          for (let i = 0; i < 3; i++) {
+            const cartGeom = new THREE.BoxGeometry(0.45, 0.08, 0.55);
+            const cartMat = new THREE.MeshStandardMaterial({ color: cartColors[i], roughness: 0.6 });
+            const cart = new THREE.Mesh(cartGeom, cartMat);
+            cart.position.set(1.8, -1.96 + i * 0.08, 1.8);
+            cart.rotation.y = 0.2;
+            scene.add(cart);
+            // Label sticker
+            const labelGeom = new THREE.PlaneGeometry(0.3, 0.35);
+            const labelColors = [0xFFE4B5, 0xB5FFB5, 0xB5B5FF];
+            const labelMat = new THREE.MeshBasicMaterial({ color: labelColors[i] });
+            const label = new THREE.Mesh(labelGeom, labelMat);
+            label.position.set(1.8, -1.91 + i * 0.08, 1.8);
+            label.rotation.x = -Math.PI / 2;
+            label.rotation.z = 0.2;
+            scene.add(label);
+          }
+
+          // Soda can (moved closer)
+          const canGeom = new THREE.CylinderGeometry(0.12, 0.12, 0.4, 16);
+          const canMat = new THREE.MeshStandardMaterial({ color: 0xCC0000, metalness: 0.7, roughness: 0.3 });
+          const sodaCan = new THREE.Mesh(canGeom, canMat);
+          sodaCan.position.set(2.0, -1.8, -0.5);
+          scene.add(sodaCan);
+          // Can top
+          const canTopGeom = new THREE.CylinderGeometry(0.11, 0.12, 0.02, 16);
+          const canTopMat = new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.9 });
+          const canTop = new THREE.Mesh(canTopGeom, canTopMat);
+          canTop.position.set(2.0, -1.59, -0.5);
+          scene.add(canTop);
+
+          // Link cable (coiled, closer to gameboy)
+          const cableMat = new THREE.MeshStandardMaterial({ color: 0x4a4a6a, roughness: 0.8 });
+          for (let i = 0; i < 15; i++) {
+            const cableGeom = new THREE.TorusGeometry(0.12 + i * 0.008, 0.018, 8, 16);
+            const cable = new THREE.Mesh(cableGeom, cableMat);
+            cable.position.set(-1.5, -1.96 + i * 0.006, 1.5);
+            cable.rotation.x = Math.PI / 2;
+            cable.rotation.z = i * 0.15;
+            scene.add(cable);
+          }
+
+          // AA Batteries (scattered near front)
+          const battPositions = [[0.8, 2.2], [1.0, 2.0], [0.6, 2.4], [1.2, 2.3]];
+          for (let i = 0; i < 4; i++) {
+            const battGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8);
+            const battMat = new THREE.MeshStandardMaterial({ color: 0xDAA520, metalness: 0.6 });
+            const batt = new THREE.Mesh(battGeom, battMat);
+            batt.position.set(battPositions[i][0], -1.98, battPositions[i][1]);
+            batt.rotation.z = Math.PI / 2;
+            batt.rotation.y = i * 0.4;
+            scene.add(batt);
+          }
+
+          // Desk lamp (back right, adjusted)
+          const lampBaseGeom = new THREE.CylinderGeometry(0.25, 0.3, 0.08, 16);
+          const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.5 });
+          const lampBase = new THREE.Mesh(lampBaseGeom, lampBaseMat);
+          lampBase.position.set(2.8, -1.96, -2.2);
+          scene.add(lampBase);
+          const lampArmGeom = new THREE.CylinderGeometry(0.025, 0.025, 1.0, 8);
+          const lampArm = new THREE.Mesh(lampArmGeom, lampBaseMat);
+          lampArm.position.set(2.8, -1.4, -2.2);
+          scene.add(lampArm);
+          const lampShadeGeom = new THREE.ConeGeometry(0.3, 0.35, 16, 1, true);
+          const lampShadeMat = new THREE.MeshStandardMaterial({ color: 0x3d5c3d, side: THREE.DoubleSide });
+          const lampShade = new THREE.Mesh(lampShadeGeom, lampShadeMat);
+          lampShade.position.set(2.8, -0.85, -2.2);
+          lampShade.rotation.x = Math.PI;
+          scene.add(lampShade);
+
+          // Eraser (pink, near notebook)
+          const eraserGeom = new THREE.BoxGeometry(0.2, 0.08, 0.4);
+          const eraserMat = new THREE.MeshStandardMaterial({ color: 0xFFB6C1, roughness: 0.95 });
+          const eraser = new THREE.Mesh(eraserGeom, eraserMat);
+          eraser.position.set(-0.8, -1.96, -0.3);
+          eraser.rotation.y = 0.4;
+          scene.add(eraser);
+
+          // Calculator
+          const calcGeom = new THREE.BoxGeometry(0.5, 0.05, 0.7);
+          const calcMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6 });
+          const calc = new THREE.Mesh(calcGeom, calcMat);
+          calc.position.set(1.8, -1.97, -1.8);
+          calc.rotation.y = -0.2;
+          scene.add(calc);
+          // Calculator screen
+          const calcScreenGeom = new THREE.PlaneGeometry(0.35, 0.15);
+          const calcScreenMat = new THREE.MeshBasicMaterial({ color: 0x90EE90 });
+          const calcScreen = new THREE.Mesh(calcScreenGeom, calcScreenMat);
+          calcScreen.position.set(1.8, -1.94, -2);
+          calcScreen.rotation.x = -Math.PI / 2;
+          calcScreen.rotation.z = -0.2;
+          scene.add(calcScreen);
+
+          // === CRT TV (back center-left) ===
+          // TV body
+          const tvBodyGeom = new THREE.BoxGeometry(1.8, 1.4, 1.2);
+          const tvBodyMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.7 });
+          const tvBody = new THREE.Mesh(tvBodyGeom, tvBodyMat);
+          tvBody.position.set(-1.5, -1.1, -3);
+          scene.add(tvBody);
+          // TV screen bezel
+          const tvBezelGeom = new THREE.BoxGeometry(1.3, 1.0, 0.05);
+          const tvBezelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+          const tvBezel = new THREE.Mesh(tvBezelGeom, tvBezelMat);
+          tvBezel.position.set(-1.5, -1.05, -2.35);
+          scene.add(tvBezel);
+          // CRT screen with animated static
+          const crtCanvas = document.createElement('canvas');
+          crtCanvas.width = 128;
+          crtCanvas.height = 96;
+          const crtCtx = crtCanvas.getContext('2d', { willReadFrequently: true });
+          const crtTexture = new THREE.CanvasTexture(crtCanvas);
+          const tvScreenGeom = new THREE.PlaneGeometry(1.15, 0.85);
+          const tvScreenMat = new THREE.MeshBasicMaterial({ map: crtTexture });
+          const tvScreen = new THREE.Mesh(tvScreenGeom, tvScreenMat);
+          tvScreen.position.set(-1.5, -1.05, -2.33);
+          scene.add(tvScreen);
+          // TV control knobs
+          for (let i = 0; i < 2; i++) {
+            const knobGeom = new THREE.CylinderGeometry(0.06, 0.06, 0.08, 12);
+            const knobMat = new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.5 });
+            const knob = new THREE.Mesh(knobGeom, knobMat);
+            knob.position.set(-0.5, -1.4 + i * 0.3, -2.38);
+            knob.rotation.x = Math.PI / 2;
+            scene.add(knob);
+          }
+          // VHF/UHF labels
+          const tvLabelGeom = new THREE.PlaneGeometry(0.15, 0.05);
+          const tvLabelMat = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+          const tvLabel = new THREE.Mesh(tvLabelGeom, tvLabelMat);
+          tvLabel.position.set(-0.5, -1.6, -2.39);
+          scene.add(tvLabel);
+
+          // CRT shader - "BAGUETTE" with static interference
+          let crtTime = 0;
+          function updateCRTStatic() {
+            crtTime++;
+
+            // Brighter blue CRT background
+            crtCtx.fillStyle = '#1a2a4a';
+            crtCtx.fillRect(0, 0, 128, 96);
+
+            // CRT glow effect
+            const gradient = crtCtx.createRadialGradient(64, 48, 0, 64, 48, 60);
+            gradient.addColorStop(0, 'rgba(60,80,120,0.4)');
+            gradient.addColorStop(1, 'rgba(20,30,50,0)');
+            crtCtx.fillStyle = gradient;
+            crtCtx.fillRect(0, 0, 128, 96);
+
+            // Draw "BAGUETTE" text with CRT glow
+            const textY = 42 + Math.sin(crtTime * 0.05) * 1.5;
+            const hOffset = Math.sin(crtTime * 0.1) * 1;
+
+            // Text glow
+            crtCtx.font = 'bold 16px monospace';
+            crtCtx.textAlign = 'center';
+
+            // Glow layers
+            crtCtx.fillStyle = 'rgba(100,150,255,0.3)';
+            crtCtx.fillText('BAGUETTE', 64, textY + 1);
+
+            // Chromatic aberration
+            crtCtx.fillStyle = 'rgba(255,100,100,0.5)';
+            crtCtx.fillText('BAGUETTE', 64 + hOffset - 1.5, textY);
+            crtCtx.fillStyle = 'rgba(100,100,255,0.5)';
+            crtCtx.fillText('BAGUETTE', 64 + hOffset + 1.5, textY);
+
+            // Main bright text
+            crtCtx.fillStyle = '#ffffff';
+            crtCtx.fillText('BAGUETTE', 64 + hOffset, textY);
+
+            // Subtitle
+            crtCtx.font = '9px monospace';
+            crtCtx.fillStyle = '#88aacc';
+            crtCtx.fillText('.art', 64 + hOffset, textY + 16);
+
+            // Static noise overlay
+            const imageData = crtCtx.getImageData(0, 0, 128, 96);
+            for (let i = 0; i < imageData.data.length; i += 4) {
+              const noise = (Math.random() - 0.5) * 40;
+              imageData.data[i] = Math.max(0, Math.min(255, imageData.data[i] + noise));
+              imageData.data[i + 1] = Math.max(0, Math.min(255, imageData.data[i + 1] + noise));
+              imageData.data[i + 2] = Math.max(0, Math.min(255, imageData.data[i + 2] + noise));
+            }
+
+            // Scanlines
+            for (let y = 0; y < 96; y += 2) {
+              for (let x = 0; x < 128; x++) {
+                const idx = (y * 128 + x) * 4;
+                imageData.data[idx] *= 0.6;
+                imageData.data[idx + 1] *= 0.6;
+                imageData.data[idx + 2] *= 0.6;
+              }
+            }
+
+            // Random horizontal glitch lines
+            if (Math.random() < 0.1) {
+              const glitchY = Math.floor(Math.random() * 96);
+              const glitchShift = Math.floor(Math.random() * 20) - 10;
+              for (let x = 0; x < 128; x++) {
+                const srcIdx = (glitchY * 128 + Math.max(0, Math.min(127, x + glitchShift))) * 4;
+                const dstIdx = (glitchY * 128 + x) * 4;
+                imageData.data[dstIdx] = imageData.data[srcIdx] + 30;
+                imageData.data[dstIdx + 1] = imageData.data[srcIdx + 1] + 30;
+                imageData.data[dstIdx + 2] = imageData.data[srcIdx + 2] + 30;
+              }
+            }
+
+            crtCtx.putImageData(imageData, 0, 0);
+            crtTexture.needsUpdate = true;
+          }
+
+          // Gameboy plane from captured texture
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.minFilter = THREE.LinearFilter;
+          const aspect = canvas.width / canvas.height;
+          const gbGeom = new THREE.PlaneGeometry(3 * aspect, 3);
+          const gbMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
+          const gameboy = new THREE.Mesh(gbGeom, gbMat);
+          scene.add(gameboy);
+
+          // Soft ambient light
+          const ambient = new THREE.AmbientLight(0xfff8e0, 0.6);
+          scene.add(ambient);
+
+          // Warm point light (desk lamp feel)
+          const lamp = new THREE.PointLight(0xffaa44, 1.2, 20);
+          lamp.position.set(3, 5, 3);
+          scene.add(lamp);
+
+          // Camera state for zoom
+          let camDistance = 6;
+          let camHeight = 0;
+          let targetDistance = 4;
+          let targetHeight = 4;
+          let animationDone = false;
+
+          camera.position.set(0, 0, camDistance);
+          camera.lookAt(0, 0, 0);
+
+          // Animation: lay gameboy down on desk
+          const duration = 2500;
+          const startTime = Date.now();
+
+          let crtFrame = 0;
+          function animate() {
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+
+            // Rotate gameboy to lay flat
+            gameboy.rotation.x = -Math.PI / 2 * eased;
+            gameboy.position.y = -2 + 0.05 + (1 - eased) * 2;
+            gameboy.position.z = eased * 0.5;
+
+            // Smoothly interpolate camera
+            camHeight += (targetHeight * eased - camHeight) * 0.1;
+            camDistance += (targetDistance - camDistance) * 0.05;
+
+            camera.position.y = camHeight;
+            camera.position.z = camDistance;
+            camera.lookAt(0, -1.5, 0);
+
+            // Update CRT static (every 3 frames for that choppy retro feel)
+            crtFrame++;
+            if (crtFrame % 3 === 0) updateCRTStatic();
+
+            renderer.render(scene, camera);
+
+            if (progress >= 1) animationDone = true;
+            requestAnimationFrame(animate);
+          }
+          animate();
+
+          // Add overlay with text
+          const overlay = document.createElement('div');
+          overlay.className = 'ending-overlay';
+          const isDesktop = !('ontouchstart' in window);
+          overlay.innerHTML = `
+            <div class="ending-text">Thanks for playing!</div>
+            <div class="ending-links">
+              <a href="mailto:hello@baguette.art">hello@baguette.art</a>
+              <a href="https://x.com/baguetteanon" target="_blank">@baguetteanon</a>
+            </div>
+            <div class="play-again-btn" id="play-again">PLAY AGAIN</div>
+            ${isDesktop ? '<div class="zoom-hint">scroll to zoom</div>' : ''}
+          `;
+          document.body.appendChild(overlay);
+
+          // Restart handlers
+          const restart = () => location.reload();
+          document.getElementById('play-again').addEventListener('click', restart);
+          document.getElementById('play-again').addEventListener('touchend', (e) => {
+            e.preventDefault();
+            restart();
+          });
+
+          // Start button also restarts
+          document.querySelector('.btn-start').addEventListener('click', restart);
+
+          // Scroll wheel zoom (desktop only)
+          if (isDesktop) {
+            container.addEventListener('wheel', (e) => {
+              e.preventDefault();
+              targetDistance = Math.max(2, Math.min(10, targetDistance + e.deltaY * 0.005));
+            }, { passive: false });
+          }
+
+          // Handle window resize
+          window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+          });
+          } catch(e) { console.error('3D scene error:', e); }
+        }).catch(e => console.error('html2canvas error:', e));
+      }, 300);
     }
 
     function enemyAttack() {
