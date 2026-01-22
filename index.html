@@ -163,19 +163,19 @@
     }
 
     .gameboy-shell.dmg-mode::after {
-      /* Speaker grille - more rectangular for DMG */
+      /* Speaker grille - horizontal slots like real DMG-001 */
       right: 1.2rem;
       bottom: 2rem;
-      width: 45px;
-      height: 45px;
+      width: 50px;
+      height: 40px;
       background:
         repeating-linear-gradient(
-          -45deg,
-          #888880 0px, #888880 2px,
-          #98988c 2px, #98988c 5px
+          180deg,
+          #606058 0px, #606058 5px,
+          #98988c 5px, #98988c 7px
         );
-      border-radius: 4px;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
+      border-radius: 3px;
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.5);
     }
 
     .gameboy-shell.dmg-mode .power-switch {
@@ -212,26 +212,29 @@
       filter: sepia(100%) hue-rotate(50deg) saturate(60%) brightness(90%) contrast(110%);
       background: linear-gradient(180deg, #8bac0f 0%, #9bbc0f 30%, #306230 60%, #0f380f 100%);
       border-radius: 2px;
+      margin-top: 10px;
     }
 
     .gameboy-shell.dmg-mode .screen-bezel {
       background: linear-gradient(180deg, #505048 0%, #606058 100%);
       box-shadow: inset 0 4px 12px rgba(0,0,0,0.7);
-      border-radius: 4px;
+      border-radius: 8px 8px 8px 20px;
       padding: 0.6rem;
+      position: relative;
     }
 
     .gameboy-shell.dmg-mode .screen-bezel::before {
       content: 'DOT MATRIX WITH STEREO SOUND';
       position: absolute;
-      top: -16px;
+      top: 6px;
       left: 50%;
       transform: translateX(-50%);
       font-size: 4px;
-      color: #707068;
-      letter-spacing: 0.5px;
+      color: #808078;
+      letter-spacing: 1px;
       white-space: nowrap;
       font-weight: normal;
+      z-index: 5;
     }
 
     .gameboy-shell.dmg-mode .power-led {
@@ -239,6 +242,65 @@
       box-shadow: 0 0 8px #ff4040;
       width: 6px;
       height: 6px;
+    }
+
+    /* Battery label for DMG */
+    .battery-label {
+      display: none;
+    }
+
+    .gameboy-shell.dmg-mode .battery-label {
+      display: block;
+      position: absolute;
+      bottom: 1.1rem;
+      left: 1.2rem;
+      font-size: 4px;
+      color: #707068;
+      letter-spacing: 0.5px;
+      transform: translateX(-50%);
+      margin-left: 18px;
+    }
+
+    /* Nintendo GAME BOY brand below screen for DMG */
+    .dmg-brand {
+      display: none;
+    }
+
+    .gameboy-shell.dmg-mode .dmg-brand {
+      display: block;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .gameboy-shell.dmg-mode .dmg-brand .nintendo-text {
+      font-size: 6px;
+      color: #2a2a28;
+      letter-spacing: 3px;
+      margin-bottom: 2px;
+    }
+
+    .gameboy-shell.dmg-mode .dmg-brand .gameboy-text {
+      font-size: 11px;
+      color: #1a1a18;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+    .gameboy-shell.dmg-mode .dmg-brand .tm-text {
+      font-size: 5px;
+      vertical-align: super;
+      color: #3a3a38;
+    }
+
+    /* Hide GBC header label in DMG mode */
+    .gameboy-shell.dmg-mode .gameboy-header {
+      visibility: hidden;
+      height: 0;
+      margin: 0;
+      padding: 0;
     }
 
     .screen-bezel {
@@ -1684,7 +1746,12 @@
         </div>
       </div>
     </div>
+    <div class="dmg-brand">
+      <div class="nintendo-text">Nintendo</div>
+      <div class="gameboy-text">GAME BOY<span class="tm-text">TM</span></div>
+    </div>
     <div class="power-led"></div>
+    <div class="battery-label">BATTERY</div>
     <div class="footer">
       <a href="mailto:hello@baguette.art" class="x-link">hello@baguette.art</a>
       <span class="link-divider">/</span>
