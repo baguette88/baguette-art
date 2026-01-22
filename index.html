@@ -3358,16 +3358,25 @@
 
           // === 90s RETRO DESK DETAILS ===
 
-          // Stack of textbooks (left side)
-          const bookColors = [0x8B0000, 0x00008B, 0x006400, 0x4B0082, 0x8B4513];
-          for (let i = 0; i < 5; i++) {
-            const bookGeom = new THREE.BoxGeometry(1.2, 0.15, 0.9);
-            const bookMat = new THREE.MeshStandardMaterial({ color: bookColors[i], roughness: 0.9 });
+          // Stack of textbooks (left side, varied sizes)
+          const books = [
+            { color: 0x8B0000, w: 1.3, h: 0.18, d: 1.0 },  // Dark red - thick
+            { color: 0x00008B, w: 1.2, h: 0.12, d: 0.9 },  // Navy
+            { color: 0x2F4F2F, w: 1.25, h: 0.15, d: 0.95 }, // Dark green
+            { color: 0x4B0082, w: 1.15, h: 0.10, d: 0.85 }, // Indigo - thin
+            { color: 0x8B4513, w: 1.1, h: 0.14, d: 0.88 },  // Brown
+          ];
+          let bookY = -1.98;
+          books.forEach((b, i) => {
+            const bookGeom = new THREE.BoxGeometry(b.w, b.h, b.d);
+            const bookMat = new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 });
             const book = new THREE.Mesh(bookGeom, bookMat);
-            book.position.set(-2.5, -1.92 + i * 0.15, -1);
-            book.rotation.y = 0.1 + Math.random() * 0.1;
+            bookY += b.h / 2;
+            book.position.set(-2.5, bookY, -1.2);
+            book.rotation.y = (i % 2 === 0 ? 0.08 : -0.05);
+            bookY += b.h / 2 + 0.005;
             scene.add(book);
-          }
+          });
 
           // Spiral notebook (open, near books)
           const notebookGeom = new THREE.BoxGeometry(0.8, 0.02, 1.1);
@@ -3403,49 +3412,78 @@
             scene.add(pencil);
           }
 
-          // Game cartridges (stacked neatly near gameboy)
-          const cartColors = [0x808080, 0x505050, 0x606060];
-          for (let i = 0; i < 3; i++) {
+          // Game cartridges (scattered naturally near gameboy)
+          const carts = [
+            { x: -0.6, z: 1.6, rot: 0.8, color: 0x707070, label: 0xFFE4B5 },
+            { x: -0.3, z: 1.9, rot: -0.3, color: 0x505050, label: 0xB5FFB5 },
+            { x: -0.8, z: 2.1, rot: 1.2, color: 0x606060, label: 0xFFB5B5 },
+          ];
+          carts.forEach(c => {
             const cartGeom = new THREE.BoxGeometry(0.45, 0.08, 0.55);
-            const cartMat = new THREE.MeshStandardMaterial({ color: cartColors[i], roughness: 0.6 });
+            const cartMat = new THREE.MeshStandardMaterial({ color: c.color, roughness: 0.6 });
             const cart = new THREE.Mesh(cartGeom, cartMat);
-            cart.position.set(1.8, -1.96 + i * 0.08, 1.8);
-            cart.rotation.y = 0.2;
+            cart.position.set(c.x, -1.96, c.z);
+            cart.rotation.y = c.rot;
             scene.add(cart);
             // Label sticker
             const labelGeom = new THREE.PlaneGeometry(0.3, 0.35);
-            const labelColors = [0xFFE4B5, 0xB5FFB5, 0xB5B5FF];
-            const labelMat = new THREE.MeshBasicMaterial({ color: labelColors[i] });
+            const labelMat = new THREE.MeshBasicMaterial({ color: c.label });
             const label = new THREE.Mesh(labelGeom, labelMat);
-            label.position.set(1.8, -1.91 + i * 0.08, 1.8);
+            label.position.set(c.x, -1.91, c.z);
             label.rotation.x = -Math.PI / 2;
-            label.rotation.z = 0.2;
+            label.rotation.z = c.rot;
             scene.add(label);
-          }
+          });
 
-          // Soda can (moved closer)
+          // Soda can (near front right)
           const canGeom = new THREE.CylinderGeometry(0.12, 0.12, 0.4, 16);
           const canMat = new THREE.MeshStandardMaterial({ color: 0xCC0000, metalness: 0.7, roughness: 0.3 });
           const sodaCan = new THREE.Mesh(canGeom, canMat);
-          sodaCan.position.set(2.0, -1.8, -0.5);
+          sodaCan.position.set(2.8, -1.8, 0.8);
           scene.add(sodaCan);
           // Can top
           const canTopGeom = new THREE.CylinderGeometry(0.11, 0.12, 0.02, 16);
           const canTopMat = new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.9 });
           const canTop = new THREE.Mesh(canTopGeom, canTopMat);
-          canTop.position.set(2.0, -1.59, -0.5);
+          canTop.position.set(2.8, -1.59, 0.8);
           scene.add(canTop);
 
-          // Link cable (coiled, closer to gameboy)
+          // Coffee mug (near books)
+          const mugGeom = new THREE.CylinderGeometry(0.14, 0.12, 0.32, 16);
+          const mugMat = new THREE.MeshStandardMaterial({ color: 0xf5f5f5, roughness: 0.4 });
+          const mug = new THREE.Mesh(mugGeom, mugMat);
+          mug.position.set(-1.8, -1.82, -1.8);
+          scene.add(mug);
+          // Mug handle
+          const handleGeom = new THREE.TorusGeometry(0.08, 0.025, 8, 12, Math.PI);
+          const handle = new THREE.Mesh(handleGeom, mugMat);
+          handle.position.set(-1.65, -1.82, -1.8);
+          handle.rotation.y = Math.PI / 2;
+          handle.rotation.x = Math.PI / 2;
+          scene.add(handle);
+          // Coffee inside
+          const coffeeGeom = new THREE.CylinderGeometry(0.12, 0.12, 0.02, 16);
+          const coffeeMat = new THREE.MeshStandardMaterial({ color: 0x3c2415, roughness: 0.9 });
+          const coffee = new THREE.Mesh(coffeeGeom, coffeeMat);
+          coffee.position.set(-1.8, -1.67, -1.8);
+          scene.add(coffee);
+
+          // Link cable (coiled, front left)
           const cableMat = new THREE.MeshStandardMaterial({ color: 0x4a4a6a, roughness: 0.8 });
-          for (let i = 0; i < 15; i++) {
-            const cableGeom = new THREE.TorusGeometry(0.12 + i * 0.008, 0.018, 8, 16);
+          for (let i = 0; i < 12; i++) {
+            const cableGeom = new THREE.TorusGeometry(0.1 + i * 0.006, 0.015, 8, 16);
             const cable = new THREE.Mesh(cableGeom, cableMat);
-            cable.position.set(-1.5, -1.96 + i * 0.006, 1.5);
+            cable.position.set(-1.8, -1.97 + i * 0.005, 1.8);
             cable.rotation.x = Math.PI / 2;
-            cable.rotation.z = i * 0.15;
+            cable.rotation.z = i * 0.12;
             scene.add(cable);
           }
+          // Cable connector
+          const connectorGeom = new THREE.BoxGeometry(0.12, 0.06, 0.2);
+          const connector = new THREE.Mesh(connectorGeom, cableMat);
+          connector.position.set(-1.5, -1.97, 2.0);
+          connector.rotation.y = 0.5;
+          scene.add(connector);
 
           // AA Batteries (scattered near front)
           const battPositions = [[0.8, 2.2], [1.0, 2.0], [0.6, 2.4], [1.2, 2.3]];
@@ -3484,21 +3522,109 @@
           eraser.rotation.y = 0.4;
           scene.add(eraser);
 
-          // Calculator
+          // Calculator (moved to back right)
           const calcGeom = new THREE.BoxGeometry(0.5, 0.05, 0.7);
           const calcMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6 });
           const calc = new THREE.Mesh(calcGeom, calcMat);
-          calc.position.set(1.8, -1.97, -1.8);
-          calc.rotation.y = -0.2;
+          calc.position.set(2.5, -1.97, -1.6);
+          calc.rotation.y = 0.3;
           scene.add(calc);
           // Calculator screen
           const calcScreenGeom = new THREE.PlaneGeometry(0.35, 0.15);
           const calcScreenMat = new THREE.MeshBasicMaterial({ color: 0x90EE90 });
           const calcScreen = new THREE.Mesh(calcScreenGeom, calcScreenMat);
-          calcScreen.position.set(1.8, -1.94, -2);
+          calcScreen.position.set(2.5, -1.94, -1.8);
           calcScreen.rotation.x = -Math.PI / 2;
-          calcScreen.rotation.z = -0.2;
+          calcScreen.rotation.z = 0.3;
           scene.add(calcScreen);
+
+          // === iPad with Shader Editor ===
+          // iPad body (space gray)
+          const ipadGeom = new THREE.BoxGeometry(1.1, 0.04, 1.5);
+          const ipadMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3c, metalness: 0.8, roughness: 0.3 });
+          const ipad = new THREE.Mesh(ipadGeom, ipadMat);
+          ipad.position.set(1.6, -1.96, -1.2);
+          ipad.rotation.y = -0.15;
+          scene.add(ipad);
+
+          // iPad screen with shader editor
+          const ipadCanvas = document.createElement('canvas');
+          ipadCanvas.width = 220;
+          ipadCanvas.height = 300;
+          const ipadCtx = ipadCanvas.getContext('2d');
+
+          // Draw shader editor UI
+          ipadCtx.fillStyle = '#1e1e2e';
+          ipadCtx.fillRect(0, 0, 220, 300);
+
+          // Title bar
+          ipadCtx.fillStyle = '#2d2d3d';
+          ipadCtx.fillRect(0, 0, 220, 24);
+          ipadCtx.fillStyle = '#888';
+          ipadCtx.font = '10px monospace';
+          ipadCtx.fillText('shader.frag', 8, 16);
+
+          // Traffic lights
+          ipadCtx.fillStyle = '#ff5f56';
+          ipadCtx.beginPath(); ipadCtx.arc(190, 12, 5, 0, Math.PI*2); ipadCtx.fill();
+          ipadCtx.fillStyle = '#ffbd2e';
+          ipadCtx.beginPath(); ipadCtx.arc(175, 12, 5, 0, Math.PI*2); ipadCtx.fill();
+          ipadCtx.fillStyle = '#27ca40';
+          ipadCtx.beginPath(); ipadCtx.arc(160, 12, 5, 0, Math.PI*2); ipadCtx.fill();
+
+          // Code lines with syntax highlighting
+          const codeLines = [
+            { text: 'uniform float u_time;', color: '#c678dd' },
+            { text: 'uniform vec2 u_resolution;', color: '#c678dd' },
+            { text: '', color: '#666' },
+            { text: 'void main() {', color: '#61afef' },
+            { text: '  vec2 uv = gl_FragCoord.xy', color: '#abb2bf' },
+            { text: '    / u_resolution;', color: '#abb2bf' },
+            { text: '', color: '#666' },
+            { text: '  // Color gradient', color: '#5c6370' },
+            { text: '  vec3 col = vec3(uv.x,', color: '#98c379' },
+            { text: '    uv.y, sin(u_time));', color: '#98c379' },
+            { text: '', color: '#666' },
+            { text: '  gl_FragColor =', color: '#e5c07b' },
+            { text: '    vec4(col, 1.0);', color: '#e5c07b' },
+            { text: '}', color: '#61afef' },
+          ];
+
+          codeLines.forEach((line, i) => {
+            ipadCtx.fillStyle = '#4a4a5a';
+            ipadCtx.fillText((i + 1).toString().padStart(2), 4, 42 + i * 16);
+            ipadCtx.fillStyle = line.color;
+            ipadCtx.fillText(line.text, 24, 42 + i * 16);
+          });
+
+          // Blinking cursor
+          ipadCtx.fillStyle = '#528bff';
+          ipadCtx.fillRect(140, 220, 8, 14);
+
+          const ipadTexture = new THREE.CanvasTexture(ipadCanvas);
+          const ipadScreenGeom = new THREE.PlaneGeometry(0.95, 1.3);
+          const ipadScreenMat = new THREE.MeshBasicMaterial({ map: ipadTexture });
+          const ipadScreen = new THREE.Mesh(ipadScreenGeom, ipadScreenMat);
+          ipadScreen.position.set(1.6, -1.93, -1.2);
+          ipadScreen.rotation.x = -Math.PI / 2;
+          ipadScreen.rotation.z = -0.15;
+          scene.add(ipadScreen);
+
+          // Apple Pencil next to iPad
+          const pencilBodyGeom = new THREE.CylinderGeometry(0.02, 0.018, 0.7, 8);
+          const pencilBodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+          const applePencil = new THREE.Mesh(pencilBodyGeom, pencilBodyMat);
+          applePencil.position.set(2.3, -1.98, -0.9);
+          applePencil.rotation.z = Math.PI / 2;
+          applePencil.rotation.y = -0.15;
+          scene.add(applePencil);
+          // Pencil tip
+          const pencilTipGeom = new THREE.ConeGeometry(0.018, 0.06, 8);
+          const pencilTipMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8 });
+          const pencilTip = new THREE.Mesh(pencilTipGeom, pencilTipMat);
+          pencilTip.position.set(2.65, -1.98, -0.85);
+          pencilTip.rotation.z = -Math.PI / 2;
+          scene.add(pencilTip);
 
           // === CRT TV (back center-left) ===
           // TV body
