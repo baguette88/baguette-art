@@ -1194,10 +1194,16 @@
       left: 4px;
       opacity: 0;
       font-size: 10px;
+      transition: opacity 0.1s;
     }
 
     .action-btn:hover::before,
-    .action-btn:active::before { opacity: 1; }
+    .action-btn:active::before,
+    .action-btn.selected::before { opacity: 1; }
+
+    .action-btn.selected {
+      background: rgba(0,0,0,0.05);
+    }
 
     /* Fight panel - FireRed style */
     .fight-panel {
@@ -1246,10 +1252,16 @@
       left: 4px;
       opacity: 0;
       font-size: 9px;
+      transition: opacity 0.1s;
     }
 
     .move-btn:hover::before,
-    .move-btn:active::before { opacity: 1; }
+    .move-btn:active::before,
+    .move-btn.selected::before { opacity: 1; }
+
+    .move-btn.selected {
+      background: rgba(0,0,0,0.05);
+    }
 
     .move-info {
       width: 32%;
@@ -1310,10 +1322,16 @@
       left: 4px;
       opacity: 0;
       font-size: 9px;
+      transition: opacity 0.1s;
     }
 
     .item-btn:hover::before,
-    .item-btn:active::before { opacity: 1; }
+    .item-btn:active::before,
+    .item-btn.selected::before { opacity: 1; }
+
+    .item-btn.selected {
+      background: rgba(0,0,0,0.05);
+    }
 
     .item-count { color: #606060; }
 
@@ -1718,6 +1736,28 @@
       background: radial-gradient(circle, #3a3a38 0%, #1a1a18 100%);
     }
 
+    /* D-pad clickable areas */
+    .dpad-up, .dpad-down, .dpad-left, .dpad-right {
+      position: absolute;
+      cursor: pointer;
+      z-index: 5;
+    }
+
+    .dpad-up { top: 0; left: 14px; width: 22px; height: 20px; }
+    .dpad-down { bottom: 0; left: 14px; width: 22px; height: 20px; }
+    .dpad-left { left: 0; top: 14px; width: 20px; height: 22px; }
+    .dpad-right { right: 0; top: 14px; width: 20px; height: 22px; }
+
+    .dpad-up:active ~ .dpad-vertical,
+    .dpad-down:active ~ .dpad-vertical {
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    .dpad-left:active ~ .dpad-horizontal,
+    .dpad-right:active ~ .dpad-horizontal {
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+    }
+
     /* A/B Buttons */
     .ab-buttons {
       position: absolute;
@@ -1766,6 +1806,18 @@
       color: rgba(60,60,56,0.7);
     }
 
+    .btn-a:active, .btn-b:active {
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,0.5),
+        0 1px 2px rgba(0,0,0,0.3);
+      transform: translateY(1px);
+    }
+
+    .btn-a, .btn-b {
+      cursor: pointer;
+      transition: transform 0.05s, box-shadow 0.05s;
+    }
+
     /* START/SELECT */
     .start-select {
       position: absolute;
@@ -1804,6 +1856,16 @@
 
     .gameboy-shell.dmg-mode .ss-label {
       color: rgba(60,60,56,0.6);
+    }
+
+    .btn-start, .btn-select {
+      cursor: pointer;
+      transition: transform 0.05s, box-shadow 0.05s;
+    }
+
+    .btn-start:active, .btn-select:active {
+      box-shadow: inset 0 2px 3px rgba(0,0,0,0.5);
+      transform: translateY(1px);
     }
 
     /* Speaker grille in bottom rim */
@@ -2029,6 +2091,10 @@
 
       <!-- D-Pad -->
       <div class="dpad">
+        <div class="dpad-up" id="dpad-up"></div>
+        <div class="dpad-down" id="dpad-down"></div>
+        <div class="dpad-left" id="dpad-left"></div>
+        <div class="dpad-right" id="dpad-right"></div>
         <div class="dpad-horizontal"></div>
         <div class="dpad-vertical"></div>
         <div class="dpad-center"></div>
@@ -2036,14 +2102,14 @@
 
       <!-- A/B Buttons -->
       <div class="ab-buttons">
-        <div class="btn-b"><span class="btn-label">B</span></div>
-        <div class="btn-a"><span class="btn-label">A</span></div>
+        <div class="btn-b" id="btn-b"><span class="btn-label">B</span></div>
+        <div class="btn-a" id="btn-a"><span class="btn-label">A</span></div>
       </div>
 
       <!-- START/SELECT -->
       <div class="start-select">
-        <div class="btn-select"><span class="ss-label">SELECT</span></div>
-        <div class="btn-start"><span class="ss-label">START</span></div>
+        <div class="btn-select" id="btn-select"><span class="ss-label">SELECT</span></div>
+        <div class="btn-start" id="btn-start"><span class="ss-label">START</span></div>
       </div>
       <!-- Speaker grille indicator -->
       <div class="speaker-grille"></div>
@@ -2835,6 +2901,110 @@
         setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
       }
     });
+
+    // ========== D-PAD AND BUTTON NAVIGATION ==========
+    let cursorPos = { main: 0, fight: 0, items: 0 };
+
+    function getMenuItems() {
+      if (currentMenu === 'main') {
+        return document.querySelectorAll('.action-btn');
+      } else if (currentMenu === 'fight') {
+        return document.querySelectorAll('.move-btn');
+      } else if (currentMenu === 'items') {
+        return document.querySelectorAll('.item-btn');
+      }
+      return [];
+    }
+
+    function updateCursor() {
+      // Clear all selections
+      document.querySelectorAll('.action-btn, .move-btn, .item-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+
+      // Set current selection
+      const items = getMenuItems();
+      const pos = cursorPos[currentMenu] || 0;
+      if (items[pos]) {
+        items[pos].classList.add('selected');
+        // Update move info if in fight menu
+        if (currentMenu === 'fight' && items[pos].dataset.move) {
+          const move = moves[items[pos].dataset.move];
+          if (move) {
+            document.getElementById('move-type').textContent = `TYPE/${move.type}`;
+            document.getElementById('move-pp').textContent = `PP ${move.pp}/${move.maxPp}`;
+          }
+        }
+      }
+    }
+
+    function moveCursor(direction) {
+      if (isAnimating) return;
+      const items = getMenuItems();
+      if (items.length === 0) return;
+
+      let pos = cursorPos[currentMenu] || 0;
+      const cols = 2; // 2-column grid layout
+
+      if (direction === 'up') {
+        pos = pos >= cols ? pos - cols : pos;
+      } else if (direction === 'down') {
+        pos = pos + cols < items.length ? pos + cols : pos;
+      } else if (direction === 'left') {
+        pos = pos % cols > 0 ? pos - 1 : pos;
+      } else if (direction === 'right') {
+        pos = pos % cols < cols - 1 && pos + 1 < items.length ? pos + 1 : pos;
+      }
+
+      cursorPos[currentMenu] = pos;
+      updateCursor();
+    }
+
+    function pressA() {
+      if (isAnimating) return;
+      const items = getMenuItems();
+      const pos = cursorPos[currentMenu] || 0;
+      if (items[pos]) {
+        items[pos].click();
+      }
+    }
+
+    function pressB() {
+      if (isAnimating) return;
+      if (currentMenu === 'fight' || currentMenu === 'items') {
+        showMenu('main');
+      }
+    }
+
+    // D-pad event listeners
+    document.getElementById('dpad-up').addEventListener('click', () => moveCursor('up'));
+    document.getElementById('dpad-down').addEventListener('click', () => moveCursor('down'));
+    document.getElementById('dpad-left').addEventListener('click', () => moveCursor('left'));
+    document.getElementById('dpad-right').addEventListener('click', () => moveCursor('right'));
+
+    // A/B button listeners
+    document.getElementById('btn-a').addEventListener('click', pressA);
+    document.getElementById('btn-b').addEventListener('click', pressB);
+
+    // Keyboard support too
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') moveCursor('up');
+      else if (e.key === 'ArrowDown') moveCursor('down');
+      else if (e.key === 'ArrowLeft') moveCursor('left');
+      else if (e.key === 'ArrowRight') moveCursor('right');
+      else if (e.key === 'z' || e.key === 'Z' || e.key === 'Enter') pressA();
+      else if (e.key === 'x' || e.key === 'X' || e.key === 'Backspace') pressB();
+    });
+
+    // Update cursor when menu changes
+    const origShowMenu = showMenu;
+    showMenu = function(menu) {
+      origShowMenu(menu);
+      setTimeout(updateCursor, 10);
+    };
+
+    // Initialize cursor on page load
+    setTimeout(updateCursor, 100);
   </script>
 </body>
 </html>
