@@ -1531,10 +1531,25 @@
       }, 800);
     }
 
+    // Helper: move cursor to tapped button (single cursor)
+    function selectButton(btn, menuType) {
+      const items = document.querySelectorAll(
+        menuType === 'main' ? '.action-btn' :
+        menuType === 'fight' ? '.move-btn' : '.item-btn'
+      );
+      const index = Array.from(items).indexOf(btn);
+      if (index !== -1) {
+        cursorPos[menuType] = index;
+        updateCursor();
+      }
+    }
+
     // Event listeners
-    document.querySelectorAll('.action-btn').forEach(btn => {
+    document.querySelectorAll('.action-btn').forEach((btn, idx) => {
       btn.addEventListener('click', () => {
         if (isAnimating) return;
+        cursorPos.main = idx;
+        updateCursor();
         const action = btn.dataset.action;
         if (action === 'fight') showMenu('fight');
         else if (action === 'bag') showMenu('items');
@@ -1549,8 +1564,12 @@
       });
     });
 
-    document.querySelectorAll('.move-btn').forEach(btn => {
-      btn.addEventListener('click', () => useMove(btn.dataset.move));
+    document.querySelectorAll('.move-btn').forEach((btn, idx) => {
+      btn.addEventListener('click', () => {
+        cursorPos.fight = idx;
+        updateCursor();
+        useMove(btn.dataset.move);
+      });
       btn.addEventListener('mouseenter', () => {
         const move = moves[btn.dataset.move];
         if (move) {
@@ -1560,8 +1579,10 @@
       });
     });
 
-    document.querySelectorAll('.item-btn').forEach(btn => {
+    document.querySelectorAll('.item-btn').forEach((btn, idx) => {
       btn.addEventListener('click', () => {
+        cursorPos.items = idx;
+        updateCursor();
         if (btn.dataset.item === 'cancel') showMenu('main');
         else useItem(btn.dataset.item);
       });
