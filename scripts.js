@@ -1418,46 +1418,84 @@
           topLight.position.set(0, 10, 0);
           scene.add(topLight);
 
-          // Camera state for zoom - adjust distance for mobile
+          // Camera animation - two phases
+          // Phase 1: Drop gameboy, zoom in close
+          // Phase 2: Pan out to wide shot
+          const phase1Duration = 2000;  // Drop and zoom in
+          const phase2Duration = 3000;  // Pan out to wide shot
+          const totalDuration = phase1Duration + phase2Duration;
+
+          // Close-up camera target (during/after drop)
+          const closeDistance = isSmallMobile ? 2.2 : isMobile ? 2.5 : 2.8;
+          const closeHeight = isSmallMobile ? 1.5 : isMobile ? 1.8 : 2.0;
+
+          // Wide shot camera target (final position like screenshot)
+          const wideDistance = isSmallMobile ? 5.5 : isMobile ? 6.0 : 6.5;
+          const wideHeight = isSmallMobile ? 3.5 : isMobile ? 4.0 : 4.5;
+
           let camDistance = 5;
           let camHeight = 0;
-          let targetDistance = isSmallMobile ? 2.8 : isMobile ? 3.0 : 3.5;
-          let targetHeight = isSmallMobile ? 2.0 : isMobile ? 2.2 : 2.8;
           let animationDone = false;
 
           camera.position.set(0, 0.5, camDistance);
           camera.lookAt(0, -0.5, 0);
 
           // Light fog for depth (not too dark)
-          scene.fog = new THREE.Fog(0x1a1520, 8, 18);
+          scene.fog = new THREE.Fog(0x1a1520, 10, 20);
 
-          // Animation: lay gameboy down on desk
-          const duration = 2500;
           const startTime = Date.now();
-
           let crtFrame = 0;
+
           function animate() {
             const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
 
-            // Rotate gameboy to lay flat - slight tilt for interest
-            gameboy.rotation.x = -Math.PI / 2 * eased * 0.95;  // Not fully flat
-            gameboy.rotation.z = eased * 0.08;  // Slight rotation
-            gameboy.position.y = -2 + 0.08 + (1 - eased) * 2.5;
-            gameboy.position.z = eased * 0.3;
-            gameboy.position.x = eased * -0.15;  // Slightly off-center (rule of thirds)
+            // Phase 1: Drop gameboy and zoom in close
+            if (elapsed < phase1Duration) {
+              const progress = elapsed / phase1Duration;
+              const eased = 1 - Math.pow(1 - progress, 3);
 
-            // Smoothly interpolate camera - LOWER angle looking slightly up
-            camHeight += (targetHeight * eased - camHeight) * 0.08;
-            camDistance += (targetDistance - camDistance) * 0.06;
+              // Rotate gameboy to lay flat
+              gameboy.rotation.x = -Math.PI / 2 * eased * 0.95;
+              gameboy.rotation.z = eased * 0.08;
+              gameboy.position.y = -2 + 0.08 + (1 - eased) * 2.5;
+              gameboy.position.z = eased * 0.3;
+              gameboy.position.x = eased * -0.15;
 
+              // Zoom in close to gameboy
+              camHeight += (closeHeight * eased - camHeight) * 0.1;
+              camDistance += (closeDistance - camDistance) * 0.08;
+            }
+            // Phase 2: Pan out to wide establishing shot
+            else {
+              const phase2Elapsed = elapsed - phase1Duration;
+              const progress = Math.min(phase2Elapsed / phase2Duration, 1);
+              // Smooth ease out
+              const eased = 1 - Math.pow(1 - progress, 2.5);
+
+              // Gameboy stays in place
+              gameboy.rotation.x = -Math.PI / 2 * 0.95;
+              gameboy.rotation.z = 0.08;
+              gameboy.position.y = -2 + 0.08;
+              gameboy.position.z = 0.3;
+              gameboy.position.x = -0.15;
+
+              // Pan out to wide shot
+              const targetDist = closeDistance + (wideDistance - closeDistance) * eased;
+              const targetH = closeHeight + (wideHeight - closeHeight) * eased;
+
+              camDistance += (targetDist - camDistance) * 0.08;
+              camHeight += (targetH - camHeight) * 0.08;
+
+              if (progress >= 1) animationDone = true;
+            }
+
+            // Camera position with subtle drift
             camera.position.y = camHeight;
             camera.position.z = camDistance;
-            camera.position.x = Math.sin(elapsed * 0.0002) * 0.1;  // Subtle drift
-            camera.lookAt(0, -1.2, 0);  // Look at desk level
+            camera.position.x = Math.sin(elapsed * 0.0001) * 0.15;
+            camera.lookAt(0, -1.0, -0.5);
 
-            // Update CRT static (every 3 frames for that choppy retro feel)
+            // Update CRT static (every 3 frames for choppy retro feel)
             crtFrame++;
             if (crtFrame % 3 === 0) updateCRTStatic();
 
@@ -1468,8 +1506,6 @@
             coffeeMat.uniforms.time.value = elapsed * 0.001;
 
             renderer.render(scene, camera);
-
-            if (progress >= 1) animationDone = true;
             requestAnimationFrame(animate);
           }
           animate();
