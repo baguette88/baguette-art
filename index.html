@@ -324,28 +324,21 @@
       80% { transform: translateX(3px); }
     }
 
-    /* Mode switch shader transition */
-    .viewport.mode-transition {
-      animation: modeShaderTransition 0.6s ease-out;
+    /* Mode switch shader transition - DMG to Color (color burst) */
+    .viewport.mode-transition-color {
+      animation: colorBurst 0.3s ease-out;
     }
 
-    @keyframes modeShaderTransition {
+    @keyframes colorBurst {
       0% {
-        filter: brightness(1) saturate(1) blur(0px);
+        filter: brightness(1) saturate(0) blur(0px);
       }
-      15% {
-        filter: brightness(2) saturate(0) blur(2px);
+      20% {
+        filter: brightness(1.8) saturate(0.3) blur(2px);
         transform: scale(1.02);
       }
-      30% {
-        filter: brightness(1.5) saturate(0.5) blur(1px) hue-rotate(90deg);
-        transform: scale(0.98);
-      }
       50% {
-        filter: brightness(0.8) saturate(2) blur(0px) hue-rotate(180deg);
-      }
-      70% {
-        filter: brightness(1.2) saturate(1.5) hue-rotate(270deg);
+        filter: brightness(1.3) saturate(1.5) blur(0px) hue-rotate(30deg);
       }
       100% {
         filter: brightness(1) saturate(1) blur(0px) hue-rotate(0deg);
@@ -353,24 +346,69 @@
       }
     }
 
-    /* Chromatic aberration overlay during transition */
-    .viewport.mode-transition::after {
+    /* Chromatic aberration overlay during color burst */
+    .viewport.mode-transition-color::after {
       content: '';
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(90deg, rgba(255,0,0,0.1) 0%, transparent 33%, transparent 66%, rgba(0,0,255,0.1) 100%);
+        linear-gradient(90deg, rgba(255,0,0,0.15) 0%, transparent 33%, transparent 66%, rgba(0,0,255,0.15) 100%);
       mix-blend-mode: screen;
-      animation: chromaShift 0.6s ease-out;
+      animation: chromaShift 0.3s ease-out;
       pointer-events: none;
       z-index: 100;
     }
 
     @keyframes chromaShift {
       0% { opacity: 0; transform: scaleX(1); }
-      20% { opacity: 1; transform: scaleX(1.1); }
-      50% { opacity: 0.8; transform: scaleX(0.95); }
+      30% { opacity: 1; transform: scaleX(1.15); }
       100% { opacity: 0; transform: scaleX(1); }
+    }
+
+    /* Color drain shader - Game Boy LCD style */
+    .viewport.mode-transition-drain {
+      animation: lcdDrain 0.35s ease-in forwards;
+    }
+
+    @keyframes lcdDrain {
+      0% {
+        filter: brightness(1) saturate(1) contrast(1);
+        clip-path: inset(0 0 0 0);
+      }
+      40% {
+        filter: brightness(0.7) saturate(0.3) contrast(1.3);
+        clip-path: inset(0 0 0 0);
+      }
+      70% {
+        filter: brightness(0.4) saturate(0) contrast(1.5);
+        clip-path: inset(20% 0 20% 0);
+      }
+      100% {
+        filter: brightness(0.2) saturate(0) contrast(2);
+        clip-path: inset(45% 0 45% 0);
+      }
+    }
+
+    /* LCD pixel ghost overlay */
+    .viewport.mode-transition-drain::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(0,50,0,0) 0%,
+        rgba(0,50,0,0.3) 50%,
+        rgba(0,50,0,0) 100%
+      );
+      animation: lcdGhost 0.35s ease-in;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes lcdGhost {
+      0% { opacity: 0; transform: scaleY(1); }
+      50% { opacity: 1; transform: scaleY(1); }
+      100% { opacity: 0; transform: scaleY(0.1); }
     }
 
     /* Scanlines */
@@ -2207,24 +2245,32 @@
     const gameboyLabel = document.getElementById('gameboy-label');
 
     powerSwitch.addEventListener('click', () => {
-      // Trigger shader transition
-      viewport.classList.add('mode-transition');
+      const goingToColor = gameboyShell.classList.contains('dmg-mode');
 
-      // Switch mode at peak of transition
-      setTimeout(() => {
-        powerSwitch.classList.toggle('on');
-        gameboyShell.classList.toggle('dmg-mode');
-        if (gameboyShell.classList.contains('dmg-mode')) {
-          gameboyLabel.innerHTML = 'GAME BOY';
-        } else {
+      if (goingToColor) {
+        // Color burst shader: DMG → Color
+        viewport.classList.add('mode-transition-color');
+
+        setTimeout(() => {
+          powerSwitch.classList.toggle('on');
+          gameboyShell.classList.toggle('dmg-mode');
           gameboyLabel.innerHTML = 'GAME BOY <span>COLOR</span>';
-        }
-      }, 150);
+        }, 75);
 
-      // Clean up transition class
-      setTimeout(() => {
-        viewport.classList.remove('mode-transition');
-      }, 600);
+        setTimeout(() => {
+          viewport.classList.remove('mode-transition-color');
+        }, 300);
+      } else {
+        // LCD drain shader: Color → DMG
+        viewport.classList.add('mode-transition-drain');
+
+        setTimeout(() => {
+          powerSwitch.classList.toggle('on');
+          gameboyShell.classList.toggle('dmg-mode');
+          gameboyLabel.innerHTML = 'GAME BOY';
+          viewport.classList.remove('mode-transition-drain');
+        }, 350);
+      }
     });
 
     let playerHp = 100;
