@@ -488,6 +488,50 @@
         12px 10px 0 #105040, 12px 11px 0 #0a4030, 12px 12px 0 #053020, 12px 13px 0 #053020;
     }
 
+    /* INFERNO - Third enemy, fire demon */
+    .inferno-sprite {
+      transform: scale(5);
+    }
+
+    .inferno-sprite .pixel-sprite {
+      box-shadow:
+        /* INFERNO - Fierce fire demon, upper-left light */
+        /* Palette: Shadow #660000 (dark red) → Mid #ff4400 (orange) → Highlight #ffff88 (yellow-white) */
+
+        /* Flame head/horns */
+        6px 2px 0 #ffff88, 10px 2px 0 #ffdd44,
+        5px 3px 0 #ffff88, 6px 3px 0 #ffdd44, 10px 3px 0 #ffaa00, 11px 3px 0 #ff6600,
+        5px 4px 0 #ffdd44, 6px 4px 0 #ffaa00, 10px 4px 0 #ff6600, 11px 4px 0 #cc3300,
+
+        /* Head - demonic face */
+        6px 5px 0 #ffff88, 7px 5px 0 #ffdd44, 8px 5px 0 #ffaa00, 9px 5px 0 #ff6600, 10px 5px 0 #cc3300,
+        5px 6px 0 #ffff88, 6px 6px 0 #ffdd44, 7px 6px 0 #ffaa00, 8px 6px 0 #ff6600, 9px 6px 0 #ff4400, 10px 6px 0 #cc3300, 11px 6px 0 #990000,
+        5px 7px 0 #ffdd44, 6px 7px 0 #ffaa00, 7px 7px 0 #ff6600, 8px 7px 0 #ff4400, 9px 7px 0 #cc3300, 10px 7px 0 #990000, 11px 7px 0 #660000,
+        5px 8px 0 #ffaa00, 6px 8px 0 #ff6600, 7px 8px 0 #ff4400, 8px 8px 0 #cc3300, 9px 8px 0 #990000, 10px 8px 0 #660000, 11px 8px 0 #440000,
+
+        /* Body - torso */
+        6px 9px 0 #ff6600, 7px 9px 0 #ff4400, 8px 9px 0 #cc3300, 9px 9px 0 #990000, 10px 9px 0 #660000,
+        6px 10px 0 #ff4400, 7px 10px 0 #cc3300, 8px 10px 0 #990000, 9px 10px 0 #660000, 10px 10px 0 #440000,
+        7px 11px 0 #990000, 8px 11px 0 #660000, 9px 11px 0 #440000,
+
+        /* Angry eyes - glowing white/yellow */
+        6px 6px 0 #ffffff, 7px 6px 0 #ffff88,
+        9px 6px 0 #ffffff, 10px 6px 0 #ffff88,
+        6px 7px 0 #ffff00, 9px 7px 0 #ffff00,
+
+        /* Mouth - jagged */
+        7px 8px 0 #440000, 8px 8px 0 #ffff88, 9px 8px 0 #440000,
+
+        /* Flame wisps around body */
+        4px 5px 0 #ffff88, 3px 6px 0 #ffdd44, 4px 7px 0 #ffaa00, 3px 8px 0 #ff6600,
+        12px 5px 0 #ffdd44, 13px 6px 0 #ffaa00, 12px 7px 0 #ff6600, 13px 8px 0 #cc3300,
+        4px 9px 0 #ff4400, 12px 9px 0 #990000,
+
+        /* Feet/base flames */
+        6px 12px 0 #660000, 7px 12px 0 #440000, 9px 12px 0 #440000, 10px 12px 0 #330000,
+        5px 13px 0 #ff6600, 6px 13px 0 #cc3300, 10px 13px 0 #660000, 11px 13px 0 #440000;
+    }
+
     /* EXP bar */
     .exp-bar-container {
       position: absolute;
@@ -1168,6 +1212,7 @@
       .sweetbun-sprite { transform: scale(5); }
       .flame-sprite { transform: scale(5); }
       .void-sprite { transform: scale(4.5); }
+      .inferno-sprite { transform: scale(4.5); }
     }
   </style>
 </head>
@@ -1307,7 +1352,8 @@
 
     const enemies = [
       { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', attack: 'SHADOW SNEAK', damage: [10, 18] },
-      { name: 'SLIME', level: 52, hp: 120, maxHp: 120, exp: 180, sprite: 'slime', attack: 'SLUDGE BOMB', damage: [12, 20] }
+      { name: 'SLIME', level: 52, hp: 120, maxHp: 120, exp: 180, sprite: 'slime', attack: 'SLUDGE BOMB', damage: [12, 20] },
+      { name: 'INFERNO', level: 55, hp: 150, maxHp: 150, exp: 250, sprite: 'inferno', attack: 'FLAME BURST', damage: [15, 25] }
     ];
 
     const moves = {
@@ -1646,7 +1692,7 @@
                 // All enemies defeated - Pokemon-style victory!
                 isAnimating = true;
                 const totalExp = enemies.reduce((sum, e) => sum + e.exp, 0);
-                const prizeMoney = 2400;
+                const prizeMoney = 3600;
 
                 // Victory announcements
                 const victoryMsgs = [
