@@ -1403,6 +1403,22 @@
       100% { opacity: 0; transform: scale(0.2); }
     }
 
+    /* Crunch - dark bite impact */
+    .crunch-particle {
+      width: 14px;
+      height: 14px;
+      background: linear-gradient(135deg, #2a1a0a 0%, #4a3020 50%, #1a0a00 100%);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      box-shadow: 0 0 8px #4a3020, 0 0 15px #2a1a0a;
+      animation: crunchBite 0.4s ease-out forwards;
+    }
+
+    @keyframes crunchBite {
+      0% { opacity: 1; transform: scale(1.5) rotate(0deg); }
+      30% { transform: scale(2) rotate(45deg); }
+      100% { opacity: 0; transform: scale(0.3) rotate(90deg) translateY(-15px); }
+    }
+
     /* Fire Blast - explosive star bursts */
     .blast-particle {
       width: 28px;
@@ -2052,7 +2068,7 @@
         <!-- Fight panel -->
         <div class="fight-panel" id="fight-panel">
           <div class="moves-box">
-            <div class="move-btn" data-move="ember">EMBER</div>
+            <div class="move-btn" data-move="crunch">CRUNCH</div>
             <div class="move-btn" data-move="flamethrower">FLAMETHWR</div>
             <div class="move-btn" data-move="shadow-ball">SHADOWBALL</div>
             <div class="move-btn" data-move="fire-blast">FIREBLAST</div>
@@ -2225,13 +2241,14 @@
     function getTypeMultiplier(moveType, enemyType) {
       const chart = {
         'FIRE': { 'FIRE': 0.5, 'GHOST': 1, 'POISON': 1 },
-        'GHOST': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1 }
+        'GHOST': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1 },
+        'DARK': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1 }
       };
       return chart[moveType]?.[enemyType] || 1;
     }
 
     const moves = {
-      'ember': { pp: 25, maxPp: 25, type: 'FIRE', power: 15, particles: 'ember' },
+      'crunch': { pp: 15, maxPp: 15, type: 'DARK', power: 20, particles: 'crunch' },
       'flamethrower': { pp: 15, maxPp: 15, type: 'FIRE', power: 25, particles: 'flamethrower' },
       'shadow-ball': { pp: 15, maxPp: 15, type: 'GHOST', power: 20, particles: 'shadow' },
       'fire-blast': { pp: 5, maxPp: 5, type: 'FIRE', power: 35, particles: 'blast' }
@@ -2534,6 +2551,8 @@
             spawnParticleBurst('flame-stream', toX, toY, 10, 40);
           } else if (move.particles === 'shadow') {
             spawnParticleBurst('shadow', toX, toY, 15, 45);
+          } else if (move.particles === 'crunch') {
+            spawnParticleBurst('crunch', toX, toY, 8, 30);
           } else {
             spawnParticleBurst('ember', toX, toY, 8, 35);
           }
