@@ -534,14 +534,14 @@
 
     /* TRAINER GHOST - Ghostly human trainer */
     .trainer-ghost-sprite {
-      transform: scale(3.5);
+      transform: scale(4);
       filter: drop-shadow(0 0 3px #9966ff) drop-shadow(0 0 6px #7744dd) drop-shadow(0 0 12px #5522bb);
       animation: ghost-float 2.5s ease-in-out infinite, ghost-flicker 4s ease-in-out infinite;
     }
 
     @keyframes ghost-float {
-      0%, 100% { transform: scale(3.5) translateY(0); }
-      50% { transform: scale(3.5) translateY(-5px); }
+      0%, 100% { transform: scale(4) translateY(0); }
+      50% { transform: scale(4) translateY(-5px); }
     }
 
     @keyframes ghost-flicker {
@@ -552,52 +552,68 @@
 
     .trainer-ghost-sprite .pixel-sprite {
       box-shadow:
-        /* TRAINER GHOST - Human trainer, spectral purple tones */
+        /* TRAINER GHOST - Detailed human trainer, spectral purple tones */
+        /* Upper-left lighting, hue-shifted purples */
 
-        /* Hair - messy ghostly hair */
-        6px 1px 0 #6a5a8a, 7px 1px 0 #7a6a9a, 8px 1px 0 #8a7aaa, 9px 1px 0 #7a6a9a, 10px 1px 0 #6a5a8a,
-        5px 2px 0 #5a4a7a, 6px 2px 0 #7a6a9a, 7px 2px 0 #9a8aba, 8px 2px 0 #9a8aba, 9px 2px 0 #8a7aaa, 10px 2px 0 #6a5a8a, 11px 2px 0 #5a4a7a,
-        5px 3px 0 #6a5a8a, 6px 3px 0 #8a7aaa, 7px 3px 0 #9a8aba, 8px 3px 0 #8a7aaa, 9px 3px 0 #7a6a9a, 10px 3px 0 #6a5a8a, 11px 3px 0 #5a4a7a,
+        /* Hair - flowing messy ghostly hair with highlights */
+        5px 0px 0 #5a4a7a, 6px 0px 0 #6a5a8a, 7px 0px 0 #7a6a9a, 9px 0px 0 #6a5a8a, 11px 0px 0 #5a4a7a,
+        4px 1px 0 #4a3a6a, 5px 1px 0 #7a6a9a, 6px 1px 0 #9a8aba, 7px 1px 0 #b8a8d8, 8px 1px 0 #9a8aba, 9px 1px 0 #8a7aaa, 10px 1px 0 #7a6a9a, 11px 1px 0 #5a4a7a, 12px 1px 0 #4a3a6a,
+        4px 2px 0 #5a4a7a, 5px 2px 0 #8a7aaa, 6px 2px 0 #b8a8d8, 7px 2px 0 #c8b8e8, 8px 2px 0 #b8a8d8, 9px 2px 0 #9a8aba, 10px 2px 0 #8a7aaa, 11px 2px 0 #6a5a8a, 12px 2px 0 #4a3a6a,
+        4px 3px 0 #6a5a8a, 5px 3px 0 #9a8aba, 6px 3px 0 #b8a8d8, 7px 3px 0 #b8a8d8, 8px 3px 0 #9a8aba, 9px 3px 0 #8a7aaa, 10px 3px 0 #7a6a9a, 11px 3px 0 #5a4a7a, 12px 3px 0 #3a2a5a,
 
-        /* Face - pale ghostly skin */
-        6px 4px 0 #d8c8e8, 7px 4px 0 #e8d8f8, 8px 4px 0 #e8d8f8, 9px 4px 0 #d8c8e8, 10px 4px 0 #c8b8d8,
-        5px 5px 0 #c8b8d8, 6px 5px 0 #e8d8f8, 7px 5px 0 #f8e8ff, 8px 5px 0 #e8d8f8, 9px 5px 0 #d8c8e8, 10px 5px 0 #c8b8d8, 11px 5px 0 #b8a8c8,
-        5px 6px 0 #d8c8e8, 6px 6px 0 #e8d8f8, 7px 6px 0 #e8d8f8, 8px 6px 0 #e8d8f8, 9px 6px 0 #d8c8e8, 10px 6px 0 #c8b8d8, 11px 6px 0 #b8a8c8,
+        /* Forehead - pale ghostly with highlight */
+        5px 4px 0 #8a7aaa, 6px 4px 0 #e8d8f8, 7px 4px 0 #f8e8ff, 8px 4px 0 #f8e8ff, 9px 4px 0 #e8d8f8, 10px 4px 0 #d8c8e8, 11px 4px 0 #7a6a9a,
 
-        /* Eyes - glowing purple */
-        6px 5px 0 #aa44ff, 7px 5px 0 #ff66ff,
-        9px 5px 0 #aa44ff, 10px 5px 0 #ff66ff,
+        /* Eyes row - detailed with brows and catchlights */
+        5px 5px 0 #c8b8d8, 6px 5px 0 #5a4a7a, 7px 5px 0 #e8d8f8, 8px 5px 0 #f8e8ff, 9px 5px 0 #e8d8f8, 10px 5px 0 #5a4a7a, 11px 5px 0 #b8a8c8,
+        5px 6px 0 #d8c8e8, 6px 6px 0 #1a0a3a, 7px 6px 0 #e8d8f8, 8px 6px 0 #e8d8f8, 9px 6px 0 #e8d8f8, 10px 6px 0 #1a0a3a, 11px 6px 0 #c8b8d8,
+        /* Eye glow */
+        6px 6px 0 #cc66ff, 10px 6px 0 #aa44ff,
+        6px 5px 0 #ffffff, 10px 5px 0 #ffaaff,
 
-        /* Mouth - slight smirk */
-        7px 6px 0 #9a7aaa, 8px 6px 0 #8a6a9a, 9px 6px 0 #9a7aaa,
+        /* Nose and cheeks */
+        5px 7px 0 #d8c8e8, 6px 7px 0 #e8d8f8, 7px 7px 0 #f8e8ff, 8px 7px 0 #e8d8f8, 9px 7px 0 #e8d8f8, 10px 7px 0 #d8c8e8, 11px 7px 0 #c8b8d8,
+        8px 7px 0 #d8c8e8,
+
+        /* Mouth - confident smirk */
+        5px 8px 0 #c8b8d8, 6px 8px 0 #d8c8e8, 7px 8px 0 #9a7aaa, 8px 8px 0 #7a5a8a, 9px 8px 0 #9a7aaa, 10px 8px 0 #c8b8d8, 11px 8px 0 #b8a8c8,
+
+        /* Chin and jaw */
+        6px 9px 0 #c8b8d8, 7px 9px 0 #d8c8e8, 8px 9px 0 #d8c8e8, 9px 9px 0 #c8b8d8, 10px 9px 0 #b8a8c8,
 
         /* Neck */
-        7px 7px 0 #c8b8d8, 8px 7px 0 #d8c8e8, 9px 7px 0 #c8b8d8,
+        7px 10px 0 #b8a8c8, 8px 10px 0 #c8b8d8, 9px 10px 0 #b8a8c8,
 
-        /* Jacket/coat collar */
-        5px 8px 0 #3a2a5a, 6px 8px 0 #4a3a6a, 7px 8px 0 #5a4a7a, 8px 8px 0 #5a4a7a, 9px 8px 0 #4a3a6a, 10px 8px 0 #3a2a5a, 11px 8px 0 #2a1a4a,
+        /* High collar - detailed with folds */
+        4px 11px 0 #2a1a4a, 5px 11px 0 #4a3a6a, 6px 11px 0 #5a4a7a, 7px 11px 0 #6a5a8a, 8px 11px 0 #6a5a8a, 9px 11px 0 #5a4a7a, 10px 11px 0 #4a3a6a, 11px 11px 0 #3a2a5a, 12px 11px 0 #2a1a4a,
+        4px 12px 0 #3a2a5a, 5px 12px 0 #5a4a7a, 6px 12px 0 #6a5a8a, 7px 12px 0 #7a6a9a, 8px 12px 0 #7a6a9a, 9px 12px 0 #6a5a8a, 10px 12px 0 #5a4a7a, 11px 12px 0 #4a3a6a, 12px 12px 0 #2a1a4a,
 
-        /* Coat body */
-        4px 9px 0 #2a1a4a, 5px 9px 0 #3a2a5a, 6px 9px 0 #4a3a6a, 7px 9px 0 #5a4a7a, 8px 9px 0 #5a4a7a, 9px 9px 0 #4a3a6a, 10px 9px 0 #3a2a5a, 11px 9px 0 #2a1a4a, 12px 9px 0 #1a0a3a,
-        4px 10px 0 #3a2a5a, 5px 10px 0 #4a3a6a, 6px 10px 0 #5a4a7a, 7px 10px 0 #6a5a8a, 8px 10px 0 #6a5a8a, 9px 10px 0 #5a4a7a, 10px 10px 0 #4a3a6a, 11px 10px 0 #3a2a5a, 12px 10px 0 #2a1a4a,
-        4px 11px 0 #3a2a5a, 5px 11px 0 #4a3a6a, 6px 11px 0 #5a4a7a, 7px 11px 0 #5a4a7a, 8px 11px 0 #5a4a7a, 9px 11px 0 #5a4a7a, 10px 11px 0 #4a3a6a, 11px 11px 0 #3a2a5a, 12px 11px 0 #2a1a4a,
-        4px 12px 0 #2a1a4a, 5px 12px 0 #3a2a5a, 6px 12px 0 #4a3a6a, 7px 12px 0 #4a3a6a, 8px 12px 0 #4a3a6a, 9px 12px 0 #4a3a6a, 10px 12px 0 #3a2a5a, 11px 12px 0 #2a1a4a, 12px 12px 0 #1a0a3a,
+        /* Coat body with lapels and shading */
+        3px 13px 0 #1a0a3a, 4px 13px 0 #3a2a5a, 5px 13px 0 #5a4a7a, 6px 13px 0 #6a5a8a, 7px 13px 0 #7a6a9a, 8px 13px 0 #7a6a9a, 9px 13px 0 #6a5a8a, 10px 13px 0 #5a4a7a, 11px 13px 0 #4a3a6a, 12px 13px 0 #2a1a4a, 13px 13px 0 #1a0a3a,
+        3px 14px 0 #2a1a4a, 4px 14px 0 #4a3a6a, 5px 14px 0 #6a5a8a, 6px 14px 0 #7a6a9a, 7px 14px 0 #8a7aaa, 8px 14px 0 #8a7aaa, 9px 14px 0 #7a6a9a, 10px 14px 0 #6a5a8a, 11px 14px 0 #4a3a6a, 12px 14px 0 #3a2a5a, 13px 14px 0 #1a0a3a,
+        3px 15px 0 #2a1a4a, 4px 15px 0 #4a3a6a, 5px 15px 0 #6a5a8a, 6px 15px 0 #7a6a9a, 7px 15px 0 #7a6a9a, 8px 15px 0 #7a6a9a, 9px 15px 0 #6a5a8a, 10px 15px 0 #5a4a7a, 11px 15px 0 #4a3a6a, 12px 15px 0 #2a1a4a, 13px 15px 0 #1a0a3a,
+        3px 16px 0 #1a0a3a, 4px 16px 0 #3a2a5a, 5px 16px 0 #5a4a7a, 6px 16px 0 #6a5a8a, 7px 16px 0 #6a5a8a, 8px 16px 0 #6a5a8a, 9px 16px 0 #5a4a7a, 10px 16px 0 #4a3a6a, 11px 16px 0 #3a2a5a, 12px 16px 0 #1a0a3a, 13px 16px 0 #0a0020,
 
-        /* Arms crossed / hands */
-        3px 10px 0 #c8b8d8, 3px 11px 0 #d8c8e8,
-        13px 10px 0 #b8a8c8, 13px 11px 0 #c8b8d8,
+        /* Glowing coat buttons */
+        8px 13px 0 #bb88ff, 8px 14px 0 #aa66ff, 8px 15px 0 #9955ee,
 
-        /* Coat buttons */
-        8px 10px 0 #9966ff, 8px 11px 0 #9966ff,
+        /* Arms/sleeves */
+        2px 14px 0 #c8b8d8, 2px 15px 0 #d8c8e8, 3px 15px 0 #c8b8d8,
+        14px 14px 0 #b8a8c8, 14px 15px 0 #c8b8d8,
 
-        /* Legs - fading into ghostly wisps */
-        5px 13px 0 #2a1a4a, 6px 13px 0 #3a2a5a, 7px 13px 0 #3a2a5a, 9px 13px 0 #3a2a5a, 10px 13px 0 #3a2a5a, 11px 13px 0 #2a1a4a,
-        6px 14px 0 #2a1a4a, 7px 14px 0 #2a1a4a, 9px 14px 0 #2a1a4a, 10px 14px 0 #2a1a4a,
-        6px 15px 0 #1a0a3a, 10px 15px 0 #1a0a3a,
+        /* Hands - ghostly pale */
+        2px 16px 0 #e8d8f8, 2px 17px 0 #d8c8e8,
+        14px 16px 0 #d8c8e8, 14px 17px 0 #c8b8d8,
 
-        /* Ghostly wisps at bottom */
-        5px 16px 0 #1a0a3a, 7px 16px 0 #2a1a4a, 9px 16px 0 #2a1a4a, 11px 16px 0 #1a0a3a,
-        6px 17px 0 #0a0020, 8px 17px 0 #1a0a3a, 10px 17px 0 #0a0020;
+        /* Coat tails / lower body fading */
+        4px 17px 0 #2a1a4a, 5px 17px 0 #3a2a5a, 6px 17px 0 #4a3a6a, 7px 17px 0 #4a3a6a, 9px 17px 0 #4a3a6a, 10px 17px 0 #3a2a5a, 11px 17px 0 #2a1a4a, 12px 17px 0 #1a0a3a,
+        5px 18px 0 #2a1a4a, 6px 18px 0 #3a2a5a, 7px 18px 0 #3a2a5a, 9px 18px 0 #3a2a5a, 10px 18px 0 #2a1a4a, 11px 18px 0 #1a0a3a,
+        5px 19px 0 #1a0a3a, 6px 19px 0 #2a1a4a, 10px 19px 0 #1a0a3a, 11px 19px 0 #0a0020,
+
+        /* Ghostly wisps dissolving */
+        4px 20px 0 #1a0a3a, 6px 20px 0 #1a0a3a, 8px 20px 0 #2a1a4a, 10px 20px 0 #1a0a3a, 12px 20px 0 #0a0020,
+        5px 21px 0 #0a0020, 7px 21px 0 #1a0a3a, 9px 21px 0 #0a0020, 11px 21px 0 #0a0020,
+        6px 22px 0 #0a0020, 8px 22px 0 #0a0020, 10px 22px 0 #0a0020;
     }
 
     /* Trainer appear overlay */
@@ -606,16 +622,16 @@
       top: 0;
       left: 0;
       right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      bottom: 32%;
+      background: rgba(0, 0, 0, 0.6);
       z-index: 55;
     }
 
     .trainer-sprite-container {
-      position: relative;
+      position: absolute;
+      top: 22%;
+      right: 18%;
+      transform: translateX(50%);
     }
 
     /* EXP bar */
