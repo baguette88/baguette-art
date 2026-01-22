@@ -1762,15 +1762,15 @@
     .ab-buttons {
       position: absolute;
       top: 18px;
-      right: 75px;
+      right: 18px;
       transform: rotate(-25deg);
       display: flex;
-      gap: 8px;
+      gap: 10px;
     }
 
     .btn-a, .btn-b {
-      width: 24px;
-      height: 24px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       box-shadow:
         inset 0 2px 3px rgba(255,255,255,0.3),
@@ -1871,10 +1871,10 @@
     /* Speaker grille in bottom rim */
     .speaker-grille {
       position: absolute;
-      top: 15px;
-      right: 18px;
-      width: 45px;
-      height: 45px;
+      top: 60px;
+      right: 15px;
+      width: 40px;
+      height: 40px;
       background:
         repeating-linear-gradient(
           45deg,
@@ -1893,8 +1893,9 @@
           #808078 4px, #808078 6px
         );
       border-radius: 4px;
-      width: 50px;
-      height: 40px;
+      width: 45px;
+      height: 35px;
+      top: 65px;
     }
 
     /* Footer links - positioned in bottom rim */
@@ -2193,6 +2194,7 @@
       setTimeout(() => {
         playerHp = Math.max(1, playerHp - statusDmg); // Don't kill from status
         updateHpBar(playerHpBar, playerHp, true);
+        vibrateOnDamage();
 
         const rect = playerCreature.getBoundingClientRect();
         const vRect = viewport.getBoundingClientRect();
@@ -2300,6 +2302,12 @@
       impactFlash.classList.add('active');
     }
 
+    function vibrateOnDamage() {
+      if (navigator.vibrate) {
+        navigator.vibrate([50, 30, 80]); // Short pattern: hit, pause, rumble
+      }
+    }
+
     function createScreenSplat() {
       const splat = document.createElement('div');
       splat.className = 'screen-splat';
@@ -2344,11 +2352,32 @@
     }
 
     function updateHpBar(bar, hp, isPlayer) {
-      bar.style.width = hp + '%';
-      bar.classList.remove('medium', 'low');
-      if (hp <= 20) bar.classList.add('low');
-      else if (hp <= 50) bar.classList.add('medium');
-      if (isPlayer) playerHpNum.textContent = Math.max(0, Math.round(hp));
+      const currentWidth = parseFloat(bar.style.width) || 100;
+      const targetWidth = Math.max(0, hp);
+      const duration = 400; // ms
+      const startTime = performance.now();
+
+      function animate(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        // Ease out cubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const currentHp = currentWidth + (targetWidth - currentWidth) * eased;
+
+        bar.style.width = currentHp + '%';
+
+        bar.classList.remove('medium', 'low');
+        if (currentHp <= 20) bar.classList.add('low');
+        else if (currentHp <= 50) bar.classList.add('medium');
+
+        if (isPlayer) playerHpNum.textContent = Math.max(0, Math.round(currentHp));
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      requestAnimationFrame(animate);
     }
 
     function showMessage(msg) {
@@ -2730,6 +2759,7 @@
           hitCreature(playerCreature);
           screenShake();
           triggerImpactFlash();
+          vibrateOnDamage();
 
           const damage = enemy.damage[0] + Math.floor(Math.random() * (enemy.damage[1] - enemy.damage[0]));
           playerHp = Math.max(0, playerHp - damage);
