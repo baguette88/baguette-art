@@ -2466,19 +2466,20 @@
       top: 65px;
     }
 
-    /* Footer links - positioned in bottom rim */
+    /* Footer links - below gameboy */
     .footer {
-      position: absolute;
-      bottom: 8px;
+      position: fixed;
+      bottom: 12px;
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
       white-space: nowrap;
+      z-index: 10;
     }
 
     .x-link {
-      font-size: 9px;
-      color: rgba(255,255,255,0.6);
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
       text-decoration: none;
       transition: color 0.2s;
     }
@@ -2486,21 +2487,9 @@
     .x-link:hover { color: #fff; }
 
     .link-divider {
-      color: rgba(255,255,255,0.3);
-      margin: 0 10px;
-      font-size: 9px;
-    }
-
-    .gameboy-shell.dmg-mode .x-link {
-      color: rgba(60,60,56,0.7);
-    }
-
-    .gameboy-shell.dmg-mode .x-link:hover {
-      color: #2a2a28;
-    }
-
-    .gameboy-shell.dmg-mode .link-divider {
-      color: rgba(60,60,56,0.4);
+      color: rgba(255,255,255,0.25);
+      margin: 0 8px;
+      font-size: 10px;
     }
 
     /* Power LED */
