@@ -1771,11 +1771,11 @@
         else if (action === 'bag') showMenu('items');
         else if (action === 'run') {
           showMessage("Can't escape!");
-          setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
+          queueDialogue(() => showMessage('What will<br>SWEETBUN do?'), 1500);
         }
         else if (action === 'pokemon') {
           showMessage('SWEETBUN is<br>already out!');
-          setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
+          queueDialogue(() => showMessage('What will<br>SWEETBUN do?'), 1500);
         }
       });
     });
@@ -1816,7 +1816,7 @@
           enemyCreature.getBoundingClientRect().left - viewport.getBoundingClientRect().left + 40,
           enemyCreature.getBoundingClientRect().top - viewport.getBoundingClientRect().top + 40,
           6, 30);
-        setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
+        queueDialogue(() => showMessage('What will<br>SWEETBUN do?'), 1500);
       }
     });
 
@@ -1878,7 +1878,42 @@
       updateCursor();
     }
 
+    // Queue for pending dialogue callbacks (allows A to skip)
+    let pendingDialogueCallback = null;
+    let pendingDialogueTimeout = null;
+
+    function queueDialogue(callback, delay) {
+      // Clear any existing pending dialogue
+      if (pendingDialogueTimeout) {
+        clearTimeout(pendingDialogueTimeout);
+      }
+      pendingDialogueCallback = callback;
+      pendingDialogueTimeout = setTimeout(() => {
+        if (pendingDialogueCallback) {
+          pendingDialogueCallback();
+          pendingDialogueCallback = null;
+          pendingDialogueTimeout = null;
+        }
+      }, delay);
+    }
+
+    function advanceDialogue() {
+      // If there's a pending dialogue, execute it immediately
+      if (pendingDialogueCallback) {
+        clearTimeout(pendingDialogueTimeout);
+        const callback = pendingDialogueCallback;
+        pendingDialogueCallback = null;
+        pendingDialogueTimeout = null;
+        callback();
+        return true;
+      }
+      return false;
+    }
+
     function pressA() {
+      // First try to advance any pending dialogue
+      if (advanceDialogue()) return;
+
       if (isAnimating) return;
       const items = getMenuItems();
       const pos = cursorPos[currentMenu] || 0;
@@ -1886,6 +1921,10 @@
         items[pos].click();
       }
     }
+
+    // Also allow clicking/tapping the message box to advance
+    battleMessage.addEventListener('click', advanceDialogue);
+    battleMessage.style.cursor = 'pointer';
 
     function pressB() {
       if (isAnimating) return;
