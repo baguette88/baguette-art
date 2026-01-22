@@ -237,14 +237,51 @@
       transform-origin: center;
     }
 
-    /* FLAME BAGUETTE - Player sprite */
+    /* SWEETBUN - Starting form! Cute round bun */
+    .sweetbun-sprite {
+      transform: scale(5);
+    }
+
+    .sweetbun-sprite .pixel-sprite {
+      box-shadow:
+        /* SWEETBUN - Cute round glazed bun, upper-left light */
+        /* Palette: Shadow #b87333 (copper) → Mid #e8a862 (honey) → Highlight #fff5e6 (cream) */
+
+        /* Round bun body */
+        7px 6px 0 #fff5e6, 8px 6px 0 #ffe8cc, 9px 6px 0 #f5d4a8,
+        6px 7px 0 #fff5e6, 7px 7px 0 #ffe8cc, 8px 7px 0 #f5d4a8, 9px 7px 0 #e8a862, 10px 7px 0 #d4944a,
+        5px 8px 0 #fff5e6, 6px 8px 0 #ffe8cc, 7px 8px 0 #f5d4a8, 8px 8px 0 #e8a862, 9px 8px 0 #d4944a, 10px 8px 0 #c07830, 11px 8px 0 #b87333,
+        5px 9px 0 #ffe8cc, 6px 9px 0 #f5d4a8, 7px 9px 0 #e8a862, 8px 9px 0 #d4944a, 9px 9px 0 #c07830, 10px 9px 0 #b87333, 11px 9px 0 #a05a20,
+        5px 10px 0 #f5d4a8, 6px 10px 0 #e8a862, 7px 10px 0 #d4944a, 8px 10px 0 #c07830, 9px 10px 0 #b87333, 10px 10px 0 #a05a20, 11px 10px 0 #8b4513,
+        6px 11px 0 #d4944a, 7px 11px 0 #c07830, 8px 11px 0 #b87333, 9px 11px 0 #a05a20, 10px 11px 0 #8b4513,
+        7px 12px 0 #a05a20, 8px 12px 0 #8b4513, 9px 12px 0 #704010,
+
+        /* Sugar glaze drizzle on top */
+        6px 6px 0 #ffffff, 8px 5px 0 #ffffff, 10px 6px 0 #fffaf0,
+        7px 7px 0 #fffaf0, 9px 6px 0 #ffffff,
+
+        /* Cute eyes with sparkle */
+        6px 8px 0 #1a1a24, 7px 8px 0 #ffffff,
+        9px 8px 0 #1a1a24, 10px 8px 0 #ffffff,
+
+        /* Rosy cheeks */
+        5px 9px 0 #ffb0a0, 11px 9px 0 #e09080,
+
+        /* Happy little smile */
+        7px 10px 0 #8b4513, 8px 10px 0 #704010, 9px 10px 0 #8b4513,
+
+        /* Tiny feet */
+        6px 13px 0 #8b4513, 7px 13px 0 #a05a20, 9px 13px 0 #704010, 10px 13px 0 #5c3010;
+    }
+
+    /* BAGUETTE - Evolved form with flames! */
     .flame-sprite {
       transform: scale(5);
     }
 
     .flame-sprite .pixel-sprite {
       box-shadow:
-        /* FLAME BAGUETTE - Upper-left light, hue-shifted palette */
+        /* BAGUETTE - Evolved form, upper-left light */
         /* Palette: Shadow #8B5A2B (sienna) → Mid #D4A574 (tan) → Highlight #FFF4D6 (cream) */
 
         /* Flame crown - light from upper-left */
@@ -262,9 +299,6 @@
         6px 12px 0 #c99a65, 7px 12px 0 #b8894f, 8px 12px 0 #a67c3d, 9px 12px 0 #8b5a2b, 10px 12px 0 #704214,
         7px 13px 0 #8b5a2b, 8px 13px 0 #704214, 9px 13px 0 #5c3317,
 
-        /* Crust score marks - follow form */
-        6px 9px 0 #c99a65, 7px 10px 0 #a67c3d, 8px 11px 0 #8b5a2b,
-
         /* Eyes - clear focal point with catchlight */
         6px 9px 0 #1a1a24, 7px 9px 0 #ffffff, 9px 9px 0 #1a1a24, 10px 9px 0 #ffffff,
         6px 10px 0 #1a1a24, 9px 10px 0 #1a1a24,
@@ -276,7 +310,7 @@
         6px 14px 0 #704214, 7px 14px 0 #8b5a2b, 9px 14px 0 #5c3317, 10px 14px 0 #4a2c0a;
     }
 
-    /* MEGA BAGUETTE - Evolved form! Bigger, more flames */
+    /* MEGA BAGUETTE - Final form! Bigger, more flames */
     .mega-flame-sprite {
       transform: scale(6);
     }
@@ -1088,6 +1122,7 @@
       .action-btn { font-size: 11px; }
       .move-btn { font-size: 10px; }
       .item-btn { font-size: 10px; }
+      .sweetbun-sprite { transform: scale(5); }
       .flame-sprite { transform: scale(5); }
       .void-sprite { transform: scale(4.5); }
     }
@@ -1117,7 +1152,7 @@
         <!-- Player HP box - bottom right -->
         <div class="stat-box player">
           <div class="stat-row">
-            <span class="stat-name">BAGUETTE</span>
+            <span class="stat-name">SWEETBUN</span>
             <span class="stat-level">50</span>
           </div>
           <div class="hp-row">
@@ -1146,7 +1181,7 @@
 
           <!-- Player creature -->
           <div class="creature creature-player" id="player-creature">
-            <div class="flame-sprite">
+            <div class="sweetbun-sprite">
               <div class="pixel-sprite"></div>
             </div>
           </div>
@@ -1155,7 +1190,7 @@
         <!-- Main battle panel -->
         <div class="battle-panel" id="main-panel">
           <div class="message-box">
-            <div class="message-text" id="battle-message">What will<br>BAGUETTE do?</div>
+            <div class="message-text" id="battle-message">What will<br>SWEETBUN do?</div>
           </div>
           <div class="action-box">
             <div class="action-btn" data-action="fight">FIGHT</div>
@@ -1188,7 +1223,7 @@
             <div class="item-btn" data-item="cancel">BACK</div>
           </div>
           <div class="move-info">
-            <div>Use on<br>BAGUETTE?</div>
+            <div>Use on<br>SWEETBUN?</div>
           </div>
         </div>
       </div>
@@ -1423,7 +1458,7 @@
       // Update PP display
       document.getElementById('move-pp').textContent = `PP ${move.pp}/${move.maxPp}`;
       const displayName = moveName.replace('-', ' ').toUpperCase();
-      showMessage(`BAGUETTE used<br>${displayName}!`);
+      showMessage(`SWEETBUN used<br>${displayName}!`);
       showMenu('main');
 
       const playerRect = playerCreature.getBoundingClientRect();
@@ -1447,9 +1482,9 @@
           triggerImpactFlash();
 
           const isCrit = Math.random() < 0.15;
-          const isMega = playerCreature.querySelector('div').classList.contains('mega-flame-sprite');
-          const megaBonus = isMega ? 200 : 0; // MEGA BAGUETTE one-shots!
-          const damage = move.power + Math.floor(Math.random() * 10) + (isCrit ? 15 : 0) + megaBonus;
+          const isEvolved = playerCreature.querySelector('div').classList.contains('flame-sprite');
+          const evoBonus = isEvolved ? 200 : 0; // BAGUETTE one-shots!
+          const damage = move.power + Math.floor(Math.random() * 10) + (isCrit ? 15 : 0) + evoBonus;
           enemyHp = Math.max(0, enemyHp - damage);
           updateHpBar(enemyHpBar, enemyHp, false);
           showDamage(toX, toY - 30, damage, isCrit);
@@ -1474,7 +1509,7 @@
             setTimeout(() => {
               // Award EXP
               const expGain = enemy.exp;
-              showMessage(`BAGUETTE gained<br>${expGain} EXP!`);
+              showMessage(`SWEETBUN gained<br>${expGain} EXP!`);
               playerExp += expGain;
               const expPercent = Math.min(100, (playerExp % 300) / 3);
               document.getElementById('exp-bar').style.width = expPercent + '%';
@@ -1484,7 +1519,7 @@
                 setTimeout(() => {
                   playerExp = playerExp % 300;
                   playerLevel++;
-                  showMessage(`BAGUETTE grew to<br>Lv${playerLevel}!`);
+                  showMessage(`SWEETBUN grew to<br>Lv${playerLevel}!`);
                   document.querySelector('.stat-box.player .stat-level').textContent = playerLevel;
                   spawnHealParticles('max-heal', playerCreature, 15);
                 }, 1500);
@@ -1514,7 +1549,7 @@
                   setTimeout(() => {
                     enemyCreature.classList.remove('appearing');
                     isAnimating = false;
-                    showMessage('What will<br>BAGUETTE do?');
+                    showMessage('What will<br>SWEETBUN do?');
                   }, 1000);
                 } else {
                   // All enemies defeated - Pokemon-style victory!
@@ -1529,7 +1564,7 @@
                   }, 500);
 
                   setTimeout(() => {
-                    showMessage(`BAGUETTE gained<br>${totalExp} total EXP!`);
+                    showMessage(`SWEETBUN gained<br>${totalExp} total EXP!`);
                     spawnHealParticles('heal', playerCreature, 8);
                   }, 2500);
 
@@ -1538,12 +1573,12 @@
                     spawnHealParticles('super-heal', playerCreature, 12);
                   }, 4500);
 
-                  // Evolution check - evolve after first victory
+                  // Evolution check - evolve after first victory (SWEETBUN → BAGUETTE)
                   setTimeout(() => {
                     const playerSpriteContainer = playerCreature.querySelector('div');
-                    if (!playerSpriteContainer.classList.contains('mega-flame-sprite')) {
+                    if (playerSpriteContainer.classList.contains('sweetbun-sprite')) {
                       hasEvolved = true;
-                      showMessage('What?<br>BAGUETTE is evolving!');
+                      showMessage('What?<br>SWEETBUN is evolving!');
 
                       // Start flashing
                       playerCreature.classList.add('evo-flashing');
@@ -1576,11 +1611,11 @@
                     }
                   }, 6500);
 
-                  // Swap to mega form
+                  // Swap to BAGUETTE form
                   setTimeout(() => {
                     if (hasEvolved) {
                       const playerSpriteContainer = playerCreature.querySelector('div');
-                      playerSpriteContainer.className = 'mega-flame-sprite';
+                      playerSpriteContainer.className = 'flame-sprite';
                     }
                   }, 9500);
 
@@ -1588,8 +1623,8 @@
                   setTimeout(() => {
                     if (hasEvolved) {
                       playerCreature.classList.remove('evo-flashing');
-                      showMessage('Congratulations!<br>BAGUETTE evolved<br>into MEGA BAGUETTE!');
-                      document.querySelector('.stat-box.player .stat-name').textContent = 'MEGA BAGUETTE';
+                      showMessage('Congratulations!<br>SWEETBUN evolved<br>into BAGUETTE!');
+                      document.querySelector('.stat-box.player .stat-name').textContent = 'BAGUETTE';
                       spawnHealParticles('super-heal', playerCreature, 20);
                     }
                   }, 11000);
@@ -1622,7 +1657,7 @@
                         enemyCreature.classList.add('appearing');
                         setTimeout(() => {
                           enemyCreature.classList.remove('appearing');
-                          showMessage('What will<br>BAGUETTE do?');
+                          showMessage('What will<br>SWEETBUN do?');
                         }, 800);
                       }, 1500);
                     };
@@ -1683,17 +1718,17 @@
             isAnimating = false;
             setTimeout(() => useMaxPotion(), 800);
           } else if (playerHp <= 0) {
-            showMessage('BAGUETTE<br>fainted!');
+            showMessage('SWEETBUN<br>fainted!');
             isAnimating = false;
             setTimeout(() => {
               playerHp = 100;
               updateHpBar(playerHpBar, 100, true);
-              showMessage('BAGUETTE woke up!');
-              setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+              showMessage('SWEETBUN woke up!');
+              setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
             }, 2000);
           } else {
             isAnimating = false;
-            setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1000);
+            setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1000);
           }
         });
       }, 500);
@@ -1701,7 +1736,7 @@
 
     function useMaxPotion() {
       isAnimating = true;
-      showMessage('BAGUETTE used<br>MAX POTION!');
+      showMessage('SWEETBUN used<br>MAX POTION!');
 
       const playerRect = playerCreature.getBoundingClientRect();
       const viewportRect = viewport.getBoundingClientRect();
@@ -1713,9 +1748,9 @@
         playerHp = 100;
         updateHpBar(playerHpBar, 100, true);
         showDamage(cx, cy - 30, 100, false, true);
-        showMessage("BAGUETTE's HP<br>was restored!");
+        showMessage("SWEETBUN's HP<br>was restored!");
         isAnimating = false;
-        setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+        setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
       }, 500);
     }
 
@@ -1730,7 +1765,7 @@
       if (btn) btn.querySelector('.item-count').textContent = `x${item.count}`;
 
       const displayName = itemName.toUpperCase().replace('-', ' ');
-      showMessage(`BAGUETTE used<br>${displayName}!`);
+      showMessage(`SWEETBUN used<br>${displayName}!`);
       showMenu('main');
 
       const playerRect = playerCreature.getBoundingClientRect();
@@ -1769,11 +1804,11 @@
         else if (action === 'bag') showMenu('items');
         else if (action === 'run') {
           showMessage("Can't escape!");
-          setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+          setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
         }
         else if (action === 'pokemon') {
-          showMessage('BAGUETTE is<br>already out!');
-          setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+          showMessage('SWEETBUN is<br>already out!');
+          setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
         }
       });
     });
@@ -1808,7 +1843,7 @@
           enemyCreature.getBoundingClientRect().left - viewport.getBoundingClientRect().left + 40,
           enemyCreature.getBoundingClientRect().top - viewport.getBoundingClientRect().top + 40,
           6, 30);
-        setTimeout(() => showMessage('What will<br>BAGUETTE do?'), 1500);
+        setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
       }
     });
   </script>
