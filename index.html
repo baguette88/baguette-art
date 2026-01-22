@@ -244,33 +244,132 @@
 
     .flame-sprite .pixel-sprite {
       box-shadow:
-        /* Baguette body - elongated bread shape */
-        6px 8px 0 #d4a574, 7px 8px 0 #e8c097, 8px 8px 0 #e8c097, 9px 8px 0 #e8c097, 10px 8px 0 #d4a574,
-        5px 9px 0 #d4a574, 6px 9px 0 #f5d5a8, 7px 9px 0 #f5d5a8, 8px 9px 0 #fff8e0, 9px 9px 0 #f5d5a8, 10px 9px 0 #f5d5a8, 11px 9px 0 #d4a574,
-        4px 10px 0 #c99a65, 5px 10px 0 #e8c097, 6px 10px 0 #f5d5a8, 7px 10px 0 #fff8e0, 8px 10px 0 #fff8e0, 9px 10px 0 #f5d5a8, 10px 10px 0 #e8c097, 11px 10px 0 #e8c097, 12px 10px 0 #c99a65,
-        4px 11px 0 #c99a65, 5px 11px 0 #e8c097, 6px 11px 0 #f5d5a8, 7px 11px 0 #f5d5a8, 8px 11px 0 #f5d5a8, 9px 11px 0 #f5d5a8, 10px 11px 0 #e8c097, 11px 11px 0 #e8c097, 12px 11px 0 #c99a65,
-        5px 12px 0 #b8894f, 6px 12px 0 #d4a574, 7px 12px 0 #e8c097, 8px 12px 0 #e8c097, 9px 12px 0 #e8c097, 10px 12px 0 #d4a574, 11px 12px 0 #b8894f,
-        6px 13px 0 #a67c3d, 7px 13px 0 #b8894f, 8px 13px 0 #c99a65, 9px 13px 0 #b8894f, 10px 13px 0 #a67c3d,
-        /* Crust scoring marks */
-        6px 10px 0 #c99a65, 8px 11px 0 #c99a65, 10px 10px 0 #c99a65,
-        /* Cute face */
-        6px 10px 0 #1a1a24, 10px 10px 0 #1a1a24,
-        7px 11px 0 #1a1a24, 9px 11px 0 #1a1a24,
-        /* Blush cheeks */
-        5px 11px 0 #ffaaaa, 11px 11px 0 #ffaaaa,
-        /* Flame crown - dancing fire */
-        7px 5px 0 #fff8e0, 8px 4px 0 #fff8e0, 9px 5px 0 #fff8e0,
-        6px 5px 0 #ffd23f, 7px 4px 0 #ffd23f, 8px 3px 0 #ffd23f, 9px 4px 0 #ffd23f, 10px 5px 0 #ffd23f,
-        5px 6px 0 #f7931e, 6px 6px 0 #ffd23f, 7px 6px 0 #fff8e0, 8px 5px 0 #fff8e0, 9px 6px 0 #ffd23f, 10px 6px 0 #f7931e, 11px 6px 0 #f7931e,
-        5px 7px 0 #ff6b35, 6px 7px 0 #f7931e, 7px 7px 0 #ffd23f, 8px 6px 0 #ffd23f, 9px 7px 0 #f7931e, 10px 7px 0 #ff6b35, 11px 7px 0 #ff6b35,
-        6px 8px 0 #ff6b35, 7px 8px 0 #f7931e, 8px 7px 0 #f7931e, 9px 8px 0 #ff6b35, 10px 8px 0 #ff6b35,
-        /* Side flames */
-        4px 7px 0 #ffd23f, 3px 6px 0 #fff8e0, 4px 8px 0 #f7931e, 3px 8px 0 #ff6b35,
-        12px 7px 0 #ffd23f, 13px 6px 0 #fff8e0, 12px 8px 0 #f7931e, 13px 8px 0 #ff6b35,
-        /* Tiny flame wisps */
-        7px 2px 0 #fff8e0, 9px 3px 0 #fff8e0, 6px 4px 0 #ffd23f, 10px 4px 0 #ffd23f,
-        /* Little feet */
-        6px 14px 0 #8b6914, 7px 14px 0 #a67c3d, 9px 14px 0 #a67c3d, 10px 14px 0 #8b6914;
+        /* FLAME BAGUETTE - Upper-left light, hue-shifted palette */
+        /* Palette: Shadow #8B5A2B (sienna) → Mid #D4A574 (tan) → Highlight #FFF4D6 (cream) */
+
+        /* Flame crown - light from upper-left */
+        7px 3px 0 #fffbe8, 8px 2px 0 #fffbe8,
+        6px 4px 0 #ffe066, 7px 4px 0 #fffbe8, 8px 3px 0 #fffbe8, 9px 4px 0 #ffc233,
+        5px 5px 0 #ff9500, 6px 5px 0 #ffcc00, 7px 5px 0 #ffe066, 8px 4px 0 #ffe066, 9px 5px 0 #ffc233, 10px 5px 0 #ff7700,
+        5px 6px 0 #cc4400, 6px 6px 0 #ff6600, 7px 6px 0 #ff9500, 8px 5px 0 #ffcc00, 9px 6px 0 #ff6600, 10px 6px 0 #cc4400,
+        6px 7px 0 #991100, 7px 7px 0 #cc4400, 8px 6px 0 #ff6600, 9px 7px 0 #991100,
+
+        /* Baguette body - upper-left highlight, bottom-right shadow */
+        6px 8px 0 #fff4d6, 7px 8px 0 #ffe8b8, 8px 8px 0 #e8c097, 9px 8px 0 #d4a574, 10px 8px 0 #c99a65,
+        5px 9px 0 #fff4d6, 6px 9px 0 #ffe8b8, 7px 9px 0 #e8c097, 8px 9px 0 #d4a574, 9px 9px 0 #c99a65, 10px 9px 0 #b8894f, 11px 9px 0 #a67c3d,
+        5px 10px 0 #ffe8b8, 6px 10px 0 #e8c097, 7px 10px 0 #d4a574, 8px 10px 0 #c99a65, 9px 10px 0 #b8894f, 10px 10px 0 #a67c3d, 11px 10px 0 #8b5a2b,
+        5px 11px 0 #e8c097, 6px 11px 0 #d4a574, 7px 11px 0 #c99a65, 8px 11px 0 #b8894f, 9px 11px 0 #a67c3d, 10px 11px 0 #8b5a2b, 11px 11px 0 #704214,
+        6px 12px 0 #c99a65, 7px 12px 0 #b8894f, 8px 12px 0 #a67c3d, 9px 12px 0 #8b5a2b, 10px 12px 0 #704214,
+        7px 13px 0 #8b5a2b, 8px 13px 0 #704214, 9px 13px 0 #5c3317,
+
+        /* Crust score marks - follow form */
+        6px 9px 0 #c99a65, 7px 10px 0 #a67c3d, 8px 11px 0 #8b5a2b,
+
+        /* Eyes - clear focal point with catchlight */
+        6px 9px 0 #1a1a24, 7px 9px 0 #ffffff, 9px 9px 0 #1a1a24, 10px 9px 0 #ffffff,
+        6px 10px 0 #1a1a24, 9px 10px 0 #1a1a24,
+
+        /* Blush - warm on lit side, cooler on shadow */
+        5px 10px 0 #ffb8a8, 11px 10px 0 #e89888,
+
+        /* Feet - grounded */
+        6px 14px 0 #704214, 7px 14px 0 #8b5a2b, 9px 14px 0 #5c3317, 10px 14px 0 #4a2c0a;
+    }
+
+    /* MEGA BAGUETTE - Evolved form! Bigger, more flames */
+    .mega-flame-sprite {
+      transform: scale(6);
+    }
+
+    .mega-flame-sprite .pixel-sprite {
+      box-shadow:
+        /* MEGA BAGUETTE - Evolved form with massive flame crown */
+
+        /* Intense flame crown - towering inferno */
+        8px 0px 0 #ffffff, 9px 0px 0 #fffbe8,
+        7px 1px 0 #fffbe8, 8px 1px 0 #ffffff, 9px 1px 0 #fffbe8, 10px 1px 0 #ffe066,
+        6px 2px 0 #ffe066, 7px 2px 0 #fffbe8, 8px 2px 0 #ffffff, 9px 2px 0 #fffbe8, 10px 2px 0 #ffe066, 11px 2px 0 #ffc233,
+        5px 3px 0 #ffc233, 6px 3px 0 #ffe066, 7px 3px 0 #fffbe8, 8px 3px 0 #fffbe8, 9px 3px 0 #ffe066, 10px 3px 0 #ffc233, 11px 3px 0 #ff9500, 12px 3px 0 #ff7700,
+        4px 4px 0 #ff9500, 5px 4px 0 #ffcc00, 6px 4px 0 #ffe066, 7px 4px 0 #fffbe8, 8px 4px 0 #ffe066, 9px 4px 0 #ffcc00, 10px 4px 0 #ff9500, 11px 4px 0 #ff6600, 12px 4px 0 #cc4400,
+        4px 5px 0 #ff7700, 5px 5px 0 #ff9500, 6px 5px 0 #ffcc00, 7px 5px 0 #ffe066, 8px 5px 0 #ffcc00, 9px 5px 0 #ff9500, 10px 5px 0 #ff6600, 11px 5px 0 #cc4400, 12px 5px 0 #991100,
+        5px 6px 0 #cc4400, 6px 6px 0 #ff6600, 7px 6px 0 #ff9500, 8px 6px 0 #ff9500, 9px 6px 0 #ff6600, 10px 6px 0 #cc4400, 11px 6px 0 #991100,
+        6px 7px 0 #991100, 7px 7px 0 #cc4400, 8px 7px 0 #ff6600, 9px 7px 0 #cc4400, 10px 7px 0 #991100,
+
+        /* Side flame wings */
+        3px 4px 0 #fffbe8, 2px 5px 0 #ffe066, 3px 5px 0 #ffcc00, 3px 6px 0 #ff9500, 2px 6px 0 #ff6600, 2px 7px 0 #cc4400,
+        14px 4px 0 #ffe066, 14px 5px 0 #ffc233, 13px 5px 0 #ff9500, 14px 6px 0 #ff6600, 13px 6px 0 #cc4400, 13px 7px 0 #991100,
+
+        /* Larger baguette body */
+        5px 8px 0 #fff4d6, 6px 8px 0 #fff4d6, 7px 8px 0 #ffe8b8, 8px 8px 0 #e8c097, 9px 8px 0 #d4a574, 10px 8px 0 #c99a65, 11px 8px 0 #b8894f,
+        4px 9px 0 #fff4d6, 5px 9px 0 #ffe8b8, 6px 9px 0 #ffe8b8, 7px 9px 0 #e8c097, 8px 9px 0 #d4a574, 9px 9px 0 #c99a65, 10px 9px 0 #b8894f, 11px 9px 0 #a67c3d, 12px 9px 0 #8b5a2b,
+        4px 10px 0 #ffe8b8, 5px 10px 0 #e8c097, 6px 10px 0 #e8c097, 7px 10px 0 #d4a574, 8px 10px 0 #c99a65, 9px 10px 0 #b8894f, 10px 10px 0 #a67c3d, 11px 10px 0 #8b5a2b, 12px 10px 0 #704214,
+        4px 11px 0 #e8c097, 5px 11px 0 #d4a574, 6px 11px 0 #d4a574, 7px 11px 0 #c99a65, 8px 11px 0 #b8894f, 9px 11px 0 #a67c3d, 10px 11px 0 #8b5a2b, 11px 11px 0 #704214, 12px 11px 0 #5c3317,
+        5px 12px 0 #c99a65, 6px 12px 0 #c99a65, 7px 12px 0 #b8894f, 8px 12px 0 #a67c3d, 9px 12px 0 #8b5a2b, 10px 12px 0 #704214, 11px 12px 0 #5c3317,
+        6px 13px 0 #a67c3d, 7px 13px 0 #8b5a2b, 8px 13px 0 #704214, 9px 13px 0 #5c3317, 10px 13px 0 #4a2c0a,
+
+        /* Determined eyes with fire reflection */
+        5px 9px 0 #1a1a24, 6px 9px 0 #ff6600, 6px 10px 0 #1a1a24,
+        10px 9px 0 #1a1a24, 11px 9px 0 #ff6600, 10px 10px 0 #1a1a24,
+
+        /* Battle-ready blush */
+        4px 10px 0 #ff8866, 12px 10px 0 #cc6644,
+
+        /* Sturdy feet */
+        5px 14px 0 #5c3317, 6px 14px 0 #704214, 7px 14px 0 #8b5a2b, 9px 14px 0 #5c3317, 10px 14px 0 #4a2c0a, 11px 14px 0 #3a1c00;
+    }
+
+    /* Evolution animations - dramatic Pokemon style */
+    @keyframes evolve-pulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.15); filter: brightness(1.5); }
+    }
+
+    @keyframes evolve-glow {
+      0% { filter: brightness(1) drop-shadow(0 0 0 #fff); }
+      20% { filter: brightness(2) drop-shadow(0 0 30px #fff); }
+      40% { filter: brightness(4) drop-shadow(0 0 60px #ffe066); }
+      60% { filter: brightness(6) drop-shadow(0 0 80px #fff); }
+      80% { filter: brightness(3) drop-shadow(0 0 40px #ff9500); }
+      100% { filter: brightness(1.2) drop-shadow(0 0 10px #ff6600); }
+    }
+
+    @keyframes evolve-silhouette {
+      0%, 100% { filter: brightness(1); }
+      30%, 70% { filter: brightness(0) drop-shadow(0 0 50px #fff); }
+    }
+
+    @keyframes evolve-shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+      20%, 40%, 60%, 80% { transform: translateX(3px); }
+    }
+
+    .evolving {
+      animation: evolve-pulse 0.4s ease-in-out infinite, evolve-shake 0.5s ease-in-out infinite;
+    }
+
+    .evolving-flash {
+      animation: evolve-glow 2.5s ease-in-out forwards, evolve-silhouette 2.5s ease-in-out forwards;
+    }
+
+    /* Screen flash for evolution */
+    @keyframes screen-flash {
+      0% { opacity: 0; }
+      30% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .evolution-flash-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, #fff 0%, #ffe066 50%, #ff9500 100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+      animation: screen-flash 1.5s ease-out forwards;
     }
 
     /* VOID SPECTER - Enemy sprite */
@@ -280,33 +379,32 @@
 
     .void-sprite .pixel-sprite {
       box-shadow:
-        /* Hooded cloak shape */
-        6px 4px 0 #3c096c, 7px 4px 0 #3c096c, 8px 4px 0 #3c096c, 9px 4px 0 #3c096c, 10px 4px 0 #3c096c,
-        5px 5px 0 #3c096c, 6px 5px 0 #5a189a, 7px 5px 0 #5a189a, 8px 5px 0 #5a189a, 9px 5px 0 #5a189a, 10px 5px 0 #5a189a, 11px 5px 0 #3c096c,
-        4px 6px 0 #240046, 5px 6px 0 #5a189a, 6px 6px 0 #7b2cbf, 7px 6px 0 #7b2cbf, 8px 6px 0 #7b2cbf, 9px 6px 0 #7b2cbf, 10px 6px 0 #7b2cbf, 11px 6px 0 #5a189a, 12px 6px 0 #240046,
-        4px 7px 0 #240046, 5px 7px 0 #5a189a, 6px 7px 0 #7b2cbf, 7px 7px 0 #9d4edd, 8px 7px 0 #9d4edd, 9px 7px 0 #9d4edd, 10px 7px 0 #7b2cbf, 11px 7px 0 #5a189a, 12px 7px 0 #240046,
-        4px 8px 0 #240046, 5px 8px 0 #5a189a, 6px 8px 0 #7b2cbf, 7px 8px 0 #9d4edd, 8px 8px 0 #c77dff, 9px 8px 0 #9d4edd, 10px 8px 0 #7b2cbf, 11px 8px 0 #5a189a, 12px 8px 0 #240046,
-        5px 9px 0 #3c096c, 6px 9px 0 #5a189a, 7px 9px 0 #7b2cbf, 8px 9px 0 #9d4edd, 9px 9px 0 #7b2cbf, 10px 9px 0 #5a189a, 11px 9px 0 #3c096c,
-        6px 10px 0 #3c096c, 7px 10px 0 #5a189a, 8px 10px 0 #7b2cbf, 9px 10px 0 #5a189a, 10px 10px 0 #3c096c,
-        /* Ghost wisps/tail */
-        5px 11px 0 #3c096c, 7px 11px 0 #5a189a, 9px 11px 0 #5a189a, 11px 11px 0 #3c096c,
-        4px 12px 0 #240046, 6px 12px 0 #3c096c, 8px 12px 0 #5a189a, 10px 12px 0 #3c096c, 12px 12px 0 #240046,
-        5px 13px 0 #240046, 7px 13px 0 #3c096c, 9px 13px 0 #3c096c, 11px 13px 0 #240046,
-        6px 14px 0 #240046, 10px 14px 0 #240046,
-        /* Glowing eyes - menacing */
-        6px 7px 0 #ff6b6b, 7px 7px 0 #ff0000, 9px 7px 0 #ff0000, 10px 7px 0 #ff6b6b,
-        6px 8px 0 #ffffff, 10px 8px 0 #ffffff,
-        /* Skull-like face markings */
-        7px 9px 0 #240046, 8px 9px 0 #3c096c, 9px 9px 0 #240046,
-        /* Ethereal crown/horns */
-        5px 2px 0 #e0aaff, 6px 3px 0 #c77dff, 7px 3px 0 #9d4edd,
-        11px 2px 0 #e0aaff, 10px 3px 0 #c77dff, 9px 3px 0 #9d4edd,
-        8px 2px 0 #e0aaff, 8px 3px 0 #c77dff,
-        /* Floating dark particles around */
-        2px 6px 0 #9d4edd, 14px 6px 0 #9d4edd,
-        3px 9px 0 #c77dff, 13px 9px 0 #c77dff,
-        1px 8px 0 #7b2cbf, 15px 8px 0 #7b2cbf,
-        2px 11px 0 #5a189a, 14px 11px 0 #5a189a;
+        /* VOID SPECTER - Upper-left light, hue-shifted palette */
+        /* Palette: Shadow #1a0533 (blue-violet) → Mid #7b2cbf (purple) → Highlight #e8c8ff (pink-lavender) */
+
+        /* Hood peak - lit from upper-left */
+        7px 3px 0 #e8c8ff, 8px 3px 0 #c77dff, 9px 3px 0 #9d4edd,
+        6px 4px 0 #e8c8ff, 7px 4px 0 #c77dff, 8px 4px 0 #9d4edd, 9px 4px 0 #7b2cbf, 10px 4px 0 #5a189a,
+
+        /* Cloak body - dramatic light falloff */
+        5px 5px 0 #c77dff, 6px 5px 0 #9d4edd, 7px 5px 0 #7b2cbf, 8px 5px 0 #5a189a, 9px 5px 0 #3c096c, 10px 5px 0 #240046, 11px 5px 0 #1a0533,
+        4px 6px 0 #e8c8ff, 5px 6px 0 #9d4edd, 6px 6px 0 #7b2cbf, 7px 6px 0 #5a189a, 8px 6px 0 #3c096c, 9px 6px 0 #240046, 10px 6px 0 #1a0533, 11px 6px 0 #0d0018, 12px 6px 0 #0d0018,
+        4px 7px 0 #c77dff, 5px 7px 0 #9d4edd, 6px 7px 0 #7b2cbf, 7px 7px 0 #5a189a, 8px 7px 0 #3c096c, 9px 7px 0 #240046, 10px 7px 0 #1a0533, 11px 7px 0 #0d0018, 12px 7px 0 #0d0018,
+        4px 8px 0 #9d4edd, 5px 8px 0 #7b2cbf, 6px 8px 0 #5a189a, 7px 8px 0 #3c096c, 8px 8px 0 #240046, 9px 8px 0 #1a0533, 10px 8px 0 #0d0018, 11px 8px 0 #0d0018, 12px 8px 0 #0d0018,
+        5px 9px 0 #7b2cbf, 6px 9px 0 #5a189a, 7px 9px 0 #3c096c, 8px 9px 0 #240046, 9px 9px 0 #1a0533, 10px 9px 0 #0d0018, 11px 9px 0 #0d0018,
+        5px 10px 0 #5a189a, 6px 10px 0 #3c096c, 7px 10px 0 #240046, 8px 10px 0 #1a0533, 9px 10px 0 #0d0018, 10px 10px 0 #0d0018,
+
+        /* Wispy tail - fading into void */
+        5px 11px 0 #3c096c, 6px 11px 0 #240046, 8px 11px 0 #1a0533, 10px 11px 0 #0d0018,
+        4px 12px 0 #3c096c, 7px 12px 0 #1a0533, 9px 12px 0 #0d0018,
+        5px 13px 0 #240046, 8px 13px 0 #0d0018,
+        6px 14px 0 #1a0533,
+
+        /* Glowing eyes - focal point with glow effect */
+        5px 6px 0 #ffcccc, 6px 6px 0 #ff4444, 7px 6px 0 #ff0000, 8px 7px 0 #cc0000,
+        5px 7px 0 #ffffff, 6px 7px 0 #ff6666,
+        9px 6px 0 #ff4444, 10px 6px 0 #ff8888,
+        9px 7px 0 #ff0000, 10px 7px 0 #ffffff;
     }
 
     /* SLIME - Second enemy sprite (green slime) */
@@ -316,34 +414,34 @@
 
     .slime-sprite .pixel-sprite {
       box-shadow:
-        /* Main gooey body - blobby shape */
-        7px 5px 0 #6bcf6b, 8px 5px 0 #6bcf6b, 9px 5px 0 #6bcf6b,
-        6px 6px 0 #4a9f4a, 7px 6px 0 #6bcf6b, 8px 6px 0 #98e898, 9px 6px 0 #6bcf6b, 10px 6px 0 #4a9f4a,
-        5px 7px 0 #3a8f3a, 6px 7px 0 #4a9f4a, 7px 7px 0 #6bcf6b, 8px 7px 0 #98e898, 9px 7px 0 #6bcf6b, 10px 7px 0 #4a9f4a, 11px 7px 0 #3a8f3a,
-        4px 8px 0 #2a6f2a, 5px 8px 0 #3a8f3a, 6px 8px 0 #4a9f4a, 7px 8px 0 #6bcf6b, 8px 8px 0 #b8f8b8, 9px 8px 0 #6bcf6b, 10px 8px 0 #4a9f4a, 11px 8px 0 #3a8f3a, 12px 8px 0 #2a6f2a,
-        4px 9px 0 #2a6f2a, 5px 9px 0 #3a8f3a, 6px 9px 0 #4a9f4a, 7px 9px 0 #6bcf6b, 8px 9px 0 #98e898, 9px 9px 0 #6bcf6b, 10px 9px 0 #4a9f4a, 11px 9px 0 #3a8f3a, 12px 9px 0 #2a6f2a,
-        5px 10px 0 #2a6f2a, 6px 10px 0 #3a8f3a, 7px 10px 0 #4a9f4a, 8px 10px 0 #6bcf6b, 9px 10px 0 #4a9f4a, 10px 10px 0 #3a8f3a, 11px 10px 0 #2a6f2a,
-        6px 11px 0 #1a5f1a, 7px 11px 0 #2a6f2a, 8px 11px 0 #3a8f3a, 9px 11px 0 #2a6f2a, 10px 11px 0 #1a5f1a,
-        /* Gooey base spread */
-        5px 11px 0 #1a5f1a, 11px 11px 0 #1a5f1a,
-        7px 12px 0 #1a5f1a, 8px 12px 0 #2a6f2a, 9px 12px 0 #1a5f1a,
-        /* Cute derpy eyes */
-        6px 7px 0 #ffffff, 7px 7px 0 #ffffff, 9px 7px 0 #ffffff, 10px 7px 0 #ffffff,
-        6px 8px 0 #ffffff, 7px 8px 0 #1a1a24, 9px 8px 0 #1a1a24, 10px 8px 0 #ffffff,
-        /* Shiny highlight bubbles */
-        7px 5px 0 #d4ffd4, 8px 6px 0 #ffffff, 6px 7px 0 #d4ffd4,
-        /* Happy little mouth */
-        7px 9px 0 #2a6f2a, 8px 10px 0 #1a5f1a, 9px 9px 0 #2a6f2a,
-        /* Dripping goo */
-        3px 9px 0 #4a9f4a, 3px 10px 0 #3a8f3a, 3px 11px 0 #2a6f2a, 3px 12px 0 #1a5f1a,
-        13px 8px 0 #4a9f4a, 13px 9px 0 #3a8f3a, 13px 10px 0 #2a6f2a,
-        2px 8px 0 #6bcf6b, 14px 7px 0 #6bcf6b,
-        /* Floating goo particles */
-        4px 5px 0 #6bcf6b, 12px 5px 0 #6bcf6b,
-        3px 7px 0 #4a9f4a, 13px 6px 0 #4a9f4a,
-        /* Little antennae/tendrils */
-        6px 4px 0 #6bcf6b, 10px 4px 0 #6bcf6b,
-        6px 3px 0 #98e898, 10px 3px 0 #98e898;
+        /* SLIME - Upper-left light, hue-shifted palette */
+        /* Palette: Shadow #1a6060 (teal) → Mid #4a9f4a (green) → Highlight #d4ff98 (yellow-green) */
+
+        /* Top dome - brightest on upper-left */
+        6px 5px 0 #e8ffb8, 7px 5px 0 #d4ff98, 8px 5px 0 #b8f878, 9px 5px 0 #8bd858,
+        5px 6px 0 #e8ffb8, 6px 6px 0 #d4ff98, 7px 6px 0 #b8f878, 8px 6px 0 #8bd858, 9px 6px 0 #6bcf6b, 10px 6px 0 #4a9f4a, 11px 6px 0 #2a7f5a,
+
+        /* Main body - gradient flows to bottom-right shadow */
+        4px 7px 0 #d4ff98, 5px 7px 0 #b8f878, 6px 7px 0 #8bd858, 7px 7px 0 #6bcf6b, 8px 7px 0 #4a9f4a, 9px 7px 0 #3a8f5a, 10px 7px 0 #2a7f5a, 11px 7px 0 #1a6060, 12px 7px 0 #1a6060,
+        4px 8px 0 #b8f878, 5px 8px 0 #8bd858, 6px 8px 0 #6bcf6b, 7px 8px 0 #4a9f4a, 8px 8px 0 #3a8f5a, 9px 8px 0 #2a7f5a, 10px 8px 0 #1a6060, 11px 8px 0 #156050, 12px 8px 0 #105040,
+        4px 9px 0 #8bd858, 5px 9px 0 #6bcf6b, 6px 9px 0 #4a9f4a, 7px 9px 0 #3a8f5a, 8px 9px 0 #2a7f5a, 9px 9px 0 #1a6060, 10px 9px 0 #156050, 11px 9px 0 #105040, 12px 9px 0 #0a4030,
+        5px 10px 0 #4a9f4a, 6px 10px 0 #3a8f5a, 7px 10px 0 #2a7f5a, 8px 10px 0 #1a6060, 9px 10px 0 #156050, 10px 10px 0 #105040, 11px 10px 0 #0a4030,
+
+        /* Base spread - darkest teal at bottom */
+        5px 11px 0 #2a7f5a, 6px 11px 0 #1a6060, 7px 11px 0 #156050, 8px 11px 0 #105040, 9px 11px 0 #0a4030, 10px 11px 0 #0a4030, 11px 11px 0 #053020,
+        6px 12px 0 #156050, 7px 12px 0 #105040, 8px 12px 0 #0a4030, 9px 12px 0 #053020, 10px 12px 0 #053020,
+
+        /* Eyes - large and focal, upper-left catchlight */
+        5px 6px 0 #ffffff, 6px 6px 0 #ffffff, 6px 7px 0 #ffffff,
+        5px 7px 0 #e8e8ff, 7px 7px 0 #1a1a24, 6px 8px 0 #1a1a24,
+        9px 6px 0 #ffffff, 10px 6px 0 #f0f0ff,
+        9px 7px 0 #e8e8ff, 10px 7px 0 #1a1a24, 9px 8px 0 #1a1a24,
+
+        /* Specular highlight - crisp white on lit side */
+        5px 5px 0 #ffffff, 6px 5px 0 #ffffff,
+
+        /* Drip on shaded side only - follows gravity */
+        12px 10px 0 #105040, 12px 11px 0 #0a4030, 12px 12px 0 #053020, 12px 13px 0 #053020;
     }
 
     /* EXP bar */
@@ -1409,6 +1507,9 @@
                 } else {
                   // All enemies defeated - Pokemon-style victory!
                   isAnimating = true;
+                  const totalExp = enemies.reduce((sum, e) => sum + e.exp, 0);
+                  const prizeMoney = 2400;
+                  let hasEvolved = false;
 
                   // Victory fanfare sequence
                   setTimeout(() => {
@@ -1416,14 +1517,78 @@
                   }, 500);
 
                   setTimeout(() => {
-                    const prizeMoney = 2400;
-                    showMessage(`BAGUETTE got<br>$${prizeMoney} for winning!`);
-                    spawnHealParticles('super-heal', playerCreature, 12);
+                    showMessage(`BAGUETTE gained<br>${totalExp} total EXP!`);
+                    spawnHealParticles('heal', playerCreature, 8);
                   }, 2500);
 
                   setTimeout(() => {
-                    showMessage('...');
+                    showMessage(`Got $${prizeMoney}<br>for winning!`);
+                    spawnHealParticles('super-heal', playerCreature, 12);
                   }, 4500);
+
+                  // Evolution check - evolve after first victory
+                  setTimeout(() => {
+                    const playerSpriteContainer = playerCreature.querySelector('div');
+                    if (!playerSpriteContainer.classList.contains('mega-flame-sprite')) {
+                      hasEvolved = true;
+                      showMessage('What?');
+                    }
+                  }, 6500);
+
+                  setTimeout(() => {
+                    if (hasEvolved) {
+                      showMessage('BAGUETTE is<br>evolving!');
+                      playerCreature.classList.add('evolving');
+                    }
+                  }, 7500);
+
+                  // Dramatic pause with pulsing
+                  setTimeout(() => {
+                    if (hasEvolved) {
+                      showMessage('...');
+                      spawnHealParticles('max-heal', playerCreature, 15);
+                    }
+                  }, 9000);
+
+                  // Big flash moment
+                  setTimeout(() => {
+                    if (hasEvolved) {
+                      playerCreature.classList.remove('evolving');
+                      playerCreature.classList.add('evolving-flash');
+
+                      // Screen flash
+                      const flash = document.createElement('div');
+                      flash.className = 'evolution-flash-overlay';
+                      viewport.appendChild(flash);
+                      setTimeout(() => flash.remove(), 1500);
+
+                      spawnHealParticles('super-heal', playerCreature, 25);
+                    }
+                  }, 10500);
+
+                  // Transform!
+                  setTimeout(() => {
+                    if (hasEvolved) {
+                      const playerSpriteContainer = playerCreature.querySelector('div');
+                      playerSpriteContainer.className = 'mega-flame-sprite';
+                      playerCreature.classList.remove('evolving-flash');
+                      showMessage('Congratulations!');
+                    }
+                  }, 12000);
+
+                  setTimeout(() => {
+                    if (hasEvolved) {
+                      showMessage('BAGUETTE evolved<br>into MEGA BAGUETTE!');
+                      document.querySelector('.stat-box.player .stat-name').textContent = 'MEGA BAGUETTE';
+                      spawnHealParticles('heal', playerCreature, 12);
+                    }
+                  }, 13500);
+
+                  setTimeout(() => {
+                    if (hasEvolved) {
+                      showMessage('Its flames burn<br>with new power!');
+                    }
+                  }, 15500);
 
                   setTimeout(() => {
                     showMessage('Want to battle<br>again? TAP!');
@@ -1457,7 +1622,7 @@
                         }, 800);
                       }, 1500);
                     };
-                  }, 6000);
+                  }, 17500);
                 }
               }, playerExp >= 300 ? 3500 : 2000);
             }, 1000);
