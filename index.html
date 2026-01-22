@@ -411,6 +411,58 @@
       100% { opacity: 0; transform: scaleY(0.1); }
     }
 
+    /* Critical hit shader */
+    .viewport.crit-flash {
+      animation: critShader 0.25s ease-out;
+    }
+
+    @keyframes critShader {
+      0% {
+        filter: invert(0) brightness(1) contrast(1);
+        transform: scale(1);
+      }
+      20% {
+        filter: invert(1) brightness(1.5) contrast(1.5);
+        transform: scale(1.04);
+      }
+      40% {
+        filter: invert(0) brightness(2) contrast(1.2) saturate(2);
+        transform: scale(0.98);
+      }
+      60% {
+        filter: invert(0.3) brightness(1.3) contrast(1.3);
+        transform: scale(1.02);
+      }
+      100% {
+        filter: invert(0) brightness(1) contrast(1) saturate(1);
+        transform: scale(1);
+      }
+    }
+
+    /* Crit slash overlay */
+    .viewport.crit-flash::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        transparent 40%,
+        rgba(255,255,255,0.9) 48%,
+        rgba(255,255,0,0.8) 50%,
+        rgba(255,255,255,0.9) 52%,
+        transparent 60%
+      );
+      animation: critSlash 0.25s ease-out;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes critSlash {
+      0% { opacity: 0; transform: translateX(-100%) rotate(0deg); }
+      30% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(100%) rotate(0deg); }
+    }
+
     /* Scanlines */
     .viewport::before {
       content: '';
@@ -915,6 +967,125 @@
         /* Feet/base flames */
         6px 12px 0 #660000, 7px 12px 0 #440000, 9px 12px 0 #440000, 10px 12px 0 #330000,
         5px 13px 0 #ff6600, 6px 13px 0 #cc3300, 10px 13px 0 #660000, 11px 13px 0 #440000;
+    }
+
+    /* CRYSTOWL - Geometric ice owl */
+    .crystowl-sprite {
+      transform: scale(5);
+      filter: drop-shadow(0 0 4px #88ddff) drop-shadow(0 0 8px #44aadd);
+      animation: crystowl-hover 2s ease-in-out infinite, crystowl-shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes crystowl-hover {
+      0%, 100% { transform: scale(5) translateY(0) rotate(-2deg); }
+      50% { transform: scale(5) translateY(-6px) rotate(2deg); }
+    }
+
+    @keyframes crystowl-shimmer {
+      0%, 100% { filter: drop-shadow(0 0 4px #88ddff) drop-shadow(0 0 8px #44aadd) brightness(1); }
+      50% { filter: drop-shadow(0 0 8px #aaeeff) drop-shadow(0 0 16px #66ccff) brightness(1.2); }
+    }
+
+    .crystowl-sprite .pixel-sprite {
+      box-shadow:
+        /* CRYSTOWL - Ice crystal owl, upper-left lighting */
+        /* Palette: Shadow #2266aa → Mid #44aadd → Highlight #eeffff */
+
+        /* Ear tufts - ice crystal points */
+        4px 1px 0 #eeffff, 5px 1px 0 #bbddff,
+        12px 1px 0 #88ccff, 13px 1px 0 #44aadd,
+        4px 2px 0 #bbddff, 5px 2px 0 #88ccff,
+        12px 2px 0 #66bbee, 13px 2px 0 #2266aa,
+        5px 3px 0 #88ccff,
+        12px 3px 0 #44aadd,
+
+        /* Head - geometric faceted */
+        6px 3px 0 #eeffff, 7px 3px 0 #bbddff, 8px 3px 0 #bbddff, 9px 3px 0 #88ccff, 10px 3px 0 #66bbee, 11px 3px 0 #44aadd,
+        5px 4px 0 #eeffff, 6px 4px 0 #bbddff, 7px 4px 0 #88ccff, 8px 4px 0 #88ccff, 9px 4px 0 #66bbee, 10px 4px 0 #44aadd, 11px 4px 0 #2266aa, 12px 4px 0 #2266aa,
+        5px 5px 0 #bbddff, 6px 5px 0 #88ccff, 7px 5px 0 #66bbee, 8px 5px 0 #66bbee, 9px 5px 0 #44aadd, 10px 5px 0 #44aadd, 11px 5px 0 #2266aa, 12px 5px 0 #1a5588,
+
+        /* Eyes - glowing cyan */
+        6px 5px 0 #ffffff, 7px 5px 0 #aaffff,
+        10px 5px 0 #88ffff, 11px 5px 0 #44dddd,
+        6px 6px 0 #aaffff, 7px 6px 0 #00dddd,
+        10px 6px 0 #00bbbb, 11px 6px 0 #008888,
+
+        /* Beak - ice crystal */
+        8px 6px 0 #eeffff, 9px 6px 0 #bbddff,
+        8px 7px 0 #bbddff, 9px 7px 0 #88ccff,
+
+        /* Lower face */
+        5px 6px 0 #88ccff, 12px 6px 0 #2266aa,
+        5px 7px 0 #66bbee, 6px 7px 0 #66bbee, 7px 7px 0 #44aadd, 10px 7px 0 #44aadd, 11px 7px 0 #2266aa, 12px 7px 0 #1a5588,
+
+        /* Body - rounded with crystal facets */
+        5px 8px 0 #eeffff, 6px 8px 0 #bbddff, 7px 8px 0 #88ccff, 8px 8px 0 #66bbee, 9px 8px 0 #66bbee, 10px 8px 0 #44aadd, 11px 8px 0 #2266aa, 12px 8px 0 #1a5588,
+        4px 9px 0 #bbddff, 5px 9px 0 #88ccff, 6px 9px 0 #66bbee, 7px 9px 0 #44aadd, 8px 9px 0 #44aadd, 9px 9px 0 #2266aa, 10px 9px 0 #2266aa, 11px 9px 0 #1a5588, 12px 9px 0 #1a5588,
+        4px 10px 0 #88ccff, 5px 10px 0 #66bbee, 6px 10px 0 #44aadd, 7px 10px 0 #2266aa, 8px 10px 0 #2266aa, 9px 10px 0 #1a5588, 10px 10px 0 #1a5588, 11px 10px 0 #104477,
+
+        /* Wings - angular ice shards */
+        2px 7px 0 #eeffff, 3px 7px 0 #bbddff,
+        2px 8px 0 #bbddff, 3px 8px 0 #88ccff, 4px 8px 0 #66bbee,
+        3px 9px 0 #66bbee,
+        14px 7px 0 #66bbee, 15px 7px 0 #44aadd,
+        13px 8px 0 #44aadd, 14px 8px 0 #2266aa, 15px 8px 0 #1a5588,
+        13px 9px 0 #2266aa,
+
+        /* Feet - small ice talons */
+        6px 11px 0 #88ccff, 7px 11px 0 #66bbee, 9px 11px 0 #44aadd, 10px 11px 0 #2266aa,
+        6px 12px 0 #44aadd, 10px 12px 0 #1a5588;
+    }
+
+    /* MOLDSPORE - Fuzzy mushroom creature */
+    .moldspore-sprite {
+      transform: scale(5);
+      animation: moldspore-breathe 2.5s ease-in-out infinite, moldspore-toxic 4s ease-in-out infinite;
+    }
+
+    @keyframes moldspore-breathe {
+      0%, 100% { transform: scale(5) scaleY(1); }
+      50% { transform: scale(5) scaleY(1.05) scaleX(0.98); }
+    }
+
+    @keyframes moldspore-toxic {
+      0%, 100% { filter: hue-rotate(0deg) brightness(1); }
+      25% { filter: hue-rotate(10deg) brightness(1.1); }
+      75% { filter: hue-rotate(-10deg) brightness(0.95); }
+    }
+
+    .moldspore-sprite .pixel-sprite {
+      box-shadow:
+        /* MOLDSPORE - Poison mushroom, upper-left lighting */
+        /* Palette: Cap #8844aa → #aa66cc, Stem #55aa55 → #88cc88, Spots #ddaaff */
+
+        /* Mushroom cap - bulbous top */
+        6px 1px 0 #ddaaff, 7px 1px 0 #cc88ee, 8px 1px 0 #bb77dd, 9px 1px 0 #aa66cc, 10px 1px 0 #9955bb,
+        5px 2px 0 #ddaaff, 6px 2px 0 #cc88ee, 7px 2px 0 #bb77dd, 8px 2px 0 #aa66cc, 9px 2px 0 #9955bb, 10px 2px 0 #8844aa, 11px 2px 0 #773399,
+        4px 3px 0 #ddaaff, 5px 3px 0 #cc88ee, 6px 3px 0 #bb77dd, 7px 3px 0 #aa66cc, 8px 3px 0 #9955bb, 9px 3px 0 #8844aa, 10px 3px 0 #773399, 11px 3px 0 #662288, 12px 3px 0 #551177,
+        4px 4px 0 #cc88ee, 5px 4px 0 #bb77dd, 6px 4px 0 #aa66cc, 7px 4px 0 #9955bb, 8px 4px 0 #8844aa, 9px 4px 0 #773399, 10px 4px 0 #662288, 11px 4px 0 #551177, 12px 4px 0 #440066,
+        4px 5px 0 #bb77dd, 5px 5px 0 #aa66cc, 6px 5px 0 #9955bb, 7px 5px 0 #8844aa, 8px 5px 0 #773399, 9px 5px 0 #662288, 10px 5px 0 #551177, 11px 5px 0 #440066, 12px 5px 0 #330055,
+        5px 6px 0 #9955bb, 6px 6px 0 #8844aa, 7px 6px 0 #773399, 8px 6px 0 #662288, 9px 6px 0 #551177, 10px 6px 0 #440066, 11px 6px 0 #330055,
+
+        /* Cap spots - toxic highlights */
+        6px 2px 0 #ffddff, 9px 3px 0 #eeccff,
+        5px 4px 0 #ffddff, 10px 4px 0 #ddbbee,
+        7px 5px 0 #eeccff,
+
+        /* Eyes - beady and creepy */
+        6px 5px 0 #ffff00, 7px 5px 0 #111100,
+        9px 5px 0 #dddd00, 10px 5px 0 #111100,
+
+        /* Stem - green fuzzy */
+        6px 7px 0 #bbeeaa, 7px 7px 0 #99dd88, 8px 7px 0 #88cc77, 9px 7px 0 #77bb66, 10px 7px 0 #66aa55,
+        6px 8px 0 #99dd88, 7px 8px 0 #88cc77, 8px 8px 0 #77bb66, 9px 8px 0 #66aa55, 10px 8px 0 #559944,
+        6px 9px 0 #88cc77, 7px 9px 0 #77bb66, 8px 9px 0 #66aa55, 9px 9px 0 #559944, 10px 9px 0 #448833,
+        7px 10px 0 #66aa55, 8px 10px 0 #559944, 9px 10px 0 #448833,
+
+        /* Fuzzy spore particles floating */
+        3px 3px 0 #ddaaff, 13px 2px 0 #cc88ee,
+        2px 6px 0 #bb77dd, 14px 5px 0 #aa66cc,
+        4px 8px 0 #99dd88, 12px 7px 0 #77bb66,
+        3px 10px 0 #88cc77, 13px 9px 0 #66aa55;
     }
 
     /* TRAINER GHOST - Ghostly human trainer */
@@ -1537,6 +1708,94 @@
       100% { opacity: 0; transform: scale(0.3) rotate(180deg) translateY(20px); }
     }
 
+    /* Ice shard particles - CRYSTOWL */
+    .ice-particle {
+      width: 6px;
+      height: 14px;
+      background: linear-gradient(180deg, #ffffff 0%, #aaeeff 30%, #44aadd 70%, #2266aa 100%);
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+      box-shadow: 0 0 8px #88ddff, 0 0 16px #44aadd;
+      animation: iceShard 0.6s ease-out forwards;
+    }
+
+    @keyframes iceShard {
+      0% { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
+      50% { opacity: 1; transform: scale(1.3) rotate(180deg) translateY(-15px); }
+      100% { opacity: 0; transform: scale(0.5) rotate(360deg) translateY(-30px); }
+    }
+
+    /* Spore particles - MOLDSPORE */
+    .spore-particle {
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, #ddaaff 0%, #aa66cc 50%, #773399 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 6px #bb77dd, 0 0 12px #8844aa;
+      animation: sporeDrift 1s ease-out forwards;
+    }
+
+    @keyframes sporeDrift {
+      0% { opacity: 0.8; transform: scale(0.5) translateY(0) translateX(0); }
+      30% { opacity: 1; transform: scale(1.2) translateY(-10px) translateX(var(--dx, 5px)); }
+      100% { opacity: 0; transform: scale(0.3) translateY(-40px) translateX(calc(var(--dx, 5px) * 2)); }
+    }
+
+    /* Ice attack shader - screen freeze effect */
+    .viewport.ice-attack {
+      animation: iceShader 0.4s ease-out;
+    }
+
+    @keyframes iceShader {
+      0% { filter: brightness(1) saturate(1) hue-rotate(0deg); }
+      30% { filter: brightness(1.4) saturate(0.5) hue-rotate(-30deg); }
+      60% { filter: brightness(1.2) saturate(0.8) hue-rotate(-15deg) contrast(1.1); }
+      100% { filter: brightness(1) saturate(1) hue-rotate(0deg); }
+    }
+
+    .viewport.ice-attack::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, transparent 30%, rgba(136, 221, 255, 0.3) 100%);
+      animation: iceFrost 0.4s ease-out;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes iceFrost {
+      0% { opacity: 0; }
+      40% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Toxic spore shader - poison cloud effect */
+    .viewport.toxic-attack {
+      animation: toxicShader 0.5s ease-out;
+    }
+
+    @keyframes toxicShader {
+      0% { filter: brightness(1) saturate(1) hue-rotate(0deg); }
+      25% { filter: brightness(0.9) saturate(1.3) hue-rotate(60deg); }
+      50% { filter: brightness(0.85) saturate(1.5) hue-rotate(90deg) blur(1px); }
+      100% { filter: brightness(1) saturate(1) hue-rotate(0deg) blur(0px); }
+    }
+
+    .viewport.toxic-attack::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(170, 102, 204, 0.4) 0%, rgba(119, 51, 153, 0.2) 50%, transparent 70%);
+      animation: toxicCloud 0.5s ease-out;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes toxicCloud {
+      0% { opacity: 0; transform: scale(0.5); }
+      40% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1.5); }
+    }
+
     /* Heal particles */
     .heal-particle {
       width: 8px;
@@ -1687,6 +1946,67 @@
     @keyframes sludgeDrip {
       0% { opacity: 1; transform: scale(1) translateY(0); }
       100% { opacity: 0; transform: scale(0.5) translateY(25px); }
+    }
+
+    /* Ice projectile */
+    .projectile.ice {
+      width: 18px;
+      height: 18px;
+      background: radial-gradient(circle, #ffffff 0%, #88ddff 30%, #44aadd 60%, #2288bb 100%);
+      box-shadow: 0 0 16px #88ddff, 0 0 32px #44aadd, inset 0 0 8px rgba(255,255,255,0.8);
+      border-radius: 50%;
+      animation: iceSpin 0.2s linear infinite;
+    }
+
+    @keyframes iceSpin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+
+    /* Ice particles */
+    .ice-particle {
+      width: 8px;
+      height: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #88ddff 50%, #44aadd 100%);
+      clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+      box-shadow: 0 0 8px #88ddff;
+      animation: iceFall 0.5s ease-out forwards;
+    }
+
+    @keyframes iceFall {
+      0% { opacity: 1; transform: scale(1) rotate(0deg) translateY(0); }
+      100% { opacity: 0; transform: scale(0.3) rotate(180deg) translateY(30px); }
+    }
+
+    /* Spore projectile */
+    .projectile.spore {
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle, #dda0dd 0%, #9370db 30%, #6b4e8b 60%, #4a2c5a 100%);
+      box-shadow: 0 0 16px #9370db, 0 0 32px #6b4e8b;
+      border-radius: 50%;
+      animation: sporePulse 0.3s ease-in-out infinite;
+    }
+
+    @keyframes sporePulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.15); filter: brightness(1.3); }
+    }
+
+    /* Spore particles */
+    .spore-particle {
+      width: 6px;
+      height: 6px;
+      background: radial-gradient(circle, #dda0dd 0%, #9370db 70%);
+      border-radius: 50%;
+      box-shadow: 0 0 6px #9370db;
+      animation: sporeFloat 0.8s ease-out forwards;
+    }
+
+    @keyframes sporeFloat {
+      0% { opacity: 1; transform: scale(1) translateY(0) translateX(0); }
+      100% { opacity: 0; transform: scale(0.5) translateY(-20px) translateX(var(--spore-drift, 10px)); }
     }
 
     /* Screen splat overlay */
@@ -2339,16 +2659,19 @@
 
     const enemies = [
       { name: 'SPECTER', level: 50, hp: 100, maxHp: 100, exp: 150, sprite: 'void', type: 'GHOST', attack: 'SHADOW SNEAK', damage: [10, 18] },
-      { name: 'SLIME', level: 52, hp: 120, maxHp: 120, exp: 180, sprite: 'slime', type: 'POISON', attack: 'SLUDGE BOMB', damage: [12, 20] },
-      { name: 'INFERNO', level: 55, hp: 150, maxHp: 150, exp: 250, sprite: 'inferno', type: 'FIRE', attack: 'FLAME BURST', damage: [15, 25] }
+      { name: 'MOLDSPORE', level: 52, hp: 110, maxHp: 110, exp: 170, sprite: 'moldspore', type: 'POISON', attack: 'TOXIC SPORE', damage: [10, 16], shader: 'toxic' },
+      { name: 'CRYSTOWL', level: 54, hp: 130, maxHp: 130, exp: 200, sprite: 'crystowl', type: 'ICE', attack: 'FROST WING', damage: [14, 22], shader: 'ice' },
+      { name: 'SLIME', level: 56, hp: 140, maxHp: 140, exp: 220, sprite: 'slime', type: 'POISON', attack: 'SLUDGE BOMB', damage: [14, 22] },
+      { name: 'INFERNO', level: 58, hp: 160, maxHp: 160, exp: 280, sprite: 'inferno', type: 'FIRE', attack: 'FLAME BURST', damage: [16, 26] }
     ];
 
     // Type effectiveness
     function getTypeMultiplier(moveType, enemyType) {
       const chart = {
-        'FIRE': { 'FIRE': 0.5, 'GHOST': 1, 'POISON': 1 },
-        'GHOST': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1 },
-        'DARK': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1 }
+        'FIRE': { 'FIRE': 0.5, 'GHOST': 1, 'POISON': 1, 'ICE': 2 },
+        'GHOST': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1, 'ICE': 1 },
+        'DARK': { 'GHOST': 2, 'FIRE': 1, 'POISON': 1, 'ICE': 1 },
+        'ICE': { 'FIRE': 0.5, 'ICE': 0.5, 'GHOST': 1, 'POISON': 1 }
       };
       return chart[moveType]?.[enemyType] || 1;
     }
@@ -2429,6 +2752,11 @@
       if (navigator.vibrate) {
         navigator.vibrate([50, 30, 80]); // Short pattern: hit, pause, rumble
       }
+    }
+
+    function triggerCritFlash() {
+      viewport.classList.add('crit-flash');
+      setTimeout(() => viewport.classList.remove('crit-flash'), 250);
     }
 
     function createScreenSplat() {
@@ -2564,6 +2892,12 @@
           spawnParticle('shadow', currentX, currentY);
         } else if (type === 'sludge') {
           spawnParticle('sludge', currentX + (Math.random() - 0.5) * 12, currentY + (Math.random() - 0.5) * 12);
+        } else if (type === 'ice') {
+          spawnParticle('ice', currentX + (Math.random() - 0.5) * 8, currentY + (Math.random() - 0.5) * 8);
+        } else if (type === 'spore') {
+          spawnParticle('spore', currentX + (Math.random() - 0.5) * 15, currentY + (Math.random() - 0.5) * 15, {
+            '--spore-drift': ((Math.random() - 0.5) * 30) + 'px'
+          });
         } else {
           spawnParticle('fire', currentX + (Math.random() - 0.5) * 10, currentY + (Math.random() - 0.5) * 10);
         }
@@ -2648,6 +2982,11 @@
           enemyHp = Math.max(0, enemyHp - damage);
           updateHpBar(enemyHpBar, enemyHp, false);
           showDamage(toX, toY - 30, damage, isCrit);
+
+          // Critical hit shader
+          if (isCrit) {
+            triggerCritFlash();
+          }
 
           // Impact particles based on move type
           if (move.particles === 'blast') {
@@ -2871,20 +3210,31 @@
       const toX = playerRect.left - viewportRect.left + playerRect.width / 2;
       const toY = playerRect.top - viewportRect.top + playerRect.height / 2;
 
+      // Determine projectile and particle types based on enemy
+      let projType = 'void', particleType = 'void';
+      if (enemy.sprite === 'slime') { projType = 'sludge'; particleType = 'sludge'; }
+      else if (enemy.sprite === 'crystowl') { projType = 'ice'; particleType = 'ice'; }
+      else if (enemy.sprite === 'moldspore') { projType = 'spore'; particleType = 'spore'; }
+      else if (enemy.type === 'FIRE') { projType = 'ember'; particleType = 'ember'; }
+
       // Enemy charge particles
       setTimeout(() => {
-        spawnParticleBurst('void', fromX, fromY, 6, 25);
+        spawnParticleBurst(particleType, fromX, fromY, 6, 25);
       }, 200);
 
       setTimeout(() => {
-        const projType = enemy.sprite === 'slime' ? 'sludge' : (enemy.type === 'FIRE' ? 'ember' : 'void');
-        const particleType = enemy.sprite === 'slime' ? 'sludge' : (enemy.type === 'FIRE' ? 'ember' : 'void');
 
         createProjectile(fromX, fromY, toX, toY, projType, () => {
           hitCreature(playerCreature);
           screenShake();
           triggerImpactFlash();
           vibrateOnDamage();
+
+          // Trigger enemy-specific attack shader
+          if (enemy.shader) {
+            viewport.classList.add(enemy.shader + '-attack');
+            setTimeout(() => viewport.classList.remove(enemy.shader + '-attack'), enemy.shader === 'ice' ? 400 : 500);
+          }
 
           const damage = enemy.damage[0] + Math.floor(Math.random() * (enemy.damage[1] - enemy.damage[0]));
           playerHp = Math.max(0, playerHp - damage);
