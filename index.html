@@ -352,24 +352,36 @@
       animation: evolve-glow 2.5s ease-in-out forwards, evolve-silhouette 2.5s ease-in-out forwards;
     }
 
-    /* Screen flash for evolution */
-    @keyframes screen-flash {
-      0% { opacity: 0; }
-      30% { opacity: 1; }
-      100% { opacity: 0; }
-    }
-
-    .evolution-flash-overlay {
+    /* Evolution white screen */
+    .evolution-screen {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: linear-gradient(180deg, #fff 0%, #ffe066 50%, #ff9500 100%);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 100;
-      animation: screen-flash 1.5s ease-out forwards;
+      background: #fff;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .evolution-screen .evolving-sprite {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+
+    @keyframes evo-morph {
+      0%, 20% { transform: scale(1); filter: brightness(1); }
+      25%, 45% { transform: scale(1.1); filter: brightness(0) drop-shadow(0 0 30px #88f); }
+      50%, 70% { transform: scale(1.2); filter: brightness(0) drop-shadow(0 0 50px #fff); }
+      75%, 95% { transform: scale(1.3); filter: brightness(0) drop-shadow(0 0 40px #ff0); }
+      100% { transform: scale(1.2); filter: brightness(1); }
+    }
+
+    .evo-morphing {
+      animation: evo-morph 3s ease-in-out forwards;
     }
 
     /* VOID SPECTER - Enemy sprite */
@@ -1527,68 +1539,57 @@
                   }, 4500);
 
                   // Evolution check - evolve after first victory
+                  let evoScreen = null;
                   setTimeout(() => {
                     const playerSpriteContainer = playerCreature.querySelector('div');
                     if (!playerSpriteContainer.classList.contains('mega-flame-sprite')) {
                       hasEvolved = true;
-                      showMessage('What?');
+                      showMessage('WHAT!<br>BAGUETTE is evolving!');
                     }
                   }, 6500);
 
+                  // White screen with sprite
                   setTimeout(() => {
                     if (hasEvolved) {
-                      showMessage('BAGUETTE is<br>evolving!');
-                      playerCreature.classList.add('evolving');
+                      evoScreen = document.createElement('div');
+                      evoScreen.className = 'evolution-screen';
+                      evoScreen.innerHTML = '<div class="evolving-sprite"><div class="creature-sprite"><div class="pixel-sprite"></div></div></div>';
+                      const evoSprite = evoScreen.querySelector('.creature-sprite > div');
+                      evoSprite.className = 'flame-sprite';
+                      viewport.appendChild(evoScreen);
+
+                      // Start morph animation
+                      setTimeout(() => {
+                        evoScreen.querySelector('.creature-sprite').classList.add('evo-morphing');
+                      }, 100);
                     }
-                  }, 7500);
+                  }, 8000);
 
-                  // Dramatic pause with pulsing
+                  // Swap to mega form mid-animation
                   setTimeout(() => {
-                    if (hasEvolved) {
-                      showMessage('...');
-                      spawnHealParticles('max-heal', playerCreature, 15);
+                    if (hasEvolved && evoScreen) {
+                      const evoSprite = evoScreen.querySelector('.creature-sprite > div');
+                      evoSprite.className = 'mega-flame-sprite';
                     }
-                  }, 9000);
+                  }, 10000);
 
-                  // Big flash moment
+                  // Remove white screen, show result
                   setTimeout(() => {
-                    if (hasEvolved) {
-                      playerCreature.classList.remove('evolving');
-                      playerCreature.classList.add('evolving-flash');
-
-                      // Screen flash
-                      const flash = document.createElement('div');
-                      flash.className = 'evolution-flash-overlay';
-                      viewport.appendChild(flash);
-                      setTimeout(() => flash.remove(), 1500);
-
-                      spawnHealParticles('super-heal', playerCreature, 25);
-                    }
-                  }, 10500);
-
-                  // Transform!
-                  setTimeout(() => {
-                    if (hasEvolved) {
+                    if (hasEvolved && evoScreen) {
+                      evoScreen.remove();
                       const playerSpriteContainer = playerCreature.querySelector('div');
                       playerSpriteContainer.className = 'mega-flame-sprite';
-                      playerCreature.classList.remove('evolving-flash');
-                      showMessage('Congratulations!');
+                      showMessage('Congratulations!<br>BAGUETTE evolved!');
+                      document.querySelector('.stat-box.player .stat-name').textContent = 'MEGA BAGUETTE';
+                      spawnHealParticles('super-heal', playerCreature, 20);
                     }
                   }, 12000);
 
                   setTimeout(() => {
                     if (hasEvolved) {
-                      showMessage('BAGUETTE evolved<br>into MEGA BAGUETTE!');
-                      document.querySelector('.stat-box.player .stat-name').textContent = 'MEGA BAGUETTE';
-                      spawnHealParticles('heal', playerCreature, 12);
+                      showMessage('MEGA BAGUETTE<br>is ready to fight!');
                     }
-                  }, 13500);
-
-                  setTimeout(() => {
-                    if (hasEvolved) {
-                      showMessage('Its flames burn<br>with new power!');
-                    }
-                  }, 15500);
+                  }, 14000);
 
                   setTimeout(() => {
                     showMessage('Want to battle<br>again? TAP!');
@@ -1622,7 +1623,7 @@
                         }, 800);
                       }, 1500);
                     };
-                  }, 17500);
+                  }, 16000);
                 }
               }, playerExp >= 300 ? 3500 : 2000);
             }, 1000);
