@@ -586,6 +586,47 @@
       line-height: 1.6;
     }
 
+    /* Pokemon-style announcement textbox */
+    .announce-box {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f8f8f8;
+      border: 4px solid #484038;
+      border-radius: 12px 12px 0 0;
+      padding: 16px 20px;
+      z-index: 60;
+      min-height: 70px;
+      display: none;
+    }
+
+    .announce-box.visible {
+      display: block;
+    }
+
+    .announce-text {
+      font-size: 18px;
+      color: #303030;
+      line-height: 1.5;
+      font-family: 'Pokemon GB', monospace;
+    }
+
+    .announce-box::after {
+      content: '▼';
+      position: absolute;
+      bottom: 8px;
+      right: 12px;
+      font-size: 12px;
+      color: #484038;
+      animation: bounce-arrow 0.6s ease-in-out infinite;
+    }
+
+    @keyframes bounce-arrow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(3px); }
+    }
+
     .action-box {
       width: 46%;
       background: #f8f8f8;
@@ -1120,8 +1161,10 @@
       .stat-level { font-size: 10px; }
       .message-text { font-size: 13px; }
       .action-btn { font-size: 11px; }
-      .move-btn { font-size: 10px; }
+      .move-btn { font-size: 10px; padding: 6px 2px 6px 18px; }
       .item-btn { font-size: 10px; }
+      .move-info { width: 28%; padding: 8px 6px; font-size: 10px; margin: 6px 4px; }
+      .moves-box { margin: 6px; padding: 6px; }
       .sweetbun-sprite { transform: scale(5); }
       .flame-sprite { transform: scale(5); }
       .void-sprite { transform: scale(4.5); }
@@ -1225,6 +1268,11 @@
           <div class="move-info">
             <div>Use on<br>SWEETBUN?</div>
           </div>
+        </div>
+
+        <!-- Pokemon-style announcement box -->
+        <div class="announce-box" id="announce-box">
+          <div class="announce-text" id="announce-text"></div>
         </div>
       </div>
     </div>
@@ -1389,6 +1437,46 @@
       battleMessage.innerHTML = msg;
     }
 
+    // Pokemon-style announcement box
+    const announceBox = document.getElementById('announce-box');
+    const announceText = document.getElementById('announce-text');
+    let announceQueue = [];
+    let isAnnouncing = false;
+
+    function showAnnounce(messages, callback) {
+      // messages can be a single string or array of strings
+      const msgArray = Array.isArray(messages) ? messages : [messages];
+      announceQueue = msgArray;
+      isAnnouncing = true;
+      showNextAnnounce(callback);
+    }
+
+    function showNextAnnounce(callback) {
+      if (announceQueue.length === 0) {
+        announceBox.classList.remove('visible');
+        isAnnouncing = false;
+        if (callback) callback();
+        return;
+      }
+
+      const msg = announceQueue.shift();
+      announceText.innerHTML = msg;
+      announceBox.classList.add('visible');
+
+      // Tap to continue
+      const handleTap = (e) => {
+        e.stopPropagation();
+        announceBox.removeEventListener('click', handleTap);
+        viewport.removeEventListener('click', handleTap);
+        showNextAnnounce(callback);
+      };
+
+      setTimeout(() => {
+        announceBox.addEventListener('click', handleTap);
+        viewport.addEventListener('click', handleTap);
+      }, 300);
+    }
+
     function createProjectile(fromX, fromY, toX, toY, type, onHit) {
       const proj = document.createElement('div');
       proj.className = `projectile ${type}`;
@@ -1503,35 +1591,37 @@
 
           if (enemyHp <= 0) {
             const enemy = enemies[currentEnemy];
-            showMessage(`Wild ${enemy.name}<br>fainted!`);
             enemyCreature.classList.add('fainting');
 
-            setTimeout(() => {
-              // Award EXP
-              const expGain = enemy.exp;
-              showMessage(`SWEETBUN gained<br>${expGain} EXP!`);
-              playerExp += expGain;
-              const expPercent = Math.min(100, (playerExp % 300) / 3);
-              document.getElementById('exp-bar').style.width = expPercent + '%';
+            // Award EXP
+            const expGain = enemy.exp;
+            playerExp += expGain;
+            const expPercent = Math.min(100, (playerExp % 300) / 3);
+            document.getElementById('exp-bar').style.width = expPercent + '%';
 
-              // Level up check
-              if (playerExp >= 300) {
-                setTimeout(() => {
-                  playerExp = playerExp % 300;
-                  playerLevel++;
-                  showMessage(`SWEETBUN grew to<br>Lv${playerLevel}!`);
-                  document.querySelector('.stat-box.player .stat-level').textContent = playerLevel;
-                  spawnHealParticles('max-heal', playerCreature, 15);
-                }, 1500);
+            // Build announcement messages
+            const announcements = [`Wild ${enemy.name}<br>fainted!`, `SWEETBUN gained<br>${expGain} EXP!`];
+
+            // Level up check
+            let didLevelUp = false;
+            if (playerExp >= 300) {
+              playerExp = playerExp % 300;
+              playerLevel++;
+              didLevelUp = true;
+              announcements.push(`SWEETBUN grew to<br>Lv${playerLevel}!`);
+            }
+
+            showAnnounce(announcements, () => {
+              if (didLevelUp) {
+                document.querySelector('.stat-box.player .stat-level').textContent = playerLevel;
+                spawnHealParticles('max-heal', playerCreature, 15);
               }
 
-              setTimeout(() => {
-                // Check for next enemy
-                if (currentEnemy < enemies.length - 1) {
-                  currentEnemy++;
-                  const nextEnemy = enemies[currentEnemy];
-                  showMessage(`Trainer sends out<br>${nextEnemy.name}!`);
-
+              // Check for next enemy
+              if (currentEnemy < enemies.length - 1) {
+                currentEnemy++;
+                const nextEnemy = enemies[currentEnemy];
+                showAnnounce(`Trainer sends out<br>${nextEnemy.name}!`, () => {
                   // Update enemy stats
                   document.querySelector('.stat-box.enemy .stat-name').textContent = nextEnemy.name;
                   document.querySelector('.stat-box.enemy .stat-level').textContent = nextEnemy.level;
@@ -1551,120 +1641,80 @@
                     isAnimating = false;
                     showMessage('What will<br>SWEETBUN do?');
                   }, 1000);
-                } else {
-                  // All enemies defeated - Pokemon-style victory!
-                  isAnimating = true;
-                  const totalExp = enemies.reduce((sum, e) => sum + e.exp, 0);
-                  const prizeMoney = 2400;
-                  let hasEvolved = false;
+                });
+              } else {
+                // All enemies defeated - Pokemon-style victory!
+                isAnimating = true;
+                const totalExp = enemies.reduce((sum, e) => sum + e.exp, 0);
+                const prizeMoney = 2400;
 
-                  // Victory fanfare sequence
-                  setTimeout(() => {
-                    showMessage('Player defeated<br>TRAINER GHOST!');
-                  }, 500);
+                // Victory announcements
+                const victoryMsgs = [
+                  'Player defeated<br>TRAINER GHOST!',
+                  `SWEETBUN gained<br>${totalExp} total EXP!`,
+                  `Got $${prizeMoney}<br>for winning!`
+                ];
 
-                  setTimeout(() => {
-                    showMessage(`SWEETBUN gained<br>${totalExp} total EXP!`);
-                    spawnHealParticles('heal', playerCreature, 8);
-                  }, 2500);
+                // Check if evolution will happen
+                const playerSpriteContainer = playerCreature.querySelector('div');
+                const willEvolve = playerSpriteContainer.classList.contains('sweetbun-sprite');
 
-                  setTimeout(() => {
-                    showMessage(`Got $${prizeMoney}<br>for winning!`);
-                    spawnHealParticles('super-heal', playerCreature, 12);
-                  }, 4500);
-
-                  // Evolution check - evolve after first victory (SWEETBUN → BAGUETTE)
-                  setTimeout(() => {
-                    const playerSpriteContainer = playerCreature.querySelector('div');
-                    if (playerSpriteContainer.classList.contains('sweetbun-sprite')) {
-                      hasEvolved = true;
-                      showMessage('What?<br>SWEETBUN is evolving!');
-
-                      // Start flashing
-                      playerCreature.classList.add('evo-flashing');
-
-                      // Get player sprite position for particles
-                      const rect = playerCreature.getBoundingClientRect();
-                      const vRect = viewport.getBoundingClientRect();
-                      const cx = rect.left - vRect.left + rect.width / 2;
-                      const cy = rect.top - vRect.top + rect.height / 2;
-
-                      // Spawn tornado particles around player
-                      const spawnTornado = () => {
-                        for (let i = 0; i < 8; i++) {
-                          setTimeout(() => {
-                            const p = document.createElement('div');
-                            p.className = 'evo-particle';
-                            p.style.left = cx + 'px';
-                            p.style.top = cy + 'px';
-                            p.style.animation = `tornado-spin 1.5s ease-in-out forwards`;
-                            p.style.animationDelay = (i * 0.1) + 's';
-                            viewport.appendChild(p);
-                            setTimeout(() => p.remove(), 2000);
-                          }, i * 60);
-                        }
-                      };
-                      spawnTornado();
-                      setTimeout(spawnTornado, 600);
-                      setTimeout(spawnTornado, 1200);
-                      setTimeout(spawnTornado, 1800);
-                    }
-                  }, 6500);
-
-                  // Swap to BAGUETTE form
-                  setTimeout(() => {
-                    if (hasEvolved) {
-                      const playerSpriteContainer = playerCreature.querySelector('div');
-                      playerSpriteContainer.className = 'flame-sprite';
-                    }
-                  }, 9500);
-
-                  // Evolution complete
-                  setTimeout(() => {
-                    if (hasEvolved) {
-                      playerCreature.classList.remove('evo-flashing');
-                      showMessage('Congratulations!<br>SWEETBUN evolved<br>into BAGUETTE!');
-                      document.querySelector('.stat-box.player .stat-name').textContent = 'BAGUETTE';
-                      spawnHealParticles('super-heal', playerCreature, 20);
-                    }
-                  }, 11000);
-
-                  setTimeout(() => {
-                    showMessage('Want to battle<br>again? TAP!');
-
-                    // Reset for replay
-                    currentEnemy = 0;
-                    const firstEnemy = enemies[0];
-                    document.querySelector('.stat-box.enemy .stat-name').textContent = firstEnemy.name;
-                    document.querySelector('.stat-box.enemy .stat-level').textContent = firstEnemy.level;
-                    const spriteContainer = enemyCreature.querySelector('div');
-                    spriteContainer.className = firstEnemy.sprite + '-sprite';
-                    enemyCreature.classList.remove('fainting');
-
-                    // Reset PP
-                    Object.values(moves).forEach(m => m.pp = m.maxPp);
-
-                    viewport.onclick = () => {
-                      viewport.onclick = null;
-                      enemyHp = firstEnemy.maxHp;
-                      playerHp = 100;
-                      updateHpBar(enemyHpBar, 100, false);
-                      updateHpBar(playerHpBar, 100, true);
-                      isAnimating = false;
-                      showMessage('TRAINER GHOST<br>wants to battle!');
-                      setTimeout(() => {
-                        showMessage(`TRAINER GHOST<br>sent out ${firstEnemy.name}!`);
-                        enemyCreature.classList.add('appearing');
-                        setTimeout(() => {
-                          enemyCreature.classList.remove('appearing');
-                          showMessage('What will<br>SWEETBUN do?');
-                        }, 800);
-                      }, 1500);
-                    };
-                  }, 13000);
+                if (willEvolve) {
+                  victoryMsgs.push('What?<br>SWEETBUN is evolving!');
                 }
-              }, playerExp >= 300 ? 3500 : 2000);
-            }, 1000);
+
+                showAnnounce(victoryMsgs, () => {
+                  spawnHealParticles('super-heal', playerCreature, 12);
+
+                  if (willEvolve) {
+                    // Start evolution animation
+                    playerCreature.classList.add('evo-flashing');
+
+                    const rect = playerCreature.getBoundingClientRect();
+                    const vRect = viewport.getBoundingClientRect();
+                    const cx = rect.left - vRect.left + rect.width / 2;
+                    const cy = rect.top - vRect.top + rect.height / 2;
+
+                    const spawnTornado = () => {
+                      for (let i = 0; i < 8; i++) {
+                        setTimeout(() => {
+                          const p = document.createElement('div');
+                          p.className = 'evo-particle';
+                          p.style.left = cx + 'px';
+                          p.style.top = cy + 'px';
+                          p.style.animation = `tornado-spin 1.5s ease-in-out forwards`;
+                          p.style.animationDelay = (i * 0.1) + 's';
+                          viewport.appendChild(p);
+                          setTimeout(() => p.remove(), 2000);
+                        }, i * 60);
+                      }
+                    };
+                    spawnTornado();
+                    setTimeout(spawnTornado, 600);
+                    setTimeout(spawnTornado, 1200);
+
+                    // Transform after animation
+                    setTimeout(() => {
+                      playerSpriteContainer.className = 'flame-sprite';
+                    }, 2000);
+
+                    setTimeout(() => {
+                      playerCreature.classList.remove('evo-flashing');
+                      showAnnounce([
+                        'Congratulations!',
+                        'SWEETBUN evolved<br>into BAGUETTE!'
+                      ], () => {
+                        document.querySelector('.stat-box.player .stat-name').textContent = 'BAGUETTE';
+                        spawnHealParticles('super-heal', playerCreature, 20);
+                        showRematchPrompt();
+                      });
+                    }, 3000);
+                  } else {
+                    showRematchPrompt();
+                  }
+                });
+              }
+            });
           } else {
             setTimeout(() => {
               isAnimating = false;
@@ -1673,6 +1723,37 @@
           }
         });
       }, 500);
+    }
+
+    function showRematchPrompt() {
+      // Reset for replay
+      currentEnemy = 0;
+      const firstEnemy = enemies[0];
+      document.querySelector('.stat-box.enemy .stat-name').textContent = firstEnemy.name;
+      document.querySelector('.stat-box.enemy .stat-level').textContent = firstEnemy.level;
+      const spriteContainer = enemyCreature.querySelector('div');
+      spriteContainer.className = firstEnemy.sprite + '-sprite';
+      enemyCreature.classList.remove('fainting');
+
+      // Reset PP
+      Object.values(moves).forEach(m => m.pp = m.maxPp);
+
+      // Reset HP and start new battle
+      enemyHp = firstEnemy.maxHp;
+      playerHp = 100;
+      updateHpBar(enemyHpBar, 100, false);
+      updateHpBar(playerHpBar, 100, true);
+
+      showAnnounce('TRAINER GHOST<br>wants to battle!', () => {
+        showAnnounce(`TRAINER GHOST<br>sent out ${firstEnemy.name}!`, () => {
+          enemyCreature.classList.add('appearing');
+          setTimeout(() => {
+            enemyCreature.classList.remove('appearing');
+            isAnimating = false;
+            showMessage('What will<br>SWEETBUN do?');
+          }, 800);
+        });
+      });
     }
 
     function enemyAttack() {
