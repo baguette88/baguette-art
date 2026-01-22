@@ -1306,6 +1306,30 @@
       background: linear-gradient(180deg, #2a1a0a 0%, #1a0a00 100%);
     }
 
+    /* Cinematic vignette overlay */
+    .ending-vignette {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center,
+        transparent 0%,
+        transparent 40%,
+        rgba(10,5,0,0.3) 60%,
+        rgba(10,5,0,0.6) 80%,
+        rgba(10,5,0,0.85) 100%
+      );
+      opacity: 0;
+      animation: fadeInVignette 2s ease-out 1s forwards;
+    }
+
+    @keyframes fadeInVignette {
+      to { opacity: 1; }
+    }
+
     .ending-overlay {
       position: fixed;
       top: 0;
@@ -1317,10 +1341,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding-top: 5%;
+      padding-top: 4%;
       pointer-events: none;
       opacity: 0;
-      animation: fadeInOverlay 1s ease-out 2s forwards;
+      animation: fadeInOverlay 1.5s ease-out 2.5s forwards;
     }
 
     @keyframes fadeInOverlay {
@@ -1329,53 +1353,60 @@
 
     .ending-overlay .ending-text {
       font-family: 'Press Start 2P', cursive;
-      font-size: 16px;
+      font-size: clamp(12px, 3vw, 18px);
       color: #f8f0d8;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
-      margin-bottom: 15px;
+      text-shadow: 0 0 20px rgba(255,200,100,0.4), 2px 2px 8px rgba(0,0,0,0.9);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
     }
 
     .ending-overlay .ending-links {
       display: flex;
       flex-direction: row;
       align-items: center;
-      gap: 30px;
-      margin-bottom: 20px;
+      gap: clamp(15px, 4vw, 40px);
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
 
     .ending-overlay .ending-links a {
       font-family: 'Press Start 2P', cursive;
-      font-size: 11px;
+      font-size: clamp(8px, 2vw, 11px);
       color: #c8a868;
       text-decoration: none;
       pointer-events: auto;
-      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-      padding: 10px;
+      text-shadow: 0 0 10px rgba(200,168,104,0.3), 1px 1px 4px rgba(0,0,0,0.8);
+      padding: 8px 12px;
+      transition: color 0.2s, text-shadow 0.2s;
     }
 
     .ending-overlay .ending-links a:hover {
       color: #f8d888;
+      text-shadow: 0 0 15px rgba(248,216,136,0.5), 1px 1px 4px rgba(0,0,0,0.8);
     }
 
     .ending-overlay .play-again-btn {
       pointer-events: auto;
-      padding: 16px 32px;
-      background: linear-gradient(180deg, #4a3a2a 0%, #3a2a1a 100%);
-      border: 3px solid #6a5a4a;
+      padding: clamp(12px, 3vw, 18px) clamp(24px, 6vw, 40px);
+      background: linear-gradient(180deg, #5a4a3a 0%, #3a2a1a 100%);
+      border: 3px solid #7a6a5a;
       border-radius: 8px;
       font-family: 'Press Start 2P', cursive;
-      font-size: 14px;
+      font-size: clamp(11px, 2.5vw, 14px);
       color: #f8f0d8;
       cursor: pointer;
       transition: all 0.15s;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
     }
 
     .ending-overlay .play-again-btn:hover,
     .ending-overlay .play-again-btn:active {
-      background: linear-gradient(180deg, #5a4a3a 0%, #4a3a2a 100%);
+      background: linear-gradient(180deg, #6a5a4a 0%, #4a3a2a 100%);
       transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
     .ending-overlay .zoom-hint {
@@ -1383,8 +1414,19 @@
       bottom: 20px;
       font-family: 'Press Start 2P', cursive;
       font-size: 8px;
-      color: rgba(200,168,104,0.5);
+      color: rgba(200,168,104,0.4);
       text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    }
+
+    /* Mobile adjustments for ending screen */
+    @media (max-width: 480px) {
+      .ending-overlay {
+        padding-top: 3%;
+      }
+      .ending-overlay .ending-links {
+        flex-direction: column;
+        gap: 8px;
+      }
     }
 
     /* EXP bar */

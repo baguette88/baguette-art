@@ -1195,33 +1195,60 @@
             crtTexture.needsUpdate = true;
           }
 
-          // Gameboy plane from captured texture
+          // Gameboy plane from captured texture - RESPONSIVE sizing
           const texture = new THREE.CanvasTexture(canvas);
           texture.minFilter = THREE.LinearFilter;
           const aspect = canvas.width / canvas.height;
-          const gbGeom = new THREE.PlaneGeometry(3 * aspect, 3);
+
+          // Calculate size based on screen - bigger on mobile to fill screen
+          const isMobile = window.innerWidth < 768;
+          const isSmallMobile = window.innerWidth < 480;
+          let gbScale = 3;
+          if (isSmallMobile) gbScale = 4.5;  // Much bigger on small phones
+          else if (isMobile) gbScale = 3.8;  // Bigger on tablets/phones
+
+          const gbGeom = new THREE.PlaneGeometry(gbScale * aspect, gbScale);
           const gbMat = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
           const gameboy = new THREE.Mesh(gbGeom, gbMat);
           scene.add(gameboy);
 
-          // Soft ambient light
-          const ambient = new THREE.AmbientLight(0xfff8e0, 0.6);
+          // === IMPROVED LIGHTING ===
+          // Dim ambient for mood
+          const ambient = new THREE.AmbientLight(0x332211, 0.3);
           scene.add(ambient);
 
-          // Warm point light (desk lamp feel)
-          const lamp = new THREE.PointLight(0xffaa44, 1.2, 20);
-          lamp.position.set(3, 5, 3);
-          scene.add(lamp);
+          // Warm key light from desk lamp (right side)
+          const keyLight = new THREE.PointLight(0xffaa44, 1.8, 12);
+          keyLight.position.set(3.5, 2, -1);
+          scene.add(keyLight);
 
-          // Camera state for zoom
-          let camDistance = 6;
+          // Cool fill light from left (subtle)
+          const fillLight = new THREE.PointLight(0x4466aa, 0.4, 15);
+          fillLight.position.set(-4, 3, 2);
+          scene.add(fillLight);
+
+          // Rim light from behind for depth
+          const rimLight = new THREE.PointLight(0xff6633, 0.6, 10);
+          rimLight.position.set(0, 1, -5);
+          scene.add(rimLight);
+
+          // Soft overhead fill
+          const topLight = new THREE.DirectionalLight(0xffeedd, 0.3);
+          topLight.position.set(0, 10, 0);
+          scene.add(topLight);
+
+          // Camera state for zoom - LOWER ANGLE, CLOSER
+          let camDistance = 5;
           let camHeight = 0;
-          let targetDistance = 4;
-          let targetHeight = 4;
+          let targetDistance = isMobile ? 3.2 : 3.5;  // Closer on mobile
+          let targetHeight = isMobile ? 2.5 : 3;      // Lower on mobile
           let animationDone = false;
 
-          camera.position.set(0, 0, camDistance);
-          camera.lookAt(0, 0, 0);
+          camera.position.set(0, 0.5, camDistance);
+          camera.lookAt(0, -0.5, 0);
+
+          // Add fog for depth
+          scene.fog = new THREE.Fog(0x1a0a00, 6, 14);
 
           // Animation: lay gameboy down on desk
           const duration = 2500;
@@ -1233,18 +1260,21 @@
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - Math.pow(1 - progress, 3);
 
-            // Rotate gameboy to lay flat
-            gameboy.rotation.x = -Math.PI / 2 * eased;
-            gameboy.position.y = -2 + 0.05 + (1 - eased) * 2;
-            gameboy.position.z = eased * 0.5;
+            // Rotate gameboy to lay flat - slight tilt for interest
+            gameboy.rotation.x = -Math.PI / 2 * eased * 0.95;  // Not fully flat
+            gameboy.rotation.z = eased * 0.08;  // Slight rotation
+            gameboy.position.y = -2 + 0.08 + (1 - eased) * 2.5;
+            gameboy.position.z = eased * 0.3;
+            gameboy.position.x = eased * -0.15;  // Slightly off-center (rule of thirds)
 
-            // Smoothly interpolate camera
-            camHeight += (targetHeight * eased - camHeight) * 0.1;
-            camDistance += (targetDistance - camDistance) * 0.05;
+            // Smoothly interpolate camera - LOWER angle looking slightly up
+            camHeight += (targetHeight * eased - camHeight) * 0.08;
+            camDistance += (targetDistance - camDistance) * 0.06;
 
             camera.position.y = camHeight;
             camera.position.z = camDistance;
-            camera.lookAt(0, -1.5, 0);
+            camera.position.x = Math.sin(elapsed * 0.0002) * 0.1;  // Subtle drift
+            camera.lookAt(0, -1.2, 0);  // Look at desk level
 
             // Update CRT static (every 3 frames for that choppy retro feel)
             crtFrame++;
@@ -1262,6 +1292,11 @@
             requestAnimationFrame(animate);
           }
           animate();
+
+          // Add vignette overlay for cinematic look
+          const vignette = document.createElement('div');
+          vignette.className = 'ending-vignette';
+          document.body.appendChild(vignette);
 
           // Add overlay with text
           const overlay = document.createElement('div');
