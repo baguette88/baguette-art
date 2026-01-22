@@ -324,45 +324,42 @@
       80% { transform: translateX(3px); }
     }
 
-    /* Mode switch shader transition - DMG to Color (color burst) */
+    /* Mode switch shader transition - DMG to Color (warm colorization) */
     .viewport.mode-transition-color {
-      animation: colorBurst 0.3s ease-out;
+      animation: colorWarm 0.6s ease-out;
     }
 
-    @keyframes colorBurst {
+    @keyframes colorWarm {
       0% {
-        filter: brightness(1) saturate(0) blur(0px);
+        filter: brightness(1) saturate(0) sepia(0.3);
       }
-      20% {
-        filter: brightness(1.8) saturate(0.3) blur(2px);
-        transform: scale(1.02);
+      30% {
+        filter: brightness(1.05) saturate(0.4) sepia(0.2);
       }
-      50% {
-        filter: brightness(1.3) saturate(1.5) blur(0px) hue-rotate(30deg);
+      60% {
+        filter: brightness(1.02) saturate(0.8) sepia(0.05);
       }
       100% {
-        filter: brightness(1) saturate(1) blur(0px) hue-rotate(0deg);
-        transform: scale(1);
+        filter: brightness(1) saturate(1) sepia(0);
       }
     }
 
-    /* Chromatic aberration overlay during color burst */
+    /* Warm glow overlay during colorization */
     .viewport.mode-transition-color::after {
       content: '';
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(90deg, rgba(255,0,0,0.15) 0%, transparent 33%, transparent 66%, rgba(0,0,255,0.15) 100%);
-      mix-blend-mode: screen;
-      animation: chromaShift 0.3s ease-out;
+      background: radial-gradient(ellipse at center, rgba(255,248,220,0.25) 0%, rgba(255,220,180,0.1) 50%, transparent 80%);
+      mix-blend-mode: overlay;
+      animation: warmGlow 0.6s ease-out;
       pointer-events: none;
       z-index: 100;
     }
 
-    @keyframes chromaShift {
-      0% { opacity: 0; transform: scaleX(1); }
-      30% { opacity: 1; transform: scaleX(1.15); }
-      100% { opacity: 0; transform: scaleX(1); }
+    @keyframes warmGlow {
+      0% { opacity: 0; }
+      40% { opacity: 1; }
+      100% { opacity: 0; }
     }
 
     /* Color drain shader - Game Boy LCD style */
@@ -1843,6 +1840,38 @@
       100% { opacity: 0; transform: scale(0.5) translateY(-50px); }
     }
 
+    /* Antidote particles - purple/blue cleansing */
+    .antidote-particle {
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(135deg, #e0aaff 0%, #9d4edd 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #c77dff, 0 0 20px #9d4edd;
+      animation: antidoteRise 0.9s ease-out forwards;
+    }
+
+    @keyframes antidoteRise {
+      0% { opacity: 0; transform: scale(0) translateY(20px); }
+      30% { opacity: 1; transform: scale(1.2) translateY(0); }
+      100% { opacity: 0; transform: scale(0.5) translateY(-40px); }
+    }
+
+    /* Burn cure particles - cool blue soothing */
+    .burn-cure-particle {
+      width: 9px;
+      height: 9px;
+      background: linear-gradient(135deg, #88ddff 0%, #44aadd 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 10px #88ddff, 0 0 20px #44aadd;
+      animation: burnCureCool 0.9s ease-out forwards;
+    }
+
+    @keyframes burnCureCool {
+      0% { opacity: 0; transform: scale(0) translateY(20px); }
+      30% { opacity: 1; transform: scale(1.3) translateY(0); }
+      100% { opacity: 0; transform: scale(0.4) translateY(-35px); }
+    }
+
     /* Attack projectiles */
     .projectile {
       position: absolute;
@@ -2490,8 +2519,8 @@
         <div class="items-panel" id="items-panel">
           <div class="items-list">
             <div class="item-btn" data-item="potion">POTION<span class="item-count">x3</span></div>
-            <div class="item-btn" data-item="super-potion">SUPERPOTION<span class="item-count">x2</span></div>
-            <div class="item-btn" data-item="max-potion">MAXPOTION<span class="item-count">x1</span></div>
+            <div class="item-btn" data-item="burn-heal">BURN HEAL<span class="item-count">x2</span></div>
+            <div class="item-btn" data-item="antidote">ANTIDOTE<span class="item-count">x2</span></div>
             <div class="item-btn" data-item="cancel">BACK</div>
           </div>
           <div class="move-info">
@@ -2685,8 +2714,8 @@
 
     const items = {
       'potion': { count: 3, heal: 20, particles: 'heal' },
-      'super-potion': { count: 2, heal: 50, particles: 'super-heal' },
-      'max-potion': { count: 1, heal: 100, particles: 'max-heal' }
+      'burn-heal': { count: 2, heal: 0, particles: 'burn-cure', cures: 'burn' },
+      'antidote': { count: 2, heal: 0, particles: 'antidote', cures: 'poison' }
     };
 
     // Particle system
@@ -3261,7 +3290,7 @@
           const finishTurn = () => {
             if (playerHp <= 15 && playerHp > 0) {
               isAnimating = false;
-              setTimeout(() => useMaxPotion(), 800);
+              setTimeout(() => useAutoHeal(), 800);
             } else if (playerHp <= 0) {
               showMessage('SWEETBUN<br>fainted!');
               isAnimating = false;
@@ -3294,24 +3323,71 @@
       }, 500);
     }
 
-    function useMaxPotion() {
+    function useAutoHeal() {
       isAnimating = true;
-      showMessage('SWEETBUN used<br>MAX POTION!');
 
       const playerRect = playerCreature.getBoundingClientRect();
       const viewportRect = viewport.getBoundingClientRect();
       const cx = playerRect.left - viewportRect.left + playerRect.width / 2;
       const cy = playerRect.top - viewportRect.top + playerRect.height / 2;
 
-      setTimeout(() => {
-        spawnHealParticles('max-heal', playerCreature, 20);
-        playerHp = 100;
-        updateHpBar(playerHpBar, 100, true);
-        showDamage(cx, cy - 30, 100, false, true);
-        showMessage("SWEETBUN's HP<br>was restored!");
+      // If poisoned, use antidote first
+      if (playerStatus === 'poison' && items['antidote'].count > 0) {
+        items['antidote'].count--;
+        const btn = document.querySelector('[data-item="antidote"]');
+        if (btn) btn.querySelector('.item-count').textContent = `x${items['antidote'].count}`;
+
+        showMessage('SWEETBUN used<br>ANTIDOTE!');
+        setTimeout(() => {
+          clearPlayerStatus();
+          spawnHealParticles('antidote', playerCreature, 12);
+          showMessage('SWEETBUN was<br>cured of poison!');
+          isAnimating = false;
+          setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
+        }, 800);
+        return;
+      }
+
+      // If burned, use burn heal first
+      if (playerStatus === 'burn' && items['burn-heal'].count > 0) {
+        items['burn-heal'].count--;
+        const btn = document.querySelector('[data-item="burn-heal"]');
+        if (btn) btn.querySelector('.item-count').textContent = `x${items['burn-heal'].count}`;
+
+        showMessage('SWEETBUN used<br>BURN HEAL!');
+        setTimeout(() => {
+          clearPlayerStatus();
+          spawnHealParticles('burn-cure', playerCreature, 12);
+          showMessage('SWEETBUN\'s burn<br>was healed!');
+          isAnimating = false;
+          setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
+        }, 800);
+        return;
+      }
+
+      // Otherwise use potion for HP
+      if (items['potion'].count > 0) {
+        items['potion'].count--;
+        const btn = document.querySelector('[data-item="potion"]');
+        if (btn) btn.querySelector('.item-count').textContent = `x${items['potion'].count}`;
+
+        showMessage('SWEETBUN used<br>POTION!');
+        setTimeout(() => {
+          showMessage("SWEETBUN's HP<br>was restored!");
+          setTimeout(() => {
+            const healAmount = Math.min(20, 100 - playerHp);
+            playerHp = Math.min(100, playerHp + 20);
+            updateHpBar(playerHpBar, playerHp, true);
+            spawnHealParticles('heal', playerCreature, 10);
+            showDamage(cx, cy - 30, healAmount, false, true);
+            isAnimating = false;
+            setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
+          }, 400);
+        }, 800);
+      } else {
         isAnimating = false;
-        setTimeout(() => showMessage('What will<br>SWEETBUN do?'), 1500);
-      }, 500);
+        showMessage('What will<br>SWEETBUN do?');
+      }
     }
 
     function useItem(itemName) {
@@ -3333,25 +3409,42 @@
       const cx = playerRect.left - viewportRect.left + playerRect.width / 2;
       const cy = playerRect.top - viewportRect.top + playerRect.height / 2;
 
+      // Status cure items
+      if (item.cures) {
+        setTimeout(() => {
+          if (playerStatus === item.cures) {
+            clearPlayerStatus();
+            spawnHealParticles(item.particles, playerCreature, 12);
+            const cureMsg = item.cures === 'poison' ? 'SWEETBUN was<br>cured of poison!' : 'SWEETBUN\'s burn<br>was healed!';
+            showMessage(cureMsg);
+          } else {
+            showMessage('It won\'t have<br>any effect...');
+          }
+          setTimeout(() => {
+            isAnimating = false;
+            enemyAttack();
+          }, 1200);
+        }, 800);
+        return;
+      }
+
+      // HP healing items - show message first, then heal (like real Pokemon)
       setTimeout(() => {
         const healAmount = Math.min(item.heal, 100 - playerHp);
-        playerHp = Math.min(100, playerHp + item.heal);
-        updateHpBar(playerHpBar, playerHp, true);
+        showMessage(`SWEETBUN's HP<br>was restored!`);
 
-        // Different particles for different potions
-        if (item.particles === 'max-heal') {
-          spawnHealParticles('max-heal', playerCreature, 20);
-        } else if (item.particles === 'super-heal') {
-          spawnHealParticles('super-heal', playerCreature, 15);
-        } else {
+        // Delay the actual HP bar fill after the message
+        setTimeout(() => {
+          playerHp = Math.min(100, playerHp + item.heal);
+          updateHpBar(playerHpBar, playerHp, true);
           spawnHealParticles('heal', playerCreature, 10);
-        }
+          showDamage(cx, cy - 30, healAmount, false, true);
 
-        showDamage(cx, cy - 30, healAmount, false, true);
-        showMessage(`Restored<br>${healAmount} HP!`);
-
-        isAnimating = false;
-        setTimeout(() => enemyAttack(), 1000);
+          setTimeout(() => {
+            isAnimating = false;
+            enemyAttack();
+          }, 800);
+        }, 400);
       }, 800);
     }
 
