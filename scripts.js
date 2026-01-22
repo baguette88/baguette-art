@@ -44,6 +44,20 @@
       }
     });
 
+    // Power OFF switch - triggers ending sequence with black screen
+    const powerOffSwitch = document.getElementById('power-off-switch');
+    if (powerOffSwitch) {
+      powerOffSwitch.addEventListener('click', () => {
+        // Add screen power-off effect
+        viewport.classList.add('powering-off');
+
+        // After screen blacks out, trigger ending
+        setTimeout(() => {
+          showEndingScreen(true); // true = powered off (black screen)
+        }, 800);
+      });
+    }
+
     let playerHp = 100;
     let enemyHp = 100;
     let playerLevel = 50;
@@ -620,25 +634,32 @@
       }, 500);
     }
 
-    function showEndingScreen() {
-      // Set up epic battle scene before capturing
-      try {
-        const playerSpriteContainer = playerCreature.querySelector('div');
-        if (playerSpriteContainer) playerSpriteContainer.className = 'flame-sprite';
+    function showEndingScreen(poweredOff = false) {
+      // If powered off, show black screen
+      if (poweredOff) {
+        // Hide all viewport content - make screen black
+        viewport.style.background = '#000';
+        viewport.innerHTML = '<div style="width:100%;height:100%;background:#111;"></div>';
+      } else {
+        // Set up epic battle scene before capturing
+        try {
+          const playerSpriteContainer = playerCreature.querySelector('div');
+          if (playerSpriteContainer) playerSpriteContainer.className = 'flame-sprite';
 
-        const enemySpriteContainer = enemyCreature.querySelector('div');
-        if (enemySpriteContainer) enemySpriteContainer.className = 'inferno-sprite';
+          const enemySpriteContainer = enemyCreature.querySelector('div');
+          if (enemySpriteContainer) enemySpriteContainer.className = 'inferno-sprite';
 
-        const enemyName = document.querySelector('.stat-box.enemy .stat-name');
-        const enemyLevel = document.querySelector('.stat-box.enemy .stat-level');
-        const playerName = document.querySelector('.stat-box.player .stat-name');
-        if (enemyName) enemyName.textContent = 'INFERNO';
-        if (enemyLevel) enemyLevel.textContent = '58';
-        if (playerName) playerName.textContent = 'BAGUETTE';
+          const enemyName = document.querySelector('.stat-box.enemy .stat-name');
+          const enemyLevel = document.querySelector('.stat-box.enemy .stat-level');
+          const playerName = document.querySelector('.stat-box.player .stat-name');
+          if (enemyName) enemyName.textContent = 'INFERNO';
+          if (enemyLevel) enemyLevel.textContent = '58';
+          if (playerName) playerName.textContent = 'BAGUETTE';
 
-        showMessage('What will<br>BAGUETTE do?');
-        showMenu('fight');
-      } catch(e) { console.log('Setup error:', e); }
+          showMessage('What will<br>BAGUETTE do?');
+          showMenu('fight');
+        } catch(e) { console.log('Setup error:', e); }
+      }
 
       // Longer delay to let sprites render before capture
       setTimeout(() => {

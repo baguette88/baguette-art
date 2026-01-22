@@ -43,6 +43,73 @@
       border-radius: 2px;
     }
 
+    /* Power OFF switch - left side of shell */
+    .power-off-switch {
+      position: absolute;
+      left: -18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 50px;
+      background: linear-gradient(90deg, #3a3a4a 0%, #4a4a5a 50%, #3a3a4a 100%);
+      border-radius: 4px 0 0 4px;
+      cursor: pointer;
+      box-shadow:
+        inset 1px 0 2px rgba(255,255,255,0.1),
+        -2px 0 4px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 4px;
+      z-index: 50;
+      transition: background 0.2s;
+    }
+
+    .power-off-switch:hover {
+      background: linear-gradient(90deg, #4a4a5a 0%, #5a5a6a 50%, #4a4a5a 100%);
+    }
+
+    .power-off-switch:active .power-off-slider {
+      top: 28px;
+    }
+
+    .power-off-slider {
+      width: 10px;
+      height: 18px;
+      background: linear-gradient(180deg, #666 0%, #444 50%, #333 100%);
+      border-radius: 2px;
+      position: relative;
+      top: 4px;
+      transition: top 0.15s;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.3),
+        0 2px 3px rgba(0,0,0,0.4);
+    }
+
+    .power-off-label {
+      font-size: 5px;
+      color: rgba(255,255,255,0.4);
+      margin-top: auto;
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Screen blackout when powering off */
+    .viewport.powering-off {
+      animation: screenOff 0.8s ease-out forwards;
+    }
+
+    @keyframes screenOff {
+      0% { filter: brightness(1); }
+      20% { filter: brightness(1.5) contrast(1.2); }
+      40% { filter: brightness(0.8); }
+      100% {
+        filter: brightness(0);
+        background: #000;
+      }
+    }
+
     /* Mode switch - top of shell */
     .mode-switch-container {
       position: absolute;
