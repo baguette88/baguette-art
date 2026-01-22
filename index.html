@@ -324,6 +324,55 @@
       80% { transform: translateX(3px); }
     }
 
+    /* Mode switch shader transition */
+    .viewport.mode-transition {
+      animation: modeShaderTransition 0.6s ease-out;
+    }
+
+    @keyframes modeShaderTransition {
+      0% {
+        filter: brightness(1) saturate(1) blur(0px);
+      }
+      15% {
+        filter: brightness(2) saturate(0) blur(2px);
+        transform: scale(1.02);
+      }
+      30% {
+        filter: brightness(1.5) saturate(0.5) blur(1px) hue-rotate(90deg);
+        transform: scale(0.98);
+      }
+      50% {
+        filter: brightness(0.8) saturate(2) blur(0px) hue-rotate(180deg);
+      }
+      70% {
+        filter: brightness(1.2) saturate(1.5) hue-rotate(270deg);
+      }
+      100% {
+        filter: brightness(1) saturate(1) blur(0px) hue-rotate(0deg);
+        transform: scale(1);
+      }
+    }
+
+    /* Chromatic aberration overlay during transition */
+    .viewport.mode-transition::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255,0,0,0.1) 0%, transparent 33%, transparent 66%, rgba(0,0,255,0.1) 100%);
+      mix-blend-mode: screen;
+      animation: chromaShift 0.6s ease-out;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    @keyframes chromaShift {
+      0% { opacity: 0; transform: scaleX(1); }
+      20% { opacity: 1; transform: scaleX(1.1); }
+      50% { opacity: 0.8; transform: scaleX(0.95); }
+      100% { opacity: 0; transform: scaleX(1); }
+    }
+
     /* Scanlines */
     .viewport::before {
       content: '';
@@ -2158,13 +2207,24 @@
     const gameboyLabel = document.getElementById('gameboy-label');
 
     powerSwitch.addEventListener('click', () => {
-      powerSwitch.classList.toggle('on');
-      gameboyShell.classList.toggle('dmg-mode');
-      if (gameboyShell.classList.contains('dmg-mode')) {
-        gameboyLabel.innerHTML = 'GAME BOY';
-      } else {
-        gameboyLabel.innerHTML = 'GAME BOY <span>COLOR</span>';
-      }
+      // Trigger shader transition
+      viewport.classList.add('mode-transition');
+
+      // Switch mode at peak of transition
+      setTimeout(() => {
+        powerSwitch.classList.toggle('on');
+        gameboyShell.classList.toggle('dmg-mode');
+        if (gameboyShell.classList.contains('dmg-mode')) {
+          gameboyLabel.innerHTML = 'GAME BOY';
+        } else {
+          gameboyLabel.innerHTML = 'GAME BOY <span>COLOR</span>';
+        }
+      }, 150);
+
+      // Clean up transition class
+      setTimeout(() => {
+        viewport.classList.remove('mode-transition');
+      }, 600);
     });
 
     let playerHp = 100;
