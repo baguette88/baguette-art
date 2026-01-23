@@ -817,15 +817,40 @@
           frameHorz.position.set(0, windowY, windowZ);
           scene.add(frameHorz);
 
-          // === DESK DETAILS ===
+          // === INTERACTIVE OBJECTS SYSTEM ===
+          // All interactive objects with unique shader reactions that lerp back
+          const interactiveObjects = [];
+          const shaderReactions = {};
 
-          // Stack of textbooks with spine details
+          // Lerp helper
+          function lerp(a, b, t) { return a + (b - a) * t; }
+
+          // Shared GLSL noise functions for shaders
+          const glslNoise = `
+            float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }
+            float noise(vec2 p) {
+              vec2 i = floor(p), f = fract(p);
+              float a = hash(i), b = hash(i + vec2(1.0, 0.0));
+              float c = hash(i + vec2(0.0, 1.0)), d = hash(i + vec2(1.0, 1.0));
+              vec2 u = f * f * (3.0 - 2.0 * f);
+              return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+            }
+            float fbm(vec2 p) {
+              float v = 0.0, a = 0.5;
+              for (int i = 0; i < 4; i++) { v += noise(p) * a; p *= 2.0; a *= 0.5; }
+              return v;
+            }
+          `;
+
+          // === DESK DETAILS (ENHANCED) ===
+
+          // Stack of textbooks with spine details and page edges
           const books = [
-            { color: 0x8B0000, w: 1.3, h: 0.18, d: 1.0, title: 'GLSL' },
-            { color: 0x00008B, w: 1.2, h: 0.12, d: 0.9, title: 'THREE' },
-            { color: 0x2F4F2F, w: 1.25, h: 0.15, d: 0.95, title: 'HLSL' },
-            { color: 0x4B0082, w: 1.15, h: 0.10, d: 0.85, title: 'GPU' },
-            { color: 0x8B4513, w: 1.1, h: 0.14, d: 0.88, title: 'MATH' },
+            { color: 0x8B0000, w: 1.3, h: 0.18, d: 1.0, title: 'GLSL', pages: 0xf5f0e0 },
+            { color: 0x00008B, w: 1.2, h: 0.12, d: 0.9, title: 'THREE', pages: 0xfff8e7 },
+            { color: 0x2F4F2F, w: 1.25, h: 0.15, d: 0.95, title: 'HLSL', pages: 0xf0e8d8 },
+            { color: 0x4B0082, w: 1.15, h: 0.10, d: 0.85, title: 'GPU', pages: 0xfff5e0 },
+            { color: 0x8B4513, w: 1.1, h: 0.14, d: 0.88, title: 'MATH', pages: 0xf8f0e0 },
           ];
 
           // Create book spine texture
@@ -875,26 +900,67 @@
           let booksGlowing = false;
           let runeLight = null;
 
+          // Create page edge texture for books
+          function createPageEdgeTexture() {
+            const c = document.createElement('canvas');
+            c.width = 128; c.height = 32;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#f5f0e0';
+            ctx.fillRect(0, 0, 128, 32);
+            // Individual page lines
+            ctx.strokeStyle = '#d0c8b0';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < 64; i++) {
+              const x = i * 2;
+              ctx.beginPath();
+              ctx.moveTo(x, 0);
+              ctx.lineTo(x, 32);
+              ctx.stroke();
+            }
+            return new THREE.CanvasTexture(c);
+          }
+          const pageEdgeTexture = createPageEdgeTexture();
+
           books.forEach((b, i) => {
-            const bookGeom = new THREE.BoxGeometry(b.w, b.h, b.d);
+            // Main book body
+            const bookGeom = new THREE.BoxGeometry(b.w, b.h, b.d, 2, 1, 2);
             const spineTexture = createBookSpine(b.title, b.color, b.h);
+
+            // Page edge material with texture
+            const pageEdgeMat = new THREE.MeshStandardMaterial({
+              map: pageEdgeTexture,
+              color: b.pages,
+              roughness: 0.95
+            });
+
             const bookMaterials = [
               new THREE.MeshStandardMaterial({ map: spineTexture }), // right (spine)
-              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // left
+              pageEdgeMat, // left (page edges)
               new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // top
               new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // bottom
-              new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // front
+              pageEdgeMat, // front (page edges)
               new THREE.MeshStandardMaterial({ color: b.color, roughness: 0.85 }), // back
             ];
             const book = new THREE.Mesh(bookGeom, bookMaterials);
             bookY += b.h / 2;
             book.position.set(-2.5, bookY, -1.2);
             book.rotation.y = (i % 2 === 0 ? 0.08 : -0.05);
-            book.userData = { baseY: bookY, color: b.color, title: b.title };
+            book.userData = {
+              baseY: bookY,
+              color: b.color,
+              title: b.title,
+              type: 'book',
+              reactionIntensity: 0,
+              originalY: bookY
+            };
             bookY += b.h / 2 + 0.005;
             scene.add(book);
             bookMeshes.push(book);
+            interactiveObjects.push(book);
           });
+
+          // Book reaction shader (pulse glow effect)
+          shaderReactions.books = { intensity: 0, target: 0 };
 
           // Rune overlay for books (hidden initially)
           const runeCanvas = document.createElement('canvas');
@@ -941,92 +1007,327 @@
           runePlane.rotation.x = -Math.PI / 2;
           scene.add(runePlane);
 
-          // Spiral notebook (open, near books)
-          const notebookGeom = new THREE.BoxGeometry(0.8, 0.02, 1.1);
-          const notebookMat = new THREE.MeshStandardMaterial({ color: 0xf5f5dc, roughness: 0.95 });
+          // === ENHANCED NOTEBOOK with ruled lines and shimmer shader ===
+          const notebookCanvas = document.createElement('canvas');
+          notebookCanvas.width = 256; notebookCanvas.height = 256;
+          const nbCtx = notebookCanvas.getContext('2d');
+          nbCtx.fillStyle = '#f8f5e8';
+          nbCtx.fillRect(0, 0, 256, 256);
+          // Ruled lines
+          nbCtx.strokeStyle = '#a8c8e8';
+          nbCtx.lineWidth = 1;
+          for (let y = 20; y < 256; y += 16) {
+            nbCtx.beginPath();
+            nbCtx.moveTo(30, y);
+            nbCtx.lineTo(256, y);
+            nbCtx.stroke();
+          }
+          // Red margin
+          nbCtx.strokeStyle = '#e88888';
+          nbCtx.lineWidth = 2;
+          nbCtx.beginPath();
+          nbCtx.moveTo(30, 0);
+          nbCtx.lineTo(30, 256);
+          nbCtx.stroke();
+          // Some "handwriting"
+          nbCtx.fillStyle = '#2a4a6a';
+          nbCtx.font = '12px cursive';
+          nbCtx.fillText('vec3 color = mix(a, b, t);', 35, 45);
+          nbCtx.fillText('// TODO: add noise', 35, 77);
+
+          const notebookTexture = new THREE.CanvasTexture(notebookCanvas);
+          const notebookGeom = new THREE.BoxGeometry(0.8, 0.025, 1.1, 4, 1, 4);
+          const notebookMat = new THREE.MeshStandardMaterial({
+            map: notebookTexture,
+            roughness: 0.95
+          });
           const notebook = new THREE.Mesh(notebookGeom, notebookMat);
           notebook.position.set(-1.2, -1.98, -0.8);
           notebook.rotation.y = -0.3;
+          notebook.userData = { type: 'notebook', reactionIntensity: 0 };
           scene.add(notebook);
-          // Spiral binding
-          for (let i = 0; i < 8; i++) {
-            const spiralGeom = new THREE.TorusGeometry(0.03, 0.008, 6, 12);
-            const spiralMat = new THREE.MeshStandardMaterial({ color: 0x333333, metalness: 0.8 });
+          interactiveObjects.push(notebook);
+          shaderReactions.notebook = { intensity: 0, target: 0 };
+
+          // Spiral binding with more detail
+          const spirals = [];
+          for (let i = 0; i < 12; i++) {
+            const spiralGeom = new THREE.TorusGeometry(0.025, 0.006, 8, 16);
+            const spiralMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.9, roughness: 0.2 });
             const spiral = new THREE.Mesh(spiralGeom, spiralMat);
-            spiral.position.set(-1.55, -1.97, -1.25 + i * 0.14);
+            spiral.position.set(-1.55, -1.965, -1.3 + i * 0.09);
             spiral.rotation.y = Math.PI / 2;
             scene.add(spiral);
+            spirals.push(spiral);
           }
 
-          // Pencil cup (right side)
-          const cupGeom = new THREE.CylinderGeometry(0.15, 0.12, 0.4, 12);
-          const cupMat = new THREE.MeshStandardMaterial({ color: 0x2F4F4F, roughness: 0.7 });
-          const cup = new THREE.Mesh(cupGeom, cupMat);
-          cup.position.set(2.2, -1.8, -1.5);
-          scene.add(cup);
-          // Pencils in cup
-          const pencilColors = [0xFFD700, 0xFF6347, 0x4169E1];
-          for (let i = 0; i < 3; i++) {
-            const pencilGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.5, 6);
-            const pencilMat = new THREE.MeshStandardMaterial({ color: pencilColors[i] });
-            const pencil = new THREE.Mesh(pencilGeom, pencilMat);
-            pencil.position.set(2.2 + (i - 1) * 0.05, -1.55, -1.5);
-            pencil.rotation.z = 0.1 * (i - 1);
-            scene.add(pencil);
+          // === ENHANCED PENCIL CUP with shader reaction ===
+          const pencilCupGeom = new THREE.CylinderGeometry(0.16, 0.13, 0.45, 24, 4);
+          // Create brushed metal texture
+          const brushedCanvas = document.createElement('canvas');
+          brushedCanvas.width = 64; brushedCanvas.height = 128;
+          const bmCtx = brushedCanvas.getContext('2d');
+          bmCtx.fillStyle = '#3a5a5a';
+          bmCtx.fillRect(0, 0, 64, 128);
+          bmCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+          for (let i = 0; i < 100; i++) {
+            bmCtx.beginPath();
+            bmCtx.moveTo(0, Math.random() * 128);
+            bmCtx.lineTo(64, Math.random() * 128);
+            bmCtx.stroke();
           }
+          const brushedTexture = new THREE.CanvasTexture(brushedCanvas);
 
-          // Game cartridges (far left, away from gameboy)
-          const carts = [
-            { x: -2.8, z: 0.8, rot: 0.4, color: 0x707070, label: 0xFFE4B5 },
-            { x: -2.5, z: 1.1, rot: -0.2, color: 0x505050, label: 0xB5FFB5 },
-            { x: -2.9, z: 1.4, rot: 0.9, color: 0x606060, label: 0xFFB5B5 },
+          const pencilCupMat = new THREE.MeshStandardMaterial({
+            map: brushedTexture,
+            metalness: 0.4,
+            roughness: 0.6
+          });
+          const pencilCup = new THREE.Mesh(pencilCupGeom, pencilCupMat);
+          pencilCup.position.set(2.2, -1.77, -1.5);
+          pencilCup.userData = { type: 'pencilCup', reactionIntensity: 0 };
+          scene.add(pencilCup);
+          interactiveObjects.push(pencilCup);
+          shaderReactions.pencilCup = { intensity: 0, target: 0 };
+
+          // Enhanced pencils with proper tips
+          const pencilMeshes = [];
+          const pencilData = [
+            { color: 0xFFD700, x: -0.04, tilt: -0.15 },
+            { color: 0xFF6347, x: 0, tilt: 0.05 },
+            { color: 0x4169E1, x: 0.04, tilt: 0.12 },
+            { color: 0x32CD32, x: 0.02, tilt: -0.08 },
+            { color: 0xFF69B4, x: -0.02, tilt: 0.18 }
           ];
-          carts.forEach(c => {
-            const cartGeom = new THREE.BoxGeometry(0.45, 0.08, 0.55);
-            const cartMat = new THREE.MeshStandardMaterial({ color: c.color, roughness: 0.6 });
-            const cart = new THREE.Mesh(cartGeom, cartMat);
-            cart.position.set(c.x, -1.96, c.z);
-            cart.rotation.y = c.rot;
-            scene.add(cart);
-            // Label sticker
-            const labelGeom = new THREE.PlaneGeometry(0.3, 0.35);
-            const labelMat = new THREE.MeshBasicMaterial({ color: c.label });
-            const label = new THREE.Mesh(labelGeom, labelMat);
-            label.position.set(c.x, -1.91, c.z);
-            label.rotation.x = -Math.PI / 2;
-            label.rotation.z = c.rot;
-            scene.add(label);
+          pencilData.forEach((p, i) => {
+            // Pencil body (hexagonal would be ideal, using cylinder)
+            const bodyGeom = new THREE.CylinderGeometry(0.018, 0.018, 0.55, 6);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: p.color, roughness: 0.7 });
+            const body = new THREE.Mesh(bodyGeom, bodyMat);
+            body.position.set(2.2 + p.x, -1.49, -1.5 + (i - 2) * 0.02);
+            body.rotation.z = p.tilt;
+            body.rotation.x = (Math.random() - 0.5) * 0.1;
+            scene.add(body);
+            pencilMeshes.push(body);
+
+            // Wood tip
+            const tipGeom = new THREE.ConeGeometry(0.018, 0.06, 6);
+            const tipMat = new THREE.MeshStandardMaterial({ color: 0xdeb887 });
+            const tip = new THREE.Mesh(tipGeom, tipMat);
+            tip.position.copy(body.position);
+            tip.position.y += 0.305;
+            tip.rotation.copy(body.rotation);
+            scene.add(tip);
+
+            // Graphite point
+            const pointGeom = new THREE.ConeGeometry(0.005, 0.02, 6);
+            const pointMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+            const point = new THREE.Mesh(pointGeom, pointMat);
+            point.position.copy(tip.position);
+            point.position.y += 0.04;
+            point.rotation.copy(tip.rotation);
+            scene.add(point);
           });
 
-          // Soda can (near front right)
-          const canGeom = new THREE.CylinderGeometry(0.12, 0.12, 0.4, 16);
-          const canMat = new THREE.MeshStandardMaterial({ color: 0xCC0000, metalness: 0.7, roughness: 0.3 });
-          const sodaCan = new THREE.Mesh(canGeom, canMat);
-          sodaCan.position.set(2.8, -1.8, 0.8);
-          scene.add(sodaCan);
-          // Can top
-          const canTopGeom = new THREE.CylinderGeometry(0.11, 0.12, 0.02, 16);
-          const canTopMat = new THREE.MeshStandardMaterial({ color: 0xC0C0C0, metalness: 0.9 });
-          const canTop = new THREE.Mesh(canTopGeom, canTopMat);
-          canTop.position.set(2.8, -1.59, 0.8);
-          scene.add(canTop);
+          // === ENHANCED GAME CARTRIDGES with holographic shader ===
+          const cartridgeMeshes = [];
+          const carts = [
+            { x: -2.8, z: 0.8, rot: 0.4, color: 0x606060, label: 'POKEMON' },
+            { x: -2.5, z: 1.1, rot: -0.2, color: 0x505050, label: 'ZELDA' },
+            { x: -2.9, z: 1.4, rot: 0.9, color: 0x555555, label: 'METROID' },
+          ];
 
-          // Coffee mug (bigger, near books)
+          // Holographic label shader
+          const holoVertShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+            void main() {
+              vUv = uv;
+              vNormal = normalMatrix * normal;
+              vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+              vViewPosition = -mvPosition.xyz;
+              gl_Position = projectionMatrix * mvPosition;
+            }
+          `;
+          const holoFragShader = `
+            uniform float uTime;
+            uniform float uIntensity;
+            uniform vec3 uBaseColor;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            varying vec3 vViewPosition;
+
+            void main() {
+              vec3 viewDir = normalize(vViewPosition);
+              float fresnel = pow(1.0 - abs(dot(vNormal, viewDir)), 3.0);
+
+              // Rainbow shift based on angle and time
+              float hue = vUv.x * 2.0 + vUv.y + uTime * 0.5 + fresnel * 2.0;
+              vec3 rainbow = vec3(
+                sin(hue) * 0.5 + 0.5,
+                sin(hue + 2.094) * 0.5 + 0.5,
+                sin(hue + 4.189) * 0.5 + 0.5
+              );
+
+              // Sparkle effect
+              float sparkle = sin(vUv.x * 50.0 + uTime * 3.0) * sin(vUv.y * 50.0 - uTime * 2.0);
+              sparkle = pow(max(0.0, sparkle), 8.0);
+
+              vec3 holoColor = mix(uBaseColor, rainbow, uIntensity * (fresnel + 0.3));
+              holoColor += sparkle * uIntensity * 0.5;
+
+              gl_FragColor = vec4(holoColor, 1.0);
+            }
+          `;
+
+          carts.forEach((c, idx) => {
+            // Cartridge body with notch detail
+            const cartGroup = new THREE.Group();
+            const cartGeom = new THREE.BoxGeometry(0.48, 0.1, 0.6, 2, 1, 2);
+            const cartMat = new THREE.MeshStandardMaterial({ color: c.color, roughness: 0.5, metalness: 0.1 });
+            const cart = new THREE.Mesh(cartGeom, cartMat);
+            cartGroup.add(cart);
+
+            // Notch at top
+            const notchGeom = new THREE.BoxGeometry(0.15, 0.08, 0.1);
+            const notch = new THREE.Mesh(notchGeom, cartMat);
+            notch.position.set(0, 0.04, -0.25);
+            cartGroup.add(notch);
+
+            // Holographic label with shader
+            const labelGeom = new THREE.PlaneGeometry(0.35, 0.4);
+            const labelMat = new THREE.ShaderMaterial({
+              uniforms: {
+                uTime: { value: 0 },
+                uIntensity: { value: 0 },
+                uBaseColor: { value: new THREE.Color(c.color).multiplyScalar(1.5) }
+              },
+              vertexShader: holoVertShader,
+              fragmentShader: holoFragShader
+            });
+            const label = new THREE.Mesh(labelGeom, labelMat);
+            label.position.set(0, 0.052, 0);
+            label.rotation.x = -Math.PI / 2;
+            cartGroup.add(label);
+
+            cartGroup.position.set(c.x, -1.95, c.z);
+            cartGroup.rotation.y = c.rot;
+            cartGroup.userData = { type: 'cartridge', reactionIntensity: 0, labelMat: labelMat, index: idx };
+            scene.add(cartGroup);
+            cartridgeMeshes.push(cartGroup);
+            interactiveObjects.push(cartGroup);
+          });
+          shaderReactions.cartridges = { intensity: 0, target: 0 };
+
+          // === ENHANCED SODA CAN with fizz shader ===
+          const sodaCanGeom = new THREE.CylinderGeometry(0.125, 0.12, 0.42, 32, 8);
+
+          // Soda can label texture
+          const sodaCanvas = document.createElement('canvas');
+          sodaCanvas.width = 256; sodaCanvas.height = 128;
+          const sodaCtx = sodaCanvas.getContext('2d');
+          // Red gradient
+          const sodaGrad = sodaCtx.createLinearGradient(0, 0, 256, 0);
+          sodaGrad.addColorStop(0, '#aa0000');
+          sodaGrad.addColorStop(0.5, '#dd2222');
+          sodaGrad.addColorStop(1, '#aa0000');
+          sodaCtx.fillStyle = sodaGrad;
+          sodaCtx.fillRect(0, 0, 256, 128);
+          // Brand text
+          sodaCtx.fillStyle = '#ffffff';
+          sodaCtx.font = 'bold 40px Arial';
+          sodaCtx.textAlign = 'center';
+          sodaCtx.fillText('COLA', 128, 70);
+          // Decorative swirl
+          sodaCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+          sodaCtx.lineWidth = 3;
+          sodaCtx.beginPath();
+          sodaCtx.moveTo(20, 100);
+          sodaCtx.quadraticCurveTo(128, 60, 236, 100);
+          sodaCtx.stroke();
+
+          const sodaTexture = new THREE.CanvasTexture(sodaCanvas);
+          const sodaCanMat = new THREE.MeshStandardMaterial({
+            map: sodaTexture,
+            metalness: 0.8,
+            roughness: 0.25
+          });
+          const sodaCan = new THREE.Mesh(sodaCanGeom, sodaCanMat);
+          sodaCan.position.set(2.8, -1.79, 0.8);
+          sodaCan.userData = { type: 'sodaCan', reactionIntensity: 0 };
+          scene.add(sodaCan);
+          interactiveObjects.push(sodaCan);
+          shaderReactions.sodaCan = { intensity: 0, target: 0 };
+
+          // Can top with pull tab detail
+          const canTopGeom = new THREE.CylinderGeometry(0.115, 0.12, 0.025, 32);
+          const canTopMat = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, metalness: 0.95, roughness: 0.15 });
+          const sodaCanTop = new THREE.Mesh(canTopGeom, canTopMat);
+          sodaCanTop.position.set(2.8, -1.57, 0.8);
+          scene.add(sodaCanTop);
+
+          // Pull tab
+          const tabGeom = new THREE.TorusGeometry(0.03, 0.008, 6, 12, Math.PI);
+          const tab = new THREE.Mesh(tabGeom, canTopMat);
+          tab.position.set(2.8, -1.555, 0.78);
+          tab.rotation.x = Math.PI / 2;
+          tab.rotation.z = 0.3;
+          scene.add(tab);
+
+          // Fizz particles for soda (created on demand during reaction)
+          const fizzParticles = [];
+
+          // === ENHANCED COFFEE MUG with ripple shader ===
           const mugX = -1.7, mugZ = -1.6;
-          const mugGeom = new THREE.CylinderGeometry(0.22, 0.18, 0.45, 16);
-          const mugMat = new THREE.MeshStandardMaterial({ color: 0xf8f8f8, roughness: 0.3 });
+
+          // Mug body with more segments
+          const mugGeom = new THREE.CylinderGeometry(0.24, 0.19, 0.5, 32, 4);
+
+          // Create ceramic texture
+          const ceramicCanvas = document.createElement('canvas');
+          ceramicCanvas.width = 128; ceramicCanvas.height = 128;
+          const cerCtx = ceramicCanvas.getContext('2d');
+          cerCtx.fillStyle = '#f0f0f0';
+          cerCtx.fillRect(0, 0, 128, 128);
+          // Subtle speckles
+          for (let i = 0; i < 50; i++) {
+            cerCtx.fillStyle = `rgba(${180 + Math.random() * 40}, ${180 + Math.random() * 40}, ${180 + Math.random() * 40}, 0.3)`;
+            cerCtx.beginPath();
+            cerCtx.arc(Math.random() * 128, Math.random() * 128, Math.random() * 2, 0, Math.PI * 2);
+            cerCtx.fill();
+          }
+          const ceramicTexture = new THREE.CanvasTexture(ceramicCanvas);
+
+          const mugMat = new THREE.MeshStandardMaterial({
+            map: ceramicTexture,
+            color: 0xffffff,
+            roughness: 0.25,
+            metalness: 0.05
+          });
           const mug = new THREE.Mesh(mugGeom, mugMat);
-          mug.position.set(mugX, -1.76, mugZ);
+          mug.position.set(mugX, -1.74, mugZ);
+          mug.userData = { type: 'mug', reactionIntensity: 0 };
           scene.add(mug);
-          // Mug handle (bigger)
-          const handleGeom = new THREE.TorusGeometry(0.12, 0.035, 8, 12, Math.PI);
+          interactiveObjects.push(mug);
+          shaderReactions.mug = { intensity: 0, target: 0 };
+
+          // Mug rim (slightly thicker)
+          const rimGeom = new THREE.TorusGeometry(0.24, 0.015, 8, 32);
+          const rim = new THREE.Mesh(rimGeom, mugMat);
+          rim.position.set(mugX, -1.49, mugZ);
+          rim.rotation.x = Math.PI / 2;
+          scene.add(rim);
+
+          // Handle with better geometry
+          const handleGeom = new THREE.TorusGeometry(0.13, 0.025, 12, 16, Math.PI);
           const handle = new THREE.Mesh(handleGeom, mugMat);
-          handle.position.set(mugX + 0.22, -1.76, mugZ);
+          handle.position.set(mugX + 0.24, -1.74, mugZ);
           handle.rotation.y = Math.PI / 2;
           handle.rotation.x = Math.PI / 2;
           scene.add(handle);
-          // Coffee inside with shader
-          const coffeeGeom = new THREE.CircleGeometry(0.19, 32);
+          // Coffee inside with enhanced ripple reaction shader
+          const coffeeGeom = new THREE.CircleGeometry(0.21, 48);
           const coffeeVertShader = `
             varying vec2 vUv;
             void main() {
@@ -1036,43 +1337,67 @@
           `;
           const coffeeFragShader = `
             uniform float time;
+            uniform float uRippleIntensity;
             varying vec2 vUv;
+
+            ${glslNoise}
+
             void main() {
               vec2 uv = vUv - 0.5;
               float dist = length(uv);
 
               // Base coffee color
               vec3 coffeeColor = vec3(0.22, 0.13, 0.08);
-              vec3 creamColor = vec3(0.35, 0.25, 0.18);
+              vec3 creamColor = vec3(0.38, 0.28, 0.20);
+              vec3 darkCoffee = vec3(0.12, 0.07, 0.04);
 
               // Subtle swirl pattern
               float angle = atan(uv.y, uv.x);
               float swirl = sin(angle * 3.0 + dist * 8.0 - time * 0.3) * 0.5 + 0.5;
 
-              // Ripple from center
+              // Base ripple
               float ripple = sin(dist * 20.0 - time * 0.8) * 0.02;
 
+              // Touch-triggered expanding ripple rings
+              float touchRipple = 0.0;
+              if (uRippleIntensity > 0.01) {
+                float ripplePhase = (1.0 - uRippleIntensity) * 3.0;
+                for (int i = 0; i < 3; i++) {
+                  float ring = smoothstep(0.02, 0.0, abs(dist - ripplePhase * 0.15 - float(i) * 0.08));
+                  touchRipple += ring * uRippleIntensity * (1.0 - float(i) * 0.3);
+                }
+              }
+
               // Edge highlight (rim of cup reflection)
-              float rim = smoothstep(0.4, 0.5, dist);
+              float rimEffect = smoothstep(0.4, 0.5, dist);
 
-              // Mix colors
-              vec3 col = mix(coffeeColor, creamColor, swirl * 0.15 + ripple);
-              col += vec3(0.1) * rim; // Rim highlight
+              // Mix colors with touch disturbance
+              float disturb = fbm(uv * 10.0 + time * 0.2) * uRippleIntensity * 0.3;
+              vec3 col = mix(coffeeColor, creamColor, swirl * 0.15 + ripple + disturb);
+              col = mix(col, darkCoffee, touchRipple * 0.5);
+              col += vec3(0.1) * rimEffect;
 
-              // Surface reflection spot
-              float highlight = smoothstep(0.15, 0.0, length(uv - vec2(-0.1, 0.1)));
-              col += vec3(0.15) * highlight;
+              // Surface reflection spot (moves when disturbed)
+              vec2 reflectOffset = vec2(-0.1 + sin(time * 2.0 + uRippleIntensity * 10.0) * uRippleIntensity * 0.1, 0.1);
+              float highlight = smoothstep(0.15, 0.0, length(uv - reflectOffset));
+              col += vec3(0.18) * highlight * (1.0 - uRippleIntensity * 0.5);
+
+              // Ripple highlights
+              col += vec3(0.15, 0.12, 0.08) * touchRipple;
 
               gl_FragColor = vec4(col, 1.0);
             }
           `;
           const coffeeMat = new THREE.ShaderMaterial({
-            uniforms: { time: { value: 0 } },
+            uniforms: {
+              time: { value: 0 },
+              uRippleIntensity: { value: 0 }
+            },
             vertexShader: coffeeVertShader,
             fragmentShader: coffeeFragShader
           });
           const coffee = new THREE.Mesh(coffeeGeom, coffeeMat);
-          coffee.position.set(mugX, -1.54, mugZ);
+          coffee.position.set(mugX, -1.49, mugZ);
           coffee.rotation.x = -Math.PI / 2;
           scene.add(coffee);
 
@@ -1213,111 +1538,397 @@
             });
           }
 
-          // Link cable (coiled, front left)
-          const cableMat = new THREE.MeshStandardMaterial({ color: 0x4a4a6a, roughness: 0.8 });
-          for (let i = 0; i < 12; i++) {
-            const cableGeom = new THREE.TorusGeometry(0.1 + i * 0.006, 0.015, 8, 16);
-            const cable = new THREE.Mesh(cableGeom, cableMat);
-            cable.position.set(-1.8, -1.97 + i * 0.005, 1.8);
-            cable.rotation.x = Math.PI / 2;
-            cable.rotation.z = i * 0.12;
-            scene.add(cable);
+          // === ENHANCED LINK CABLE with energy pulse shader ===
+          const cableGroup = new THREE.Group();
+          const cableMat = new THREE.MeshStandardMaterial({ color: 0x4a4a6a, roughness: 0.7, metalness: 0.2 });
+          const cableMeshes = [];
+          for (let i = 0; i < 15; i++) {
+            const cableGeom = new THREE.TorusGeometry(0.1 + i * 0.005, 0.012, 12, 24);
+            const cable = new THREE.Mesh(cableGeom, cableMat.clone());
+            cable.position.set(0, i * 0.004, 0);
+            cable.rotation.z = i * 0.1;
+            cableGroup.add(cable);
+            cableMeshes.push(cable);
           }
-          // Cable connector
-          const connectorGeom = new THREE.BoxGeometry(0.12, 0.06, 0.2);
-          const connector = new THREE.Mesh(connectorGeom, cableMat);
-          connector.position.set(-1.5, -1.97, 2.0);
-          connector.rotation.y = 0.5;
-          scene.add(connector);
+          cableGroup.position.set(-1.8, -1.97, 1.8);
+          cableGroup.rotation.x = Math.PI / 2;
+          cableGroup.userData = { type: 'cable', reactionIntensity: 0 };
+          scene.add(cableGroup);
+          interactiveObjects.push(cableGroup);
+          shaderReactions.cable = { intensity: 0, target: 0 };
 
-          // AA Batteries (scattered near front)
-          const battPositions = [[0.8, 2.2], [1.0, 2.0], [0.6, 2.4], [1.2, 2.3]];
+          // Cable connector with detail
+          const connectorGroup = new THREE.Group();
+          const connectorBody = new THREE.Mesh(
+            new THREE.BoxGeometry(0.14, 0.07, 0.22, 2, 1, 2),
+            cableMat
+          );
+          connectorGroup.add(connectorBody);
+          // Connector pins
           for (let i = 0; i < 4; i++) {
-            const battGeom = new THREE.CylinderGeometry(0.04, 0.04, 0.2, 8);
-            const battMat = new THREE.MeshStandardMaterial({ color: 0xDAA520, metalness: 0.6 });
+            const pin = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.008, 0.008, 0.04, 6),
+              new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9 })
+            );
+            pin.position.set(-0.03 + i * 0.02, -0.04, 0);
+            pin.rotation.x = Math.PI / 2;
+            connectorGroup.add(pin);
+          }
+          connectorGroup.position.set(-1.5, -1.96, 2.0);
+          connectorGroup.rotation.y = 0.5;
+          scene.add(connectorGroup);
+
+          // === ENHANCED BATTERIES with energy glow shader ===
+          const batteryGroup = new THREE.Group();
+          const batteryMeshes = [];
+          const battPositions = [[0.8, 2.2, 0], [1.0, 2.0, 0.3], [0.6, 2.4, -0.2], [1.2, 2.3, 0.15]];
+
+          // Battery shader for energy glow
+          const batteryVertShader = `
+            varying vec2 vUv;
+            varying vec3 vNormal;
+            void main() {
+              vUv = uv;
+              vNormal = normalMatrix * normal;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `;
+          const batteryFragShader = `
+            uniform float uIntensity;
+            uniform float uTime;
+            varying vec2 vUv;
+            varying vec3 vNormal;
+
+            void main() {
+              // Gold base color
+              vec3 goldColor = vec3(0.85, 0.65, 0.13);
+              vec3 brightGold = vec3(1.0, 0.9, 0.4);
+
+              // Energy pulse traveling along battery
+              float pulse = sin(vUv.y * 20.0 - uTime * 8.0) * 0.5 + 0.5;
+              pulse = pow(pulse, 4.0) * uIntensity;
+
+              // Edge glow
+              float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
+              float edgeGlow = fresnel * uIntensity;
+
+              vec3 col = mix(goldColor, brightGold, pulse + edgeGlow);
+              col += vec3(0.2, 0.5, 1.0) * pulse * 0.3; // Blue energy tint
+
+              gl_FragColor = vec4(col, 1.0);
+            }
+          `;
+
+          battPositions.forEach((pos, i) => {
+            // Battery body
+            const battGeom = new THREE.CylinderGeometry(0.045, 0.045, 0.22, 16, 8);
+            const battMat = new THREE.ShaderMaterial({
+              uniforms: {
+                uIntensity: { value: 0 },
+                uTime: { value: 0 }
+              },
+              vertexShader: batteryVertShader,
+              fragmentShader: batteryFragShader
+            });
             const batt = new THREE.Mesh(battGeom, battMat);
-            batt.position.set(battPositions[i][0], -1.98, battPositions[i][1]);
+            batt.position.set(pos[0], -1.975, pos[1]);
             batt.rotation.z = Math.PI / 2;
-            batt.rotation.y = i * 0.4;
+            batt.rotation.y = pos[2];
+            batt.userData = { type: 'battery', reactionIntensity: 0, index: i };
             scene.add(batt);
+            batteryMeshes.push(batt);
+            interactiveObjects.push(batt);
+
+            // Positive terminal
+            const termGeom = new THREE.CylinderGeometry(0.02, 0.02, 0.02, 8);
+            const termMat = new THREE.MeshStandardMaterial({ color: 0xc0c0c0, metalness: 0.9 });
+            const term = new THREE.Mesh(termGeom, termMat);
+            term.position.copy(batt.position);
+            term.position.x += 0.12 * Math.cos(pos[2]);
+            term.position.z -= 0.12 * Math.sin(pos[2]);
+            term.rotation.z = Math.PI / 2;
+            scene.add(term);
+          });
+          shaderReactions.batteries = { intensity: 0, target: 0 };
+
+          // === ENHANCED DESK LAMP with warm glow pulse shader ===
+          const lampGroup = new THREE.Group();
+
+          // Weighted base with texture
+          const lampBaseGeom = new THREE.CylinderGeometry(0.28, 0.32, 0.1, 24, 2);
+          const lampBaseMat = new THREE.MeshStandardMaterial({
+            color: 0x1a1a1a,
+            metalness: 0.7,
+            roughness: 0.3
+          });
+          const lampBase = new THREE.Mesh(lampBaseGeom, lampBaseMat);
+          lampGroup.add(lampBase);
+
+          // Articulated arm segments
+          const armMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.6, roughness: 0.4 });
+          const arm1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 12), armMat);
+          arm1.position.set(0, 0.3, 0);
+          lampGroup.add(arm1);
+
+          // Joint
+          const joint = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), armMat);
+          joint.position.set(0, 0.55, 0);
+          lampGroup.add(joint);
+
+          const arm2 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.55, 12), armMat);
+          arm2.position.set(0, 0.85, -0.1);
+          arm2.rotation.x = 0.2;
+          lampGroup.add(arm2);
+
+          // Lamp shade with interior
+          const lampShadeGeom = new THREE.ConeGeometry(0.32, 0.4, 24, 1, true);
+          const lampShadeMat = new THREE.MeshStandardMaterial({
+            color: 0x2d4a2d,
+            side: THREE.DoubleSide,
+            metalness: 0.1,
+            roughness: 0.7
+          });
+          const lampShade = new THREE.Mesh(lampShadeGeom, lampShadeMat);
+          lampShade.position.set(0, 1.1, -0.15);
+          lampShade.rotation.x = Math.PI + 0.15;
+          lampGroup.add(lampShade);
+
+          // Inner shade (lighter)
+          const innerShadeGeom = new THREE.ConeGeometry(0.3, 0.38, 24, 1, true);
+          const innerShadeMat = new THREE.MeshStandardMaterial({
+            color: 0xffeedd,
+            side: THREE.BackSide,
+            emissive: 0xffcc88,
+            emissiveIntensity: 0.2
+          });
+          const innerShade = new THREE.Mesh(innerShadeGeom, innerShadeMat);
+          innerShade.position.copy(lampShade.position);
+          innerShade.rotation.copy(lampShade.rotation);
+          lampGroup.add(innerShade);
+
+          lampGroup.position.set(2.8, -1.96, -2.2);
+          lampGroup.userData = { type: 'lamp', reactionIntensity: 0, innerShade: innerShade };
+          scene.add(lampGroup);
+          interactiveObjects.push(lampGroup);
+          shaderReactions.lamp = { intensity: 0, target: 0 };
+
+          // === ENHANCED ERASER with soft bounce glow ===
+          const eraserGeom = new THREE.BoxGeometry(0.22, 0.09, 0.45, 4, 2, 4);
+          // Rubber texture
+          const rubberCanvas = document.createElement('canvas');
+          rubberCanvas.width = 64; rubberCanvas.height = 64;
+          const rubCtx = rubberCanvas.getContext('2d');
+          rubCtx.fillStyle = '#ffb6c1';
+          rubCtx.fillRect(0, 0, 64, 64);
+          // Wear marks
+          rubCtx.fillStyle = 'rgba(255,255,255,0.2)';
+          for (let i = 0; i < 10; i++) {
+            rubCtx.fillRect(Math.random() * 64, Math.random() * 64, Math.random() * 15, 2);
+          }
+          // Brand imprint
+          rubCtx.fillStyle = 'rgba(150,80,100,0.4)';
+          rubCtx.font = 'bold 10px sans-serif';
+          rubCtx.fillText('SOFT', 18, 35);
+          const rubberTexture = new THREE.CanvasTexture(rubberCanvas);
+
+          const eraserMat = new THREE.MeshStandardMaterial({
+            map: rubberTexture,
+            color: 0xffb6c1,
+            roughness: 0.98
+          });
+          const eraser = new THREE.Mesh(eraserGeom, eraserMat);
+          eraser.position.set(-0.8, -1.955, -0.3);
+          eraser.rotation.y = 0.4;
+          eraser.userData = { type: 'eraser', reactionIntensity: 0, baseY: -1.955 };
+          scene.add(eraser);
+          interactiveObjects.push(eraser);
+          shaderReactions.eraser = { intensity: 0, target: 0 };
+
+          // === ENHANCED CALCULATOR with LCD shader ===
+          const calcGroup = new THREE.Group();
+
+          const calcBodyGeom = new THREE.BoxGeometry(0.55, 0.06, 0.75, 2, 1, 2);
+          const calcBodyMat = new THREE.MeshStandardMaterial({
+            color: 0x1a1a1a,
+            roughness: 0.5,
+            metalness: 0.1
+          });
+          const calcBody = new THREE.Mesh(calcBodyGeom, calcBodyMat);
+          calcGroup.add(calcBody);
+
+          // LCD screen with shader
+          const lcdVertShader = `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `;
+          const lcdFragShader = `
+            uniform float uTime;
+            uniform float uFlashIntensity;
+            varying vec2 vUv;
+
+            void main() {
+              // LCD green base
+              vec3 lcdOff = vec3(0.4, 0.5, 0.35);
+              vec3 lcdOn = vec3(0.1, 0.15, 0.1);
+              vec3 flashColor = vec3(0.7, 1.0, 0.6);
+
+              // 7-segment display simulation
+              float digit = 0.0;
+              vec2 uv = vUv;
+
+              // Pixelated segments
+              vec2 segUv = fract(uv * vec2(8.0, 1.0));
+              float seg = step(0.2, segUv.x) * step(segUv.x, 0.8);
+              seg *= step(0.3, segUv.y) * step(segUv.y, 0.7);
+
+              // Random digits effect during flash
+              float randDigit = fract(sin(floor(uv.x * 8.0) * 127.1 + uTime * 5.0) * 43758.5) * uFlashIntensity;
+
+              vec3 col = mix(lcdOff, lcdOn, seg * (0.3 + randDigit * 0.7));
+
+              // Flash effect
+              col = mix(col, flashColor, uFlashIntensity * 0.6);
+
+              // Scanlines
+              col *= 0.95 + 0.05 * sin(vUv.y * 100.0);
+
+              gl_FragColor = vec4(col, 1.0);
+            }
+          `;
+
+          const lcdMat = new THREE.ShaderMaterial({
+            uniforms: {
+              uTime: { value: 0 },
+              uFlashIntensity: { value: 0 }
+            },
+            vertexShader: lcdVertShader,
+            fragmentShader: lcdFragShader
+          });
+
+          const lcdGeom = new THREE.PlaneGeometry(0.4, 0.12);
+          const lcd = new THREE.Mesh(lcdGeom, lcdMat);
+          lcd.position.set(0, 0.032, -0.22);
+          lcd.rotation.x = -Math.PI / 2;
+          calcGroup.add(lcd);
+
+          // Calculator buttons
+          const btnMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.8 });
+          for (let row = 0; row < 4; row++) {
+            for (let col = 0; col < 4; col++) {
+              const btn = new THREE.Mesh(
+                new THREE.BoxGeometry(0.08, 0.02, 0.08, 1, 1, 1),
+                btnMat
+              );
+              btn.position.set(-0.15 + col * 0.1, 0.035, 0.05 + row * 0.1);
+              calcGroup.add(btn);
+            }
           }
 
-          // Desk lamp (back right, adjusted)
-          const lampBaseGeom = new THREE.CylinderGeometry(0.25, 0.3, 0.08, 16);
-          const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x2a2a2a, metalness: 0.5 });
-          const lampBase = new THREE.Mesh(lampBaseGeom, lampBaseMat);
-          lampBase.position.set(2.8, -1.96, -2.2);
-          scene.add(lampBase);
-          const lampArmGeom = new THREE.CylinderGeometry(0.025, 0.025, 1.0, 8);
-          const lampArm = new THREE.Mesh(lampArmGeom, lampBaseMat);
-          lampArm.position.set(2.8, -1.4, -2.2);
-          scene.add(lampArm);
-          const lampShadeGeom = new THREE.ConeGeometry(0.3, 0.35, 16, 1, true);
-          const lampShadeMat = new THREE.MeshStandardMaterial({ color: 0x3d5c3d, side: THREE.DoubleSide });
-          const lampShade = new THREE.Mesh(lampShadeGeom, lampShadeMat);
-          lampShade.position.set(2.8, -0.85, -2.2);
-          lampShade.rotation.x = Math.PI;
-          scene.add(lampShade);
+          calcGroup.position.set(2.5, -1.94, -1.6);
+          calcGroup.rotation.y = 0.3;
+          calcGroup.userData = { type: 'calculator', reactionIntensity: 0, lcdMat: lcdMat };
+          scene.add(calcGroup);
+          interactiveObjects.push(calcGroup);
+          shaderReactions.calculator = { intensity: 0, target: 0 };
 
-          // Eraser (pink, near notebook)
-          const eraserGeom = new THREE.BoxGeometry(0.2, 0.08, 0.4);
-          const eraserMat = new THREE.MeshStandardMaterial({ color: 0xFFB6C1, roughness: 0.95 });
-          const eraser = new THREE.Mesh(eraserGeom, eraserMat);
-          eraser.position.set(-0.8, -1.96, -0.3);
-          eraser.rotation.y = 0.4;
-          scene.add(eraser);
+          // === ENHANCED iPad with glitch shader ===
+          const ipadGroup = new THREE.Group();
 
-          // Calculator (moved to back right)
-          const calcGeom = new THREE.BoxGeometry(0.5, 0.05, 0.7);
-          const calcMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6 });
-          const calc = new THREE.Mesh(calcGeom, calcMat);
-          calc.position.set(2.5, -1.97, -1.6);
-          calc.rotation.y = 0.3;
-          scene.add(calc);
-          // Calculator screen
-          const calcScreenGeom = new THREE.PlaneGeometry(0.35, 0.15);
-          const calcScreenMat = new THREE.MeshBasicMaterial({ color: 0x90EE90 });
-          const calcScreen = new THREE.Mesh(calcScreenGeom, calcScreenMat);
-          calcScreen.position.set(2.5, -1.94, -1.8);
-          calcScreen.rotation.x = -Math.PI / 2;
-          calcScreen.rotation.z = 0.3;
-          scene.add(calcScreen);
+          // iPad body with chamfered edges (space gray)
+          const ipadBodyGeom = new THREE.BoxGeometry(1.15, 0.045, 1.55, 4, 1, 4);
+          const ipadBodyMat = new THREE.MeshStandardMaterial({
+            color: 0x3a3a3c,
+            metalness: 0.85,
+            roughness: 0.25
+          });
+          const ipadBody = new THREE.Mesh(ipadBodyGeom, ipadBodyMat);
+          ipadGroup.add(ipadBody);
 
-          // === iPad with Shader Editor ===
-          // iPad body (space gray)
-          const ipadGeom = new THREE.BoxGeometry(1.1, 0.04, 1.5);
-          const ipadMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3c, metalness: 0.8, roughness: 0.3 });
-          const ipad = new THREE.Mesh(ipadGeom, ipadMat);
-          ipad.position.set(1.6, -1.96, -1.2);
-          ipad.rotation.y = -0.15;
-          scene.add(ipad);
+          // Screen bezel
+          const bezelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a });
+          const bezel = new THREE.Mesh(new THREE.PlaneGeometry(1.05, 1.45), bezelMat);
+          bezel.position.y = 0.024;
+          bezel.rotation.x = -Math.PI / 2;
+          ipadGroup.add(bezel);
 
-          // iPad screen with shader editor
+          // iPad screen with glitch shader
+          const glitchVertShader = `
+            varying vec2 vUv;
+            void main() {
+              vUv = uv;
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `;
+          const glitchFragShader = `
+            uniform sampler2D uTexture;
+            uniform float uTime;
+            uniform float uGlitchIntensity;
+            varying vec2 vUv;
+
+            float rand(vec2 co) {
+              return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            void main() {
+              vec2 uv = vUv;
+
+              // Horizontal glitch offset
+              float glitchLine = step(0.99, rand(vec2(floor(uv.y * 50.0), floor(uTime * 10.0))));
+              float offset = glitchLine * (rand(vec2(uTime, uv.y)) - 0.5) * 0.1 * uGlitchIntensity;
+              uv.x += offset;
+
+              // Chromatic aberration
+              float aberration = uGlitchIntensity * 0.01;
+              vec4 colR = texture2D(uTexture, uv + vec2(aberration, 0.0));
+              vec4 colG = texture2D(uTexture, uv);
+              vec4 colB = texture2D(uTexture, uv - vec2(aberration, 0.0));
+
+              vec3 col = vec3(colR.r, colG.g, colB.b);
+
+              // Scanline effect
+              float scanline = sin(uv.y * 400.0 + uTime * 5.0) * 0.03 * uGlitchIntensity;
+              col += scanline;
+
+              // Random block corruption
+              float blockGlitch = step(0.995, rand(vec2(floor(uv.x * 20.0), floor(uv.y * 20.0 + uTime))));
+              col = mix(col, vec3(rand(uv + uTime), rand(uv * 2.0 + uTime), rand(uv * 3.0 + uTime)), blockGlitch * uGlitchIntensity);
+
+              // Color inversion bands
+              float invertBand = step(0.98, sin(uv.y * 30.0 + uTime * 20.0)) * uGlitchIntensity;
+              col = mix(col, 1.0 - col, invertBand * 0.5);
+
+              gl_FragColor = vec4(col, 1.0);
+            }
+          `;
+
+          // Create iPad screen texture
           const ipadCanvas = document.createElement('canvas');
-          ipadCanvas.width = 220;
-          ipadCanvas.height = 300;
+          ipadCanvas.width = 256; ipadCanvas.height = 340;
           const ipadCtx = ipadCanvas.getContext('2d');
 
-          // Draw shader editor UI
+          // Editor background
           ipadCtx.fillStyle = '#1e1e2e';
-          ipadCtx.fillRect(0, 0, 220, 300);
+          ipadCtx.fillRect(0, 0, 256, 340);
 
           // Title bar
           ipadCtx.fillStyle = '#2d2d3d';
-          ipadCtx.fillRect(0, 0, 220, 24);
+          ipadCtx.fillRect(0, 0, 256, 28);
           ipadCtx.fillStyle = '#888';
-          ipadCtx.font = '10px monospace';
-          ipadCtx.fillText('shader.frag', 8, 16);
+          ipadCtx.font = '12px monospace';
+          ipadCtx.fillText('shader.frag', 10, 18);
 
           // Traffic lights
           ipadCtx.fillStyle = '#ff5f56';
-          ipadCtx.beginPath(); ipadCtx.arc(190, 12, 5, 0, Math.PI*2); ipadCtx.fill();
+          ipadCtx.beginPath(); ipadCtx.arc(220, 14, 6, 0, Math.PI*2); ipadCtx.fill();
           ipadCtx.fillStyle = '#ffbd2e';
-          ipadCtx.beginPath(); ipadCtx.arc(175, 12, 5, 0, Math.PI*2); ipadCtx.fill();
+          ipadCtx.beginPath(); ipadCtx.arc(200, 14, 6, 0, Math.PI*2); ipadCtx.fill();
           ipadCtx.fillStyle = '#27ca40';
-          ipadCtx.beginPath(); ipadCtx.arc(160, 12, 5, 0, Math.PI*2); ipadCtx.fill();
+          ipadCtx.beginPath(); ipadCtx.arc(180, 14, 6, 0, Math.PI*2); ipadCtx.fill();
 
-          // Code lines with syntax highlighting
+          // Code with syntax highlighting
           const codeLines = [
             { text: 'uniform float u_time;', color: '#c678dd' },
             { text: 'uniform vec2 u_resolution;', color: '#c678dd' },
@@ -1326,50 +1937,92 @@
             { text: '  vec2 uv = gl_FragCoord.xy', color: '#abb2bf' },
             { text: '    / u_resolution;', color: '#abb2bf' },
             { text: '', color: '#666' },
-            { text: '  // Color gradient', color: '#5c6370' },
-            { text: '  vec3 col = vec3(uv.x,', color: '#98c379' },
-            { text: '    uv.y, sin(u_time));', color: '#98c379' },
+            { text: '  // Rainbow effect', color: '#5c6370' },
+            { text: '  float hue = uv.x + u_time;', color: '#98c379' },
+            { text: '  vec3 col = vec3(', color: '#98c379' },
+            { text: '    sin(hue) * 0.5 + 0.5,', color: '#d19a66' },
+            { text: '    sin(hue + 2.09) * 0.5,', color: '#d19a66' },
+            { text: '    sin(hue + 4.18) * 0.5);', color: '#d19a66' },
             { text: '', color: '#666' },
             { text: '  gl_FragColor =', color: '#e5c07b' },
             { text: '    vec4(col, 1.0);', color: '#e5c07b' },
             { text: '}', color: '#61afef' },
           ];
 
+          ipadCtx.font = '11px monospace';
           codeLines.forEach((line, i) => {
             ipadCtx.fillStyle = '#4a4a5a';
-            ipadCtx.fillText((i + 1).toString().padStart(2), 4, 42 + i * 16);
+            ipadCtx.fillText((i + 1).toString().padStart(2), 6, 48 + i * 17);
             ipadCtx.fillStyle = line.color;
-            ipadCtx.fillText(line.text, 24, 42 + i * 16);
+            ipadCtx.fillText(line.text, 28, 48 + i * 17);
           });
 
-          // Blinking cursor
+          // Cursor
           ipadCtx.fillStyle = '#528bff';
-          ipadCtx.fillRect(140, 220, 8, 14);
+          ipadCtx.fillRect(180, 295, 9, 15);
 
           const ipadTexture = new THREE.CanvasTexture(ipadCanvas);
-          const ipadScreenGeom = new THREE.PlaneGeometry(0.95, 1.3);
-          const ipadScreenMat = new THREE.MeshBasicMaterial({ map: ipadTexture });
-          const ipadScreen = new THREE.Mesh(ipadScreenGeom, ipadScreenMat);
-          ipadScreen.position.set(1.6, -1.93, -1.2);
-          ipadScreen.rotation.x = -Math.PI / 2;
-          ipadScreen.rotation.z = -0.15;
-          scene.add(ipadScreen);
 
-          // Apple Pencil next to iPad
-          const pencilBodyGeom = new THREE.CylinderGeometry(0.02, 0.018, 0.7, 8);
-          const pencilBodyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
-          const applePencil = new THREE.Mesh(pencilBodyGeom, pencilBodyMat);
-          applePencil.position.set(2.3, -1.98, -0.9);
-          applePencil.rotation.z = Math.PI / 2;
-          applePencil.rotation.y = -0.15;
-          scene.add(applePencil);
-          // Pencil tip
-          const pencilTipGeom = new THREE.ConeGeometry(0.018, 0.06, 8);
-          const pencilTipMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8 });
-          const pencilTip = new THREE.Mesh(pencilTipGeom, pencilTipMat);
-          pencilTip.position.set(2.65, -1.98, -0.85);
-          pencilTip.rotation.z = -Math.PI / 2;
-          scene.add(pencilTip);
+          const ipadScreenMat = new THREE.ShaderMaterial({
+            uniforms: {
+              uTexture: { value: ipadTexture },
+              uTime: { value: 0 },
+              uGlitchIntensity: { value: 0 }
+            },
+            vertexShader: glitchVertShader,
+            fragmentShader: glitchFragShader
+          });
+
+          const ipadScreen = new THREE.Mesh(new THREE.PlaneGeometry(0.98, 1.35), ipadScreenMat);
+          ipadScreen.position.y = 0.025;
+          ipadScreen.rotation.x = -Math.PI / 2;
+          ipadGroup.add(ipadScreen);
+
+          // Camera bump
+          const cameraBump = new THREE.Mesh(
+            new THREE.BoxGeometry(0.15, 0.02, 0.15),
+            ipadBodyMat
+          );
+          cameraBump.position.set(-0.4, 0.03, -0.6);
+          ipadGroup.add(cameraBump);
+
+          ipadGroup.position.set(1.6, -1.955, -1.2);
+          ipadGroup.rotation.y = -0.15;
+          ipadGroup.userData = { type: 'ipad', reactionIntensity: 0, screenMat: ipadScreenMat };
+          scene.add(ipadGroup);
+          interactiveObjects.push(ipadGroup);
+          shaderReactions.ipad = { intensity: 0, target: 0 };
+
+          // Apple Pencil with detail
+          const applePencilGroup = new THREE.Group();
+          const pencilBodyGeom = new THREE.CylinderGeometry(0.022, 0.02, 0.72, 12);
+          const pencilBodyMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.25,
+            metalness: 0.1
+          });
+          const applePencilBody = new THREE.Mesh(pencilBodyGeom, pencilBodyMat);
+          applePencilGroup.add(applePencilBody);
+
+          // Flat side for charging
+          const flatSide = new THREE.Mesh(
+            new THREE.BoxGeometry(0.01, 0.3, 0.035),
+            pencilBodyMat
+          );
+          flatSide.position.set(-0.018, 0.15, 0);
+          applePencilGroup.add(flatSide);
+
+          // Tip
+          const tipGeom = new THREE.ConeGeometry(0.02, 0.05, 12);
+          const tipMat = new THREE.MeshStandardMaterial({ color: 0xd0d0d0, metalness: 0.8 });
+          const tip = new THREE.Mesh(tipGeom, tipMat);
+          tip.position.y = 0.385;
+          applePencilGroup.add(tip);
+
+          applePencilGroup.position.set(2.35, -1.97, -0.9);
+          applePencilGroup.rotation.z = Math.PI / 2;
+          applePencilGroup.rotation.y = -0.15;
+          scene.add(applePencilGroup);
 
           // === CRT TV (back center-left) ===
           // TV body
@@ -1654,12 +2307,103 @@
               }
             }
 
+            // === LERP ALL SHADER REACTIONS ===
+            const lerpSpeed = 0.03;
+            const time = elapsed * 0.001;
+
+            // Coffee mug ripple
+            shaderReactions.mug.intensity = lerp(shaderReactions.mug.intensity, shaderReactions.mug.target, lerpSpeed);
+            shaderReactions.mug.target *= 0.98;
+            coffeeMat.uniforms.uRippleIntensity.value = shaderReactions.mug.intensity;
+
+            // Cartridge holographic effect
+            shaderReactions.cartridges.intensity = lerp(shaderReactions.cartridges.intensity, shaderReactions.cartridges.target, lerpSpeed);
+            shaderReactions.cartridges.target *= 0.97;
+            cartridgeMeshes.forEach(cart => {
+              if (cart.userData.labelMat) {
+                cart.userData.labelMat.uniforms.uIntensity.value = shaderReactions.cartridges.intensity;
+                cart.userData.labelMat.uniforms.uTime.value = time;
+              }
+            });
+
+            // Battery energy pulse
+            shaderReactions.batteries.intensity = lerp(shaderReactions.batteries.intensity, shaderReactions.batteries.target, lerpSpeed);
+            shaderReactions.batteries.target *= 0.96;
+            batteryMeshes.forEach(batt => {
+              if (batt.material.uniforms) {
+                batt.material.uniforms.uIntensity.value = shaderReactions.batteries.intensity;
+                batt.material.uniforms.uTime.value = time;
+              }
+            });
+
+            // Calculator LCD flash
+            shaderReactions.calculator.intensity = lerp(shaderReactions.calculator.intensity, shaderReactions.calculator.target, lerpSpeed * 1.5);
+            shaderReactions.calculator.target *= 0.94;
+            if (calcGroup.userData.lcdMat) {
+              calcGroup.userData.lcdMat.uniforms.uFlashIntensity.value = shaderReactions.calculator.intensity;
+              calcGroup.userData.lcdMat.uniforms.uTime.value = time;
+            }
+
+            // iPad glitch effect
+            shaderReactions.ipad.intensity = lerp(shaderReactions.ipad.intensity, shaderReactions.ipad.target, lerpSpeed);
+            shaderReactions.ipad.target *= 0.95;
+            if (ipadGroup.userData.screenMat) {
+              ipadGroup.userData.screenMat.uniforms.uGlitchIntensity.value = shaderReactions.ipad.intensity;
+              ipadGroup.userData.screenMat.uniforms.uTime.value = time;
+            }
+
+            // Lamp glow pulse
+            shaderReactions.lamp.intensity = lerp(shaderReactions.lamp.intensity, shaderReactions.lamp.target, lerpSpeed);
+            shaderReactions.lamp.target *= 0.97;
+            if (lampGroup.userData.innerShade) {
+              lampGroup.userData.innerShade.material.emissiveIntensity = 0.2 + shaderReactions.lamp.intensity * 0.8;
+              lampLight.intensity = 2.0 + shaderReactions.lamp.intensity * 3.0;
+            }
+
+            // Eraser soft bounce
+            shaderReactions.eraser.intensity = lerp(shaderReactions.eraser.intensity, shaderReactions.eraser.target, lerpSpeed * 2);
+            shaderReactions.eraser.target *= 0.92;
+            if (eraser.userData.baseY !== undefined) {
+              eraser.position.y = eraser.userData.baseY + Math.sin(time * 15) * shaderReactions.eraser.intensity * 0.02;
+              eraser.material.emissive = new THREE.Color(0xff88aa);
+              eraser.material.emissiveIntensity = shaderReactions.eraser.intensity * 0.3;
+            }
+
+            // Soda can fizz (could add particle system here)
+            shaderReactions.sodaCan.intensity = lerp(shaderReactions.sodaCan.intensity, shaderReactions.sodaCan.target, lerpSpeed);
+            shaderReactions.sodaCan.target *= 0.96;
+            if (shaderReactions.sodaCan.intensity > 0.1) {
+              sodaCan.rotation.y += shaderReactions.sodaCan.intensity * 0.02;
+            }
+
+            // Pencil cup sparkle
+            shaderReactions.pencilCup.intensity = lerp(shaderReactions.pencilCup.intensity, shaderReactions.pencilCup.target, lerpSpeed);
+            shaderReactions.pencilCup.target *= 0.95;
+            pencilMeshes.forEach((p, i) => {
+              p.rotation.z += Math.sin(time * 5 + i) * shaderReactions.pencilCup.intensity * 0.01;
+            });
+
+            // Cable energy flow
+            shaderReactions.cable.intensity = lerp(shaderReactions.cable.intensity, shaderReactions.cable.target, lerpSpeed);
+            shaderReactions.cable.target *= 0.96;
+            cableMeshes.forEach((cable, i) => {
+              const pulse = Math.sin(time * 8 - i * 0.3) * 0.5 + 0.5;
+              cable.material.emissive = new THREE.Color(0x4488ff);
+              cable.material.emissiveIntensity = pulse * shaderReactions.cable.intensity * 0.5;
+            });
+
+            // Notebook shimmer
+            shaderReactions.notebook.intensity = lerp(shaderReactions.notebook.intensity, shaderReactions.notebook.target, lerpSpeed);
+            shaderReactions.notebook.target *= 0.95;
+            notebook.material.emissive = new THREE.Color(0xffffdd);
+            notebook.material.emissiveIntensity = shaderReactions.notebook.intensity * 0.2;
+
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
           }
           animate();
 
-          // Raycaster for book click detection
+          // Raycaster for all interactive object detection
           const raycaster = new THREE.Raycaster();
           const mouse = new THREE.Vector2();
 
@@ -1670,44 +2414,116 @@
             mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(bookMeshes);
 
-            if (intersects.length > 0) {
-              // Toggle rune glow
-              booksGlowing = !booksGlowing;
-
-              if (booksGlowing) {
-                // Add glowing rune light
-                runeLight = new THREE.PointLight(0x66aaff, 2, 3);
-                runeLight.position.set(-2.5, -1.2, -1.2);
-                scene.add(runeLight);
-
-                // Make books glow
-                bookMeshes.forEach(book => {
-                  book.material.forEach(mat => {
-                    if (mat.emissive) {
-                      mat.emissive.setHex(0x223344);
-                      mat.emissiveIntensity = 0.3;
-                    }
-                  });
+            // Check all interactive objects (including nested meshes in groups)
+            const allMeshes = [];
+            interactiveObjects.forEach(obj => {
+              if (obj.isGroup) {
+                obj.traverse(child => {
+                  if (child.isMesh) allMeshes.push(child);
                 });
               } else {
-                // Remove glow
-                if (runeLight) {
-                  scene.remove(runeLight);
-                  runeLight = null;
-                }
-                runePlaneMat.opacity = 0;
+                allMeshes.push(obj);
+              }
+            });
 
-                // Remove book glow
-                bookMeshes.forEach(book => {
-                  book.material.forEach(mat => {
-                    if (mat.emissive) {
-                      mat.emissive.setHex(0x000000);
-                      mat.emissiveIntensity = 0;
-                    }
-                  });
-                });
+            const intersects = raycaster.intersectObjects(allMeshes, true);
+
+            if (intersects.length > 0) {
+              // Find the parent interactive object
+              let hitObject = intersects[0].object;
+              while (hitObject.parent && !hitObject.userData.type) {
+                hitObject = hitObject.parent;
+              }
+
+              const objType = hitObject.userData.type;
+
+              // Trigger unique shader reaction based on object type
+              switch (objType) {
+                case 'book':
+                  // Toggle rune glow (existing behavior)
+                  booksGlowing = !booksGlowing;
+                  if (booksGlowing) {
+                    runeLight = new THREE.PointLight(0x66aaff, 2, 3);
+                    runeLight.position.set(-2.5, -1.2, -1.2);
+                    scene.add(runeLight);
+                    bookMeshes.forEach(book => {
+                      book.material.forEach(mat => {
+                        if (mat.emissive) {
+                          mat.emissive.setHex(0x223344);
+                          mat.emissiveIntensity = 0.3;
+                        }
+                      });
+                    });
+                  } else {
+                    if (runeLight) { scene.remove(runeLight); runeLight = null; }
+                    runePlaneMat.opacity = 0;
+                    bookMeshes.forEach(book => {
+                      book.material.forEach(mat => {
+                        if (mat.emissive) {
+                          mat.emissive.setHex(0x000000);
+                          mat.emissiveIntensity = 0;
+                        }
+                      });
+                    });
+                  }
+                  shaderReactions.books.target = 1.0;
+                  break;
+
+                case 'mug':
+                  // Coffee ripple effect
+                  shaderReactions.mug.target = 1.0;
+                  break;
+
+                case 'cartridge':
+                  // Holographic shimmer
+                  shaderReactions.cartridges.target = 1.0;
+                  break;
+
+                case 'battery':
+                  // Energy pulse
+                  shaderReactions.batteries.target = 1.0;
+                  break;
+
+                case 'calculator':
+                  // LCD flash/scramble
+                  shaderReactions.calculator.target = 1.0;
+                  break;
+
+                case 'ipad':
+                  // Glitch effect
+                  shaderReactions.ipad.target = 1.0;
+                  break;
+
+                case 'lamp':
+                  // Warm glow pulse
+                  shaderReactions.lamp.target = 1.0;
+                  break;
+
+                case 'eraser':
+                  // Soft bounce glow
+                  shaderReactions.eraser.target = 1.0;
+                  break;
+
+                case 'sodaCan':
+                  // Fizz effect
+                  shaderReactions.sodaCan.target = 1.0;
+                  break;
+
+                case 'pencilCup':
+                  // Pencil scatter/sparkle
+                  shaderReactions.pencilCup.target = 1.0;
+                  break;
+
+                case 'cable':
+                  // Energy flow pulse
+                  shaderReactions.cable.target = 1.0;
+                  break;
+
+                case 'notebook':
+                  // Page shimmer
+                  shaderReactions.notebook.target = 1.0;
+                  break;
               }
             }
           }
