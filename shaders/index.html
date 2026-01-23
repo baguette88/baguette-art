@@ -167,6 +167,10 @@
     .shader-card.slime .shader-name { color: #77dd77; }
     .shader-card.slime .feature-tag { background: #1a2a1a; color: #55aa55; }
 
+    .shader-card.steam { --accent: #aabbcc; }
+    .shader-card.steam .shader-name { color: #ddeeff; }
+    .shader-card.steam .feature-tag { background: #1a1a2a; color: #99aabb; }
+
     footer {
       padding: 2rem;
       text-align: center;
@@ -355,6 +359,30 @@
           <span class="feature-tag">Iridescence</span>
         </div>
         <a href="slime.tsl.js" class="view-source">View Source →</a>
+      </div>
+    </article>
+
+    <!-- Steam Shader -->
+    <article class="shader-card steam">
+      <div class="shader-canvas-container">
+        <canvas class="shader-canvas" id="steam-canvas"></canvas>
+      </div>
+      <div class="shader-info">
+        <h2 class="shader-name">
+          STEAM
+          <span class="shader-type tsl">GLSL</span>
+        </h2>
+        <p class="shader-description">
+          Volumetric vapor effect with organic turbulent movement.
+          Features life-based fade and wispy noise-distorted edges.
+        </p>
+        <div class="shader-features">
+          <span class="feature-tag">FBM Noise</span>
+          <span class="feature-tag">Volumetric</span>
+          <span class="feature-tag">Life Fade</span>
+          <span class="feature-tag">Wispy Edges</span>
+        </div>
+        <a href="steam.tsl.js" class="view-source">View Source →</a>
       </div>
     </article>
   </main>
@@ -769,6 +797,72 @@
       `
     };
 
+    // STEAM SHADER
+    const steamShader = {
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float uTime;
+        varying vec2 vUv;
+        ${glslUtils}
+
+        void main() {
+          vec2 uv = vUv - 0.5;
+          float dist = length(uv);
+
+          // Multiple rising steam columns
+          float steam = 0.0;
+          for (int i = 0; i < 5; i++) {
+            float fi = float(i);
+            float offsetX = sin(fi * 1.5) * 0.15;
+            float speed = 0.4 + fi * 0.1;
+            float phase = fi * 0.7;
+
+            vec2 steamUv = vec2(uv.x - offsetX, uv.y + uTime * speed + phase);
+
+            // Turbulent noise for wispy shape
+            float turb = fbm(steamUv * 3.0, 4);
+            float wisp = fbm(steamUv * 5.0 - vec2(uTime * 0.2, 0.0), 3);
+
+            // Column shape
+            float columnDist = abs(uv.x - offsetX);
+            float column = smoothstep(0.15 + turb * 0.08, 0.0, columnDist);
+
+            // Vertical fade (stronger at bottom)
+            float yFade = smoothstep(0.5, -0.3, uv.y);
+
+            // Wispy density
+            float density = column * yFade * (0.5 + wisp * 0.5);
+            density *= 0.4; // Per-column opacity
+
+            steam += density;
+          }
+
+          steam = clamp(steam, 0.0, 1.0);
+
+          // Warm white to gray
+          float colorNoise = fbm(uv * 2.0 + uTime * 0.1, 2);
+          vec3 steamColor = mix(
+            vec3(0.95, 0.95, 0.98),
+            vec3(0.85, 0.88, 0.92),
+            colorNoise
+          );
+
+          // Soft circular vignette
+          float vignette = smoothstep(0.7, 0.2, dist);
+
+          float alpha = steam * vignette * 0.7;
+
+          gl_FragColor = vec4(steamColor, alpha);
+        }
+      `
+    };
+
     // ===========================================
     // SCENE SETUP
     // ===========================================
@@ -820,6 +914,7 @@
     initShaderCanvas('fire-canvas', fireShader);
     initShaderCanvas('spectre-canvas', spectreShader);
     initShaderCanvas('slime-canvas', slimeShader);
+    initShaderCanvas('steam-canvas', steamShader);
   </script>
 </body>
 </html>

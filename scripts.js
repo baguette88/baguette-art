@@ -869,7 +869,12 @@
             return new THREE.CanvasTexture(spineCanvas);
           }
 
+          // Store book meshes for interactivity
+          const bookMeshes = [];
           let bookY = -1.98;
+          let booksGlowing = false;
+          let runeLight = null;
+
           books.forEach((b, i) => {
             const bookGeom = new THREE.BoxGeometry(b.w, b.h, b.d);
             const spineTexture = createBookSpine(b.title, b.color, b.h);
@@ -885,9 +890,56 @@
             bookY += b.h / 2;
             book.position.set(-2.5, bookY, -1.2);
             book.rotation.y = (i % 2 === 0 ? 0.08 : -0.05);
+            book.userData = { baseY: bookY, color: b.color, title: b.title };
             bookY += b.h / 2 + 0.005;
             scene.add(book);
+            bookMeshes.push(book);
           });
+
+          // Rune overlay for books (hidden initially)
+          const runeCanvas = document.createElement('canvas');
+          runeCanvas.width = 128;
+          runeCanvas.height = 128;
+          const runeCtx = runeCanvas.getContext('2d');
+
+          function drawRunes(time) {
+            runeCtx.clearRect(0, 0, 128, 128);
+            runeCtx.fillStyle = `rgba(100, 200, 255, ${0.3 + Math.sin(time * 3) * 0.2})`;
+
+            // Draw mystical rune symbols
+            const runes = ['ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᚷ', 'ᚹ', 'ᚺ', 'ᚾ'];
+            runeCtx.font = '20px serif';
+            runeCtx.textAlign = 'center';
+
+            for (let i = 0; i < 6; i++) {
+              const x = 20 + (i % 3) * 44;
+              const y = 40 + Math.floor(i / 3) * 50;
+              const glow = Math.sin(time * 2 + i) * 0.5 + 0.5;
+              runeCtx.fillStyle = `rgba(100, 200, 255, ${0.4 + glow * 0.6})`;
+              runeCtx.fillText(runes[i], x, y);
+            }
+
+            // Glowing circle
+            runeCtx.strokeStyle = `rgba(150, 220, 255, ${0.3 + Math.sin(time * 4) * 0.2})`;
+            runeCtx.lineWidth = 2;
+            runeCtx.beginPath();
+            runeCtx.arc(64, 64, 50 + Math.sin(time * 2) * 5, 0, Math.PI * 2);
+            runeCtx.stroke();
+          }
+
+          const runeTexture = new THREE.CanvasTexture(runeCanvas);
+          const runePlaneGeom = new THREE.PlaneGeometry(1.5, 1.2);
+          const runePlaneMat = new THREE.MeshBasicMaterial({
+            map: runeTexture,
+            transparent: true,
+            opacity: 0,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending
+          });
+          const runePlane = new THREE.Mesh(runePlaneGeom, runePlaneMat);
+          runePlane.position.set(-2.5, -1.3, -1.2);
+          runePlane.rotation.x = -Math.PI / 2;
+          scene.add(runePlane);
 
           // Spiral notebook (open, near books)
           const notebookGeom = new THREE.BoxGeometry(0.8, 0.02, 1.1);
@@ -1024,47 +1076,106 @@
           coffee.rotation.x = -Math.PI / 2;
           scene.add(coffee);
 
-          // Steam particles with custom shader
+          // Volumetric steam with realistic shader
           const steamParticles = [];
-          const steamCount = 12;
+          const steamCount = 15;
           const steamVertShader = `
             varying vec2 vUv;
+            varying float vHeight;
+            uniform float uTime;
+
             void main() {
               vUv = uv;
+              vHeight = position.y;
               gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
             }
           `;
           const steamFragShader = `
-            uniform float opacity;
+            uniform float uTime;
+            uniform float uOpacity;
+            uniform float uLife;
             varying vec2 vUv;
+
+            // Simplex noise for organic movement
+            float hash(vec2 p) {
+              return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+            }
+
+            float noise(vec2 p) {
+              vec2 i = floor(p);
+              vec2 f = fract(p);
+              float a = hash(i);
+              float b = hash(i + vec2(1.0, 0.0));
+              float c = hash(i + vec2(0.0, 1.0));
+              float d = hash(i + vec2(1.0, 1.0));
+              vec2 u = f * f * (3.0 - 2.0 * f);
+              return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+            }
+
+            float fbm(vec2 p) {
+              float value = 0.0;
+              float amplitude = 0.5;
+              for (int i = 0; i < 4; i++) {
+                value += noise(p) * amplitude;
+                p *= 2.0;
+                amplitude *= 0.5;
+              }
+              return value;
+            }
+
             void main() {
-              float dist = length(vUv - vec2(0.5));
-              float alpha = smoothstep(0.5, 0.1, dist) * opacity;
-              gl_FragColor = vec4(1.0, 1.0, 1.0, alpha * 0.4);
+              vec2 uv = vUv - 0.5;
+              float dist = length(uv);
+
+              // Wispy turbulent shape
+              float turbulence = fbm(uv * 4.0 + uTime * 0.5);
+              float wisp = fbm(uv * 3.0 - vec2(0.0, uTime * 0.8));
+
+              // Soft circular falloff with noise edge
+              float edge = smoothstep(0.5, 0.1 + turbulence * 0.15, dist);
+
+              // Vary density across the steam
+              float density = edge * (0.6 + wisp * 0.4);
+
+              // Warm white/gray color
+              vec3 steamColor = mix(vec3(0.95, 0.95, 0.98), vec3(0.85, 0.88, 0.92), wisp);
+
+              // Life-based fade (fades as particle rises)
+              float lifeFade = smoothstep(1.0, 0.0, uLife);
+
+              float alpha = density * uOpacity * lifeFade * 0.5;
+
+              gl_FragColor = vec4(steamColor, alpha);
             }
           `;
 
           for (let i = 0; i < steamCount; i++) {
-            const steamGeo = new THREE.PlaneGeometry(0.12, 0.2);
+            const steamGeo = new THREE.PlaneGeometry(0.15, 0.25);
             const steamMat = new THREE.ShaderMaterial({
-              uniforms: { opacity: { value: 0.6 } },
+              uniforms: {
+                uTime: { value: 0 },
+                uOpacity: { value: 0.7 },
+                uLife: { value: 0 }
+              },
               vertexShader: steamVertShader,
               fragmentShader: steamFragShader,
               transparent: true,
               side: THREE.DoubleSide,
-              depthWrite: false
+              depthWrite: false,
+              blending: THREE.NormalBlending
             });
             const steam = new THREE.Mesh(steamGeo, steamMat);
             steam.position.set(
-              mugX + (Math.random() - 0.5) * 0.15,
-              -1.5 + Math.random() * 0.3,
-              mugZ + (Math.random() - 0.5) * 0.15
+              mugX + (Math.random() - 0.5) * 0.12,
+              -1.52 + Math.random() * 0.2,
+              mugZ + (Math.random() - 0.5) * 0.12
             );
             steam.userData = {
-              baseY: -1.5,
-              speed: 0.0008 + Math.random() * 0.0006,  // Much slower
-              drift: (Math.random() - 0.5) * 0.0003,
-              phase: Math.random() * Math.PI * 2
+              baseY: -1.52,
+              speed: 0.0006 + Math.random() * 0.0004,
+              drift: (Math.random() - 0.5) * 0.0002,
+              phase: Math.random() * Math.PI * 2,
+              timeOffset: Math.random() * 10
             };
             scene.add(steam);
             steamParticles.push(steam);
@@ -1074,22 +1185,27 @@
           function updateSteam(time) {
             steamParticles.forEach(s => {
               s.position.y += s.userData.speed;
-              s.position.x += Math.sin(time * 0.5 + s.userData.phase) * 0.0003 + s.userData.drift;
-              s.position.z += Math.cos(time * 0.4 + s.userData.phase) * 0.0002;
+              s.position.x += Math.sin(time * 0.3 + s.userData.phase) * 0.0002 + s.userData.drift;
+              s.position.z += Math.cos(time * 0.25 + s.userData.phase) * 0.00015;
 
-              // Fade out as it rises
+              // Calculate life (0 = just spawned, 1 = fully risen)
               const height = s.position.y - s.userData.baseY;
-              s.material.uniforms.opacity.value = Math.max(0, 0.5 - height * 1.2);
+              const maxHeight = 0.6;
+              const life = Math.min(height / maxHeight, 1.0);
+
+              s.material.uniforms.uLife.value = life;
+              s.material.uniforms.uTime.value = time + s.userData.timeOffset;
 
               // Scale up as it rises
-              const scale = 1 + height * 2;
-              s.scale.set(scale, scale, 1);
+              const scale = 1 + height * 3;
+              s.scale.set(scale, scale * 1.2, 1);
 
-              // Reset when faded
-              if (height > 0.5) {
+              // Reset when fully faded
+              if (height > maxHeight) {
                 s.position.y = s.userData.baseY;
-                s.position.x = mugX + (Math.random() - 0.5) * 0.15;
-                s.position.z = mugZ + (Math.random() - 0.5) * 0.15;
+                s.position.x = mugX + (Math.random() - 0.5) * 0.12;
+                s.position.z = mugZ + (Math.random() - 0.5) * 0.12;
+                s.userData.timeOffset = Math.random() * 10;
               }
 
               // Billboard - face camera
@@ -1526,10 +1642,83 @@
             // Animate coffee ripples
             coffeeMat.uniforms.time.value = elapsed * 0.001;
 
+            // Animate runes if books are glowing
+            if (booksGlowing) {
+              drawRunes(elapsed * 0.001);
+              runeTexture.needsUpdate = true;
+              runePlaneMat.opacity = 0.6 + Math.sin(elapsed * 0.003) * 0.2;
+
+              // Pulse the rune light
+              if (runeLight) {
+                runeLight.intensity = 1.5 + Math.sin(elapsed * 0.004) * 0.5;
+              }
+            }
+
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
           }
           animate();
+
+          // Raycaster for book click detection
+          const raycaster = new THREE.Raycaster();
+          const mouse = new THREE.Vector2();
+
+          function onSceneClick(event) {
+            // Calculate mouse position in normalized device coordinates
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(bookMeshes);
+
+            if (intersects.length > 0) {
+              // Toggle rune glow
+              booksGlowing = !booksGlowing;
+
+              if (booksGlowing) {
+                // Add glowing rune light
+                runeLight = new THREE.PointLight(0x66aaff, 2, 3);
+                runeLight.position.set(-2.5, -1.2, -1.2);
+                scene.add(runeLight);
+
+                // Make books glow
+                bookMeshes.forEach(book => {
+                  book.material.forEach(mat => {
+                    if (mat.emissive) {
+                      mat.emissive.setHex(0x223344);
+                      mat.emissiveIntensity = 0.3;
+                    }
+                  });
+                });
+              } else {
+                // Remove glow
+                if (runeLight) {
+                  scene.remove(runeLight);
+                  runeLight = null;
+                }
+                runePlaneMat.opacity = 0;
+
+                // Remove book glow
+                bookMeshes.forEach(book => {
+                  book.material.forEach(mat => {
+                    if (mat.emissive) {
+                      mat.emissive.setHex(0x000000);
+                      mat.emissiveIntensity = 0;
+                    }
+                  });
+                });
+              }
+            }
+          }
+
+          renderer.domElement.addEventListener('click', onSceneClick);
+          renderer.domElement.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+              const touch = e.changedTouches[0];
+              onSceneClick({ clientX: touch.clientX, clientY: touch.clientY });
+            }
+          });
 
           // Add vignette overlay for cinematic look
           const vignette = document.createElement('div');
